@@ -10,26 +10,26 @@ export interface Database {
         Row: {
           id: string
           email: string
-          credits: number
-          total_purchased: number
-          created_at: string
-          updated_at: string
+          credits: number | null
+          total_purchased: number | null
+          created_at: string | null
+          updated_at: string | null
         }
         Insert: {
           id: string
           email: string
-          credits?: number
-          total_purchased?: number
-          created_at?: string
-          updated_at?: string
+          credits?: number | null
+          total_purchased?: number | null
+          created_at?: string | null
+          updated_at?: string | null
         }
         Update: {
           id?: string
           email?: string
-          credits?: number
-          total_purchased?: number
-          created_at?: string
-          updated_at?: string
+          credits?: number | null
+          total_purchased?: number | null
+          created_at?: string | null
+          updated_at?: string | null
         }
       }
       adventures: {
@@ -37,7 +37,7 @@ export interface Database {
           id: string
           user_id: string | null
           guest_email: string | null
-          guest_token: string
+          guest_token: string | null
           title: string
           frame: string
           focus: string

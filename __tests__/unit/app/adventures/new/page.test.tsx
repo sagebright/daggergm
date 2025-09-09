@@ -2,8 +2,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useRouter } from 'next/navigation'
+import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime'
 import NewAdventurePage from '@/app/adventures/new/page'
 import { createClient } from '@/lib/supabase/client'
+import { createMockSupabaseClient } from '@/test/mocks/supabase'
 
 // Mock next/navigation
 vi.mock('next/navigation', () => ({
@@ -18,20 +20,21 @@ vi.mock('@/lib/supabase/client', () => ({
 
 describe('NewAdventurePage', () => {
   const mockPush = vi.fn()
-  const mockRouter = {
+  const mockRouter: AppRouterInstance = {
     push: mockPush,
     refresh: vi.fn(),
+    back: vi.fn(),
+    forward: vi.fn(),
+    replace: vi.fn(),
+    prefetch: vi.fn(),
   }
-  const mockSupabaseClient = {
-    auth: {
-      getUser: vi.fn().mockResolvedValue({ data: { user: null }, error: null }),
-    },
-  }
+  const mockSupabaseClient = createMockSupabaseClient()
 
   beforeEach(() => {
     vi.clearAllMocks()
     vi.mocked(useRouter).mockReturnValue(mockRouter)
     vi.mocked(createClient).mockReturnValue(mockSupabaseClient)
+    mockSupabaseClient.auth.getUser = vi.fn().mockResolvedValue({ data: { user: null }, error: null })
   })
 
   describe('guest user flow', () => {
@@ -185,7 +188,7 @@ describe('NewAdventurePage', () => {
   describe('authenticated user flow', () => {
     it('should not show guest limitations for logged-in users', async () => {
       // Mock authenticated user
-      mockSupabaseClient.auth.getUser.mockResolvedValueOnce({
+      mockSupabaseClient.auth.getUser = vi.fn().mockResolvedValueOnce({
         data: {
           user: {
             id: '123e4567-e89b-12d3-a456-426614174000',

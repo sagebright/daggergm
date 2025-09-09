@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react'
 import { redirect } from 'next/navigation'
 import DashboardPage from '@/app/dashboard/page'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { createMockSupabaseClient } from '@/test/mocks/supabase'
 
 // Mock dependencies
 vi.mock('next/navigation', () => ({
@@ -30,12 +31,7 @@ vi.mock('next/link', () => ({
 }))
 
 describe('DashboardPage', () => {
-  const mockSupabaseClient = {
-    auth: {
-      getUser: vi.fn(),
-    },
-    from: vi.fn(),
-  }
+  const mockSupabaseClient = createMockSupabaseClient()
 
   beforeEach(() => {
     vi.clearAllMocks()
@@ -44,7 +40,7 @@ describe('DashboardPage', () => {
 
   describe('authentication', () => {
     it('should redirect to login if user is not authenticated', async () => {
-      mockSupabaseClient.auth.getUser.mockResolvedValueOnce({
+      ;(mockSupabaseClient.auth.getUser as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
         data: { user: null },
       })
 
@@ -60,7 +56,7 @@ describe('DashboardPage', () => {
 
   describe('authenticated user with no adventures', () => {
     beforeEach(() => {
-      mockSupabaseClient.auth.getUser.mockResolvedValue({
+      ;(mockSupabaseClient.auth.getUser as ReturnType<typeof vi.fn>).mockResolvedValue({
         data: {
           user: {
             id: '123e4567-e89b-12d3-a456-426614174000',
@@ -76,7 +72,7 @@ describe('DashboardPage', () => {
         single: vi.fn(),
       }
 
-      mockSupabaseClient.from.mockImplementation((table: string) => {
+      mockSupabaseClient.from = vi.fn().mockImplementation((table: string) => {
         if (table === 'adventures') {
           return {
             ...mockSelect,
@@ -118,7 +114,7 @@ describe('DashboardPage', () => {
     })
 
     it('should show zero credits when profile has no credits', async () => {
-      mockSupabaseClient.from.mockImplementation((table: string) => {
+      mockSupabaseClient.from = vi.fn().mockImplementation((table: string) => {
         if (table === 'adventures') {
           return {
             select: vi.fn().mockReturnThis(),
@@ -144,7 +140,7 @@ describe('DashboardPage', () => {
 
   describe('authenticated user with adventures', () => {
     beforeEach(() => {
-      mockSupabaseClient.auth.getUser.mockResolvedValue({
+      ;(mockSupabaseClient.auth.getUser as ReturnType<typeof vi.fn>).mockResolvedValue({
         data: {
           user: {
             id: '123e4567-e89b-12d3-a456-426614174000',
@@ -168,7 +164,7 @@ describe('DashboardPage', () => {
         },
       ]
 
-      mockSupabaseClient.from.mockImplementation((table: string) => {
+      mockSupabaseClient.from = vi.fn().mockImplementation((table: string) => {
         if (table === 'adventures') {
           return {
             select: vi.fn().mockReturnThis(),
@@ -230,7 +226,7 @@ describe('DashboardPage', () => {
 
   describe('database queries', () => {
     beforeEach(() => {
-      mockSupabaseClient.auth.getUser.mockResolvedValue({
+      ;(mockSupabaseClient.auth.getUser as ReturnType<typeof vi.fn>).mockResolvedValue({
         data: {
           user: {
             id: '123e4567-e89b-12d3-a456-426614174000',
@@ -253,7 +249,7 @@ describe('DashboardPage', () => {
         single: vi.fn().mockResolvedValue({ data: { credits: 5 } }),
       })
 
-      mockSupabaseClient.from.mockImplementation((table: string) => {
+      mockSupabaseClient.from = vi.fn().mockImplementation((table: string) => {
         if (table === 'adventures') {
           return mockFrom(table)
         }

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { useForm } from 'react-hook-form'
 import {
@@ -13,11 +13,7 @@ import {
 
 // Mock react-hook-form
 vi.mock('react-hook-form', () => ({
-  useForm: vi.fn(() => ({
-    control: {},
-    getFieldState: vi.fn(() => ({})),
-    formState: { errors: {} },
-  })),
+  useForm: vi.fn(),
   useFormContext: vi.fn(() => ({
     getFieldState: vi.fn(() => ({})),
   })),
@@ -50,6 +46,77 @@ vi.mock('@radix-ui/react-slot', () => ({
   Slot: ({ children }: { children: React.ReactNode }) => <div data-testid="slot">{children}</div>,
 }))
 
+// Setup mock form before tests
+beforeEach(() => {
+  const mockForm = {
+    control: {
+      _subjects: {},
+      _removeUnmounted: vi.fn(),
+      _names: {},
+      _state: {},
+      _defaultValues: {},
+      _getWatch: vi.fn(),
+      _reset: vi.fn(),
+      _options: {},
+      _getDirty: vi.fn(),
+      _proxyFormState: {},
+      _getFieldArray: vi.fn(),
+      _executeSchema: vi.fn(),
+      _getIsDirty: vi.fn(),
+      register: vi.fn(),
+      unregister: vi.fn(),
+      getFieldState: vi.fn(),
+      _updateValid: vi.fn(),
+      _updateFieldArray: vi.fn(),
+      _updateDisabledField: vi.fn(),
+      _fields: {},
+      _formValues: {},
+      _stateFlags: {},
+    },
+    getFieldState: vi.fn(() => ({
+      invalid: false,
+      isDirty: false,
+      isTouched: false,
+      isValidating: false,
+      error: undefined,
+    })),
+    formState: { 
+      errors: {},
+      isDirty: false,
+      isLoading: false,
+      isSubmitted: false,
+      isSubmitSuccessful: false,
+      isSubmitting: false,
+      isValidating: false,
+      isValid: true,
+      touchedFields: {},
+      dirtyFields: {},
+      defaultValues: {},
+      submitCount: 0,
+      disabled: false,
+      validatingFields: {},
+      isReady: true,
+    },
+    watch: vi.fn(),
+    getValues: vi.fn(),
+    setValue: vi.fn(),
+    clearErrors: vi.fn(),
+    handleSubmit: vi.fn(),
+    reset: vi.fn(),
+    resetField: vi.fn(),
+    setFocus: vi.fn(),
+    trigger: vi.fn(),
+    setError: vi.fn(),
+    unregister: vi.fn(),
+    register: vi.fn(),
+    subscribe: vi.fn(),
+    _subjects: {},
+    _state: {},
+  } as any
+  
+  vi.mocked(useForm).mockReturnValue(mockForm)
+})
+
 // Test wrapper component
 function TestFormWrapper({ children }: { children: React.ReactNode }) {
   const form = useForm()
@@ -59,7 +126,7 @@ function TestFormWrapper({ children }: { children: React.ReactNode }) {
 describe('Form Components', () => {
   describe('Form', () => {
     it('should render FormProvider', () => {
-      render(<Form>Test content</Form>)
+      render(<TestFormWrapper>Test content</TestFormWrapper>)
 
       const provider = screen.getByTestId('form-provider')
       expect(provider).toBeInTheDocument()

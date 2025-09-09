@@ -40,6 +40,12 @@ describe('Supabase Server Utils', () => {
     const mockCookieStore = {
       getAll: vi.fn(),
       set: vi.fn(),
+      get: vi.fn(),
+      has: vi.fn(),
+      delete: vi.fn(),
+      clear: vi.fn(),
+      [Symbol.iterator]: vi.fn(),
+      size: 0,
     }
 
     beforeEach(() => {
@@ -98,7 +104,8 @@ describe('Supabase Server Utils', () => {
         { name: 'cookie2', value: 'value2', options: { path: '/test' } },
       ]
 
-      cookiesConfig.setAll(cookiesToSet)
+      expect(cookiesConfig).toBeDefined()
+      ;(cookiesConfig as any).setAll(cookiesToSet)
 
       expect(mockCookieStore.set).toHaveBeenCalledTimes(2)
       expect(mockCookieStore.set).toHaveBeenCalledWith('cookie1', 'value1', { path: '/' })
@@ -118,8 +125,9 @@ describe('Supabase Server Utils', () => {
       const cookiesConfig = mockCreateServerClient.mock.calls[0][2].cookies
 
       // Test that setAll doesn't throw even when cookieStore.set throws
+      expect(cookiesConfig).toBeDefined()
       expect(() => {
-        cookiesConfig.setAll([{ name: 'cookie1', value: 'value1', options: { path: '/' } }])
+        ;(cookiesConfig as any).setAll([{ name: 'cookie1', value: 'value1', options: { path: '/' } }])
       }).not.toThrow()
     })
   })
@@ -168,8 +176,9 @@ describe('Supabase Server Utils', () => {
       const cookiesConfig = mockCreateServerClient.mock.calls[0][2].cookies
 
       // Test setAll does nothing (no-op)
+      expect(cookiesConfig).toBeDefined()
       expect(() => {
-        cookiesConfig.setAll([{ name: 'cookie1', value: 'value1', options: { path: '/' } }])
+        ;(cookiesConfig as any).setAll([{ name: 'cookie1', value: 'value1', options: { path: '/' } }])
       }).not.toThrow()
     })
   })
