@@ -3,6 +3,18 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { createServerSupabaseClient, createServiceRoleClient } from '@/lib/supabase/server'
 
+// Type for cookie config
+type CookieConfig = {
+  name: string
+  value: string
+  options: { path: string }
+}
+
+type CookiesConfig = {
+  getAll: () => CookieConfig[]
+  setAll: (cookies: CookieConfig[]) => void
+}
+
 // Mock environment variables
 const originalEnv = process.env
 
@@ -105,7 +117,7 @@ describe('Supabase Server Utils', () => {
       ]
 
       expect(cookiesConfig).toBeDefined()
-      ;(cookiesConfig as any).setAll(cookiesToSet)
+      ;(cookiesConfig as CookiesConfig).setAll(cookiesToSet)
 
       expect(mockCookieStore.set).toHaveBeenCalledTimes(2)
       expect(mockCookieStore.set).toHaveBeenCalledWith('cookie1', 'value1', { path: '/' })
@@ -127,7 +139,13 @@ describe('Supabase Server Utils', () => {
       // Test that setAll doesn't throw even when cookieStore.set throws
       expect(cookiesConfig).toBeDefined()
       expect(() => {
-        ;(cookiesConfig as any).setAll([{ name: 'cookie1', value: 'value1', options: { path: '/' } }])
+        ;(
+          cookiesConfig as {
+            setAll: (
+              cookies: Array<{ name: string; value: string; options: { path: string } }>,
+            ) => void
+          }
+        ).setAll([{ name: 'cookie1', value: 'value1', options: { path: '/' } }])
       }).not.toThrow()
     })
   })
@@ -178,7 +196,13 @@ describe('Supabase Server Utils', () => {
       // Test setAll does nothing (no-op)
       expect(cookiesConfig).toBeDefined()
       expect(() => {
-        ;(cookiesConfig as any).setAll([{ name: 'cookie1', value: 'value1', options: { path: '/' } }])
+        ;(
+          cookiesConfig as {
+            setAll: (
+              cookies: Array<{ name: string; value: string; options: { path: string } }>,
+            ) => void
+          }
+        ).setAll([{ name: 'cookie1', value: 'value1', options: { path: '/' } }])
       }).not.toThrow()
     })
   })

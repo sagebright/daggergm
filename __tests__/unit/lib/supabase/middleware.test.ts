@@ -25,7 +25,7 @@ vi.mock('@supabase/ssr', () => ({
 
 vi.mock('next/server', async (importOriginal) => {
   const actual = await importOriginal<typeof import('next/server')>()
-  
+
   // Create a more complete NextResponse mock
   const createMockResponse = () => {
     const response = {
@@ -59,7 +59,7 @@ vi.mock('next/server', async (importOriginal) => {
     }
     return response as unknown as NextResponse
   }
-  
+
   return {
     ...actual,
     NextResponse: {
@@ -177,7 +177,7 @@ describe('updateSession', () => {
     ]
 
     expect(cookiesConfig).toBeDefined()
-    ;(cookiesConfig as any).setAll(cookiesToSet)
+    ;(cookiesConfig as { setAll: (cookies: typeof cookiesToSet) => void }).setAll(cookiesToSet)
 
     // Should set cookies on request
     expect(request.cookies.set).toHaveBeenCalledWith('session', 'new-session')
@@ -187,7 +187,9 @@ describe('updateSession', () => {
     expect(NextResponse.next).toHaveBeenCalled()
 
     // Get the response from NextResponse.next() to check cookie setting
-    const response = vi.mocked(NextResponse.next).mock.results[vi.mocked(NextResponse.next).mock.results.length - 1]?.value
+    const response = vi.mocked(NextResponse.next).mock.results[
+      vi.mocked(NextResponse.next).mock.results.length - 1
+    ]?.value
     if (response && 'cookies' in response) {
       expect(response.cookies.set).toHaveBeenCalledWith('session', 'new-session', {
         path: '/',

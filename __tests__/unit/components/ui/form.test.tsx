@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import { useForm } from 'react-hook-form'
+import { useForm, UseFormReturn, FieldValues } from 'react-hook-form'
 import {
   Form,
   FormField,
@@ -80,7 +80,7 @@ beforeEach(() => {
       isValidating: false,
       error: undefined,
     })),
-    formState: { 
+    formState: {
       errors: {},
       isDirty: false,
       isLoading: false,
@@ -112,8 +112,8 @@ beforeEach(() => {
     subscribe: vi.fn(),
     _subjects: {},
     _state: {},
-  } as any
-  
+  } as unknown as UseFormReturn<FieldValues>
+
   vi.mocked(useForm).mockReturnValue(mockForm)
 })
 
