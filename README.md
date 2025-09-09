@@ -4,6 +4,9 @@ DaggerGM is a SaaS platform that revolutionizes TTRPG adventure preparation thro
 
 ## 🚀 Getting Started
 
+[![CI](https://github.com/sagebright/daggergm/actions/workflows/ci.yml/badge.svg)](https://github.com/sagebright/daggergm/actions/workflows/ci.yml)
+[![Docker CI](https://github.com/sagebright/daggergm/actions/workflows/docker-ci.yml/badge.svg)](https://github.com/sagebright/daggergm/actions/workflows/docker-ci.yml)
+
 ### Prerequisites
 
 - Node.js 18+
