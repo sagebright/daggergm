@@ -10,18 +10,18 @@ test.describe('Homepage', () => {
     // Check for main heading
     const heading = page.locator('h1')
     await expect(heading).toBeVisible()
-    await expect(heading).toContainText('DaggerGM')
+    await expect(heading).toContainText('Create Epic Daggerheart Adventures')
   })
 
-  test('should have login link', async ({ page }) => {
+  test('should have get started button', async ({ page }) => {
     await page.goto('/')
 
-    // Look for login link
-    const loginLink = page.locator('text=Log in')
-    await expect(loginLink).toBeVisible()
+    // Look for Get Started button
+    const getStartedButton = page.locator('text=Get Started')
+    await expect(getStartedButton).toBeVisible()
 
-    // Click login link and verify navigation
-    await loginLink.click()
+    // Click button and verify navigation
+    await getStartedButton.click()
     await expect(page).toHaveURL('/auth/login')
   })
 })
