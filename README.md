@@ -1,36 +1,143 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# DaggerGM - AI-Powered Daggerheart Adventure Generator
 
-## Getting Started
+DaggerGM is a SaaS platform that revolutionizes TTRPG adventure preparation through AI-guided generation with Frame-aware content creation and semantic search capabilities. Built on Next.js 14 with Server Actions, Supabase, and GPT-4, the platform enables Game Masters to generate, refine, and export complete one-shot adventures in under 10 minutes.
 
-First, run the development server:
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js 18+
+- npm or yarn
+- Supabase account
+- OpenAI API key
+- Stripe account (for payments)
+
+### Environment Setup
+
+1. Copy `.env.local.example` to `.env.local`:
+
+   ```bash
+   cp .env.local.example .env.local
+   ```
+
+2. Update `.env.local` with your credentials:
+   - Supabase project URL and keys
+   - OpenAI API key
+   - Stripe keys (optional for MVP testing)
+
+### Database Setup
+
+1. Create a new Supabase project
+
+2. Run the database migrations:
+
+   ```bash
+   # In Supabase SQL editor, run the migrations in order:
+   # 1. supabase/migrations/00001_initial_schema.sql
+   # 2. supabase/migrations/00002_rls_policies.sql
+   ```
+
+3. Generate TypeScript types:
+   ```bash
+   SUPABASE_PROJECT_ID=your-project-id npm run db:types
+   ```
+
+### Installation
 
 ```bash
+# Install dependencies
+npm install
+
+# Run development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to see the application.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🏗️ Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+daggergm/
+├── app/                    # Next.js 14 App Router
+│   ├── (auth)/            # Auth routes (login, signup)
+│   ├── (dashboard)/       # Protected routes
+│   ├── api/               # API routes
+│   └── layout.tsx         # Root layout
+├── components/            # React components
+│   ├── ui/               # Base UI components (shadcn)
+│   └── features/         # Feature-specific components
+├── lib/                   # Core utilities
+│   ├── supabase/         # Supabase client
+│   ├── llm/              # LLM abstraction
+│   ├── auth/             # Auth utilities
+│   └── validation/       # Zod schemas
+├── types/                 # TypeScript types
+├── supabase/             # Database migrations
+└── __tests__/            # Test files
+```
 
-## Learn More
+## 🧪 Testing
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+# Run unit tests
+npm test
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Run tests with UI
+npm run test:ui
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# Run tests with coverage
+npm run test:coverage
 
-## Deploy on Vercel
+# Run E2E tests (requires running dev server)
+npx playwright test
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🔒 Security
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- All database tables have Row Level Security (RLS) enabled
+- Server Actions are validated with Zod schemas
+- Guest sessions use secure tokens
+- API rate limiting is implemented (optional with Redis)
+
+## 🚀 Deployment
+
+The application is designed to deploy on Vercel with Supabase Cloud.
+
+### Production Checklist
+
+- [ ] Set all environment variables in Vercel
+- [ ] Run database migrations in production
+- [ ] Configure Stripe webhooks
+- [ ] Enable Supabase email authentication
+- [ ] Set up monitoring (Vercel Analytics)
+
+## 📝 Development Workflow
+
+1. **Feature Development**
+   - Create feature branch from `main`
+   - Implement with proper TypeScript types
+   - Add tests for new functionality
+   - Ensure RLS policies are tested
+
+2. **Code Quality**
+   - Pre-commit hooks run linting and formatting
+   - All Server Actions must have Zod validation
+   - Components should be properly typed
+
+3. **Database Changes**
+   - Create numbered migration files
+   - Test RLS policies thoroughly
+   - Update TypeScript types after schema changes
+
+## 🤝 Contributing
+
+Please see the contributing guidelines in the PRP document for detailed information on:
+
+- Architecture decisions
+- Code standards
+- Testing requirements
+- Security considerations
+
+## 📄 License
+
+Copyright (c) 2025 DaggerGM. All rights reserved.

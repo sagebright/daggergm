@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+        - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+        - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+    container_name: daggergm-app
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+    env_file:
+      - .env.local
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    command: npm run dev
+    networks:
+      - daggergm-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Test runner service
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: test
+    container_name: daggergm-test
+    environment:
+      - NODE_ENV=test
+    env_file:
+      - .env.test.local
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: npm run test:watch
+    networks:
+      - daggergm-network
+
+networks:
+  daggergm-network:
+    driver: bridge
+
+volumes:
+  node_modules:
