@@ -21,6 +21,7 @@ jobs:
           context: .
           target: test
           push: false
+          load: true
           tags: daggergm:test
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -43,6 +44,7 @@ jobs:
           context: .
           target: test
           push: false
+          load: true
           tags: daggergm:lint
           cache-from: type=gha
           cache-to: type=gha,mode=max
