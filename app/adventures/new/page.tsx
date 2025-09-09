@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { createClientSupabaseClient } from '@/lib/supabase/client'
+import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
@@ -18,11 +18,19 @@ const ADVENTURE_STEPS = [
     title: 'Primary Motif',
     description: 'Choose the main theme for your adventure',
     options: [
-      { value: 'high_fantasy', label: 'High Fantasy' },
-      { value: 'low_fantasy', label: 'Low Fantasy' },
-      { value: 'sword_sorcery', label: 'Sword & Sorcery' },
-      { value: 'grimdark', label: 'Grimdark' },
-      { value: 'weird', label: 'Weird' },
+      {
+        value: 'high_fantasy',
+        label: 'High Fantasy',
+        description: 'Epic adventures with magic and heroism',
+      },
+      {
+        value: 'low_fantasy',
+        label: 'Low Fantasy',
+        description: 'Subtle magic in realistic settings',
+      },
+      { value: 'sword_sorcery', label: 'Sword & Sorcery', description: 'Combat and mysticism' },
+      { value: 'grimdark', label: 'Grimdark', description: 'Dark, morally ambiguous stories' },
+      { value: 'weird', label: 'Weird', description: 'Strange and surreal adventures' },
     ],
   },
   // Add more steps as needed
@@ -39,7 +47,7 @@ export default function NewAdventurePage() {
   }, [])
 
   async function checkAuth() {
-    const supabase = createClientSupabaseClient()
+    const supabase = createClient()
     const { data } = await supabase.auth.getUser()
     setIsGuest(!data.user)
     setLoading(false)

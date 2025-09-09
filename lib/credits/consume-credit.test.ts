@@ -55,6 +55,18 @@ describe('consumeAdventureCredit', () => {
   })
 
   describe('error handling', () => {
+    it('should throw error when data is null/undefined', async () => {
+      const validUserId = '123e4567-e89b-12d3-a456-426614174000'
+
+      mockRpc.mockResolvedValueOnce({
+        data: null,
+        error: null,
+      })
+
+      await expect(consumeAdventureCredit(validUserId, mockSupabase)).rejects.toThrow(
+        'Invalid response format from credit consumption',
+      )
+    })
     it('should throw InsufficientCreditsError when user has no credits', async () => {
       // Arrange
       const userId = '123e4567-e89b-12d3-a456-426614174000'
@@ -142,8 +154,21 @@ describe('consumeAdventureCredit', () => {
 
       mockRpc.mockRejectedValueOnce(new Error('Network timeout'))
 
-      // Act & Assert
+      // Act & Assert - Error instances are re-thrown as-is
       await expect(consumeAdventureCredit(userId, mockSupabase)).rejects.toThrow('Network timeout')
+    })
+
+    it('should throw generic error for unknown error types', async () => {
+      // Arrange
+      const userId = '123e4567-e89b-12d3-a456-426614174000'
+
+      // Simulate a non-Error object to reach line 103-104
+      mockRpc.mockRejectedValueOnce('string error')
+
+      // Act & Assert
+      await expect(consumeAdventureCredit(userId, mockSupabase)).rejects.toThrow(
+        'An unexpected error occurred during credit consumption',
+      )
     })
 
     it('should validate userId format', async () => {
