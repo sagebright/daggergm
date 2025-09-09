@@ -1,23 +1,27 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach, vi, MockedFunction } from 'vitest'
 import { consumeAdventureCredit } from './consume-credit'
 import { createMockSupabaseClient } from '@/test/mocks/supabase'
 import { CreditError, InsufficientCreditsError } from './errors'
+import type { SupabaseClient } from '@supabase/supabase-js'
+import type { Database } from '@/types/database.generated'
 
 describe('consumeAdventureCredit', () => {
-  let mockSupabase: ReturnType<typeof createMockSupabaseClient>
+  let mockSupabase: SupabaseClient<Database>
+  let mockRpc: MockedFunction<typeof mockSupabase.rpc>
 
   beforeEach(() => {
     mockSupabase = createMockSupabaseClient()
+    mockRpc = mockSupabase.rpc as MockedFunction<typeof mockSupabase.rpc>
     vi.clearAllMocks()
   })
 
   describe('successful credit consumption', () => {
     it('should consume exactly one credit for authenticated user', async () => {
       // Arrange
-      const userId = 'user-123'
+      const userId = '123e4567-e89b-12d3-a456-426614174000'
       const expectedCredits = 4
 
-      mockSupabase.rpc.mockResolvedValueOnce({
+      mockRpc.mockResolvedValueOnce({
         data: {
           success: true,
           remaining_credits: expectedCredits,
@@ -29,7 +33,7 @@ describe('consumeAdventureCredit', () => {
       const result = await consumeAdventureCredit(userId, mockSupabase)
 
       // Assert
-      expect(mockSupabase.rpc).toHaveBeenCalledWith('consume_adventure_credit', {
+      expect(mockRpc).toHaveBeenCalledWith('consume_adventure_credit', {
         p_user_id: userId,
         p_adventure_id: expect.any(String),
       })
@@ -53,9 +57,9 @@ describe('consumeAdventureCredit', () => {
   describe('error handling', () => {
     it('should throw InsufficientCreditsError when user has no credits', async () => {
       // Arrange
-      const userId = 'user-123'
+      const userId = '123e4567-e89b-12d3-a456-426614174000'
 
-      mockSupabase.rpc.mockResolvedValueOnce({
+      mockRpc.mockResolvedValueOnce({
         data: null,
         error: {
           code: 'insufficient_credits',
@@ -64,20 +68,16 @@ describe('consumeAdventureCredit', () => {
       })
 
       // Act & Assert
-      await expect(consumeAdventureCredit(userId, mockSupabase)).rejects.toThrow(
-        InsufficientCreditsError,
-      )
-
-      await expect(consumeAdventureCredit(userId, mockSupabase)).rejects.toThrow(
-        'User has no credits remaining',
+      await expect(consumeAdventureCredit(userId, mockSupabase)).rejects.toThrowError(
+        new InsufficientCreditsError('User has no credits remaining'),
       )
     })
 
     it('should throw CreditError for database errors', async () => {
       // Arrange
-      const userId = 'user-123'
+      const userId = '123e4567-e89b-12d3-a456-426614174000'
 
-      mockSupabase.rpc.mockResolvedValueOnce({
+      mockRpc.mockResolvedValueOnce({
         data: null,
         error: {
           code: 'database_error',
@@ -98,9 +98,9 @@ describe('consumeAdventureCredit', () => {
 
     it('should throw error for unexpected response format', async () => {
       // Arrange
-      const userId = 'user-123'
+      const userId = '123e4567-e89b-12d3-a456-426614174000'
 
-      mockSupabase.rpc.mockResolvedValueOnce({
+      mockRpc.mockResolvedValueOnce({
         data: { unexpected: 'format' },
         error: null,
       })
@@ -115,9 +115,9 @@ describe('consumeAdventureCredit', () => {
   describe('edge cases', () => {
     it('should handle successful credit consumption with adventure id', async () => {
       // Arrange
-      const userId = 'user-123'
+      const userId = '123e4567-e89b-12d3-a456-426614174000'
 
-      mockSupabase.rpc.mockResolvedValueOnce({
+      mockRpc.mockResolvedValueOnce({
         data: {
           success: true,
           remaining_credits: 4,
@@ -129,7 +129,7 @@ describe('consumeAdventureCredit', () => {
       const result = await consumeAdventureCredit(userId, mockSupabase)
 
       // Assert
-      expect(mockSupabase.rpc).toHaveBeenCalledWith('consume_adventure_credit', {
+      expect(mockRpc).toHaveBeenCalledWith('consume_adventure_credit', {
         p_user_id: userId,
         p_adventure_id: expect.any(String),
       })
@@ -138,9 +138,9 @@ describe('consumeAdventureCredit', () => {
 
     it('should handle network timeouts gracefully', async () => {
       // Arrange
-      const userId = 'user-123'
+      const userId = '123e4567-e89b-12d3-a456-426614174000'
 
-      mockSupabase.rpc.mockRejectedValueOnce(new Error('Network timeout'))
+      mockRpc.mockRejectedValueOnce(new Error('Network timeout'))
 
       // Act & Assert
       await expect(consumeAdventureCredit(userId, mockSupabase)).rejects.toThrow('Network timeout')
@@ -155,14 +155,36 @@ describe('consumeAdventureCredit', () => {
         'Invalid user ID format',
       )
     })
+
+    it('should accept valid UUID format', async () => {
+      // Arrange
+      const validUserId = 'f47ac10b-58cc-4372-a567-0e02b2c3d479'
+
+      mockRpc.mockResolvedValueOnce({
+        data: {
+          success: true,
+          remaining_credits: 10,
+        },
+        error: null,
+      })
+
+      // Act
+      const result = await consumeAdventureCredit(validUserId, mockSupabase)
+
+      // Assert
+      expect(result).toEqual({
+        success: true,
+        remainingCredits: 10,
+      })
+    })
   })
 
   describe('transaction safety', () => {
     it('should use database transaction for credit consumption', async () => {
       // Arrange
-      const userId = 'user-123'
+      const userId = '123e4567-e89b-12d3-a456-426614174000'
 
-      mockSupabase.rpc.mockResolvedValueOnce({
+      mockRpc.mockResolvedValueOnce({
         data: {
           success: true,
           remaining_credits: 4,
