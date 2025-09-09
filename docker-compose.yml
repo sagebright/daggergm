@@ -5,13 +5,14 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      target: dev
       args:
-        - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
-        - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
-        - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+        - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL:-}
+        - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY:-}
+        - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY:-}
     container_name: daggergm-app
     ports:
-      - "3000:3000"
+      - "3002:3002"
     environment:
       - NODE_ENV=development
     env_file:
@@ -24,7 +25,7 @@ services:
     networks:
       - daggergm-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:3002/api/health"]
       interval: 30s
       timeout: 10s
       retries: 3
