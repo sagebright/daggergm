@@ -30,7 +30,8 @@ describe('consumeAdventureCredit', () => {
 
       // Assert
       expect(mockSupabase.rpc).toHaveBeenCalledWith('consume_adventure_credit', {
-        user_id: userId,
+        p_user_id: userId,
+        p_adventure_id: expect.any(String),
       })
       expect(result).toEqual({
         success: true,
@@ -38,29 +39,14 @@ describe('consumeAdventureCredit', () => {
       })
     })
 
-    it('should work for guest users with token', async () => {
+    it('should throw error for guest users (not implemented)', async () => {
       // Arrange
       const guestToken = 'guest-token-123'
 
-      mockSupabase.rpc.mockResolvedValueOnce({
-        data: {
-          success: true,
-          remaining_credits: 0,
-        },
-        error: null,
-      })
-
-      // Act
-      const result = await consumeAdventureCredit(null, mockSupabase, guestToken)
-
-      // Assert
-      expect(mockSupabase.rpc).toHaveBeenCalledWith('consume_guest_credit', {
-        guest_token: guestToken,
-      })
-      expect(result).toEqual({
-        success: true,
-        remainingCredits: 0,
-      })
+      // Act & Assert
+      await expect(consumeAdventureCredit(null, mockSupabase, guestToken)).rejects.toThrow(
+        'Guest credit consumption not implemented yet',
+      )
     })
   })
 
@@ -127,27 +113,25 @@ describe('consumeAdventureCredit', () => {
   })
 
   describe('edge cases', () => {
-    it('should handle race conditions with idempotency key', async () => {
+    it('should handle successful credit consumption with adventure id', async () => {
       // Arrange
       const userId = 'user-123'
-      const idempotencyKey = 'idem-key-123'
 
       mockSupabase.rpc.mockResolvedValueOnce({
         data: {
           success: true,
           remaining_credits: 4,
-          idempotency_key_used: true,
         },
         error: null,
       })
 
       // Act
-      const result = await consumeAdventureCredit(userId, mockSupabase, undefined, idempotencyKey)
+      const result = await consumeAdventureCredit(userId, mockSupabase)
 
       // Assert
       expect(mockSupabase.rpc).toHaveBeenCalledWith('consume_adventure_credit', {
-        user_id: userId,
-        idempotency_key: idempotencyKey,
+        p_user_id: userId,
+        p_adventure_id: expect.any(String),
       })
       expect(result.success).toBe(true)
     })

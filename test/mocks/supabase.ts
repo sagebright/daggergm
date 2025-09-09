@@ -1,11 +1,13 @@
 import { vi } from 'vitest'
+import { SupabaseClient } from '@supabase/supabase-js'
+import { Database } from '@/types/database.generated'
 
 /**
  * Creates a mock Supabase client for testing
  * Provides all the methods we use in the app with vi.fn() mocks
  */
 export function createMockSupabaseClient() {
-  return {
+  const mockClient = {
     from: vi.fn(() => ({
       select: vi.fn().mockReturnThis(),
       insert: vi.fn().mockReturnThis(),
@@ -45,10 +47,12 @@ export function createMockSupabaseClient() {
         subscribe: vi.fn(),
       })),
     },
-  }
+  } as unknown as SupabaseClient<Database>
+
+  return mockClient
 }
 
 /**
  * Type helper for the mock client
  */
-export type MockSupabaseClient = ReturnType<typeof createMockSupabaseClient>
+export type MockSupabaseClient = SupabaseClient<Database>
