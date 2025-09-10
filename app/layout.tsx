@@ -28,6 +28,7 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         {children}
         <Toaster position="bottom-right" />
+        {/* Pipeline test: v1.0.1 */}
       </body>
     </html>
   )
