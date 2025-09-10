@@ -1,9 +1,12 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { generateAdventure, type AdventureConfig } from '@/app/actions/adventures'
+import { toast } from 'sonner'
 
 // Adventure creation steps based on requirements
 const ADVENTURE_STEPS = [
@@ -37,10 +40,12 @@ const ADVENTURE_STEPS = [
 ]
 
 export default function NewAdventurePage() {
+  const router = useRouter()
   const [currentStep, setCurrentStep] = useState(0)
   const [selections, setSelections] = useState<Record<string, string>>({})
   const [isGuest, setIsGuest] = useState(true)
   const [loading, setLoading] = useState(true)
+  const [generating, setGenerating] = useState(false)
 
   useEffect(() => {
     checkAuth()
@@ -53,15 +58,48 @@ export default function NewAdventurePage() {
     setLoading(false)
   }
 
-  const handleSelection = (value: string) => {
-    setSelections({ ...selections, [ADVENTURE_STEPS[currentStep].id]: value })
+  const handleSelection = async (value: string) => {
+    const newSelections = { ...selections, [ADVENTURE_STEPS[currentStep].id]: value }
+    setSelections(newSelections)
 
     if (currentStep < ADVENTURE_STEPS.length - 1) {
       setCurrentStep(currentStep + 1)
     } else {
-      // All steps completed, navigate to scaffold generation
-      // For now, just log - actual navigation will be implemented
+      // All steps completed, generate adventure
       console.log('Adventure config:', selections)
+      await handleAdventureGeneration(newSelections)
+    }
+  }
+
+  const handleAdventureGeneration = async (config: Record<string, string>) => {
+    setGenerating(true)
+
+    try {
+      toast.info('Generating your adventure...', { duration: 2000 })
+
+      const adventureConfig: AdventureConfig = {
+        length: config.length,
+        primary_motif: config.primary_motif,
+        // Add defaults for missing fields
+        party_size: 4,
+        party_level: 1,
+        difficulty: 'standard',
+        stakes: 'personal',
+      }
+
+      const result = await generateAdventure(adventureConfig)
+
+      if (result.success) {
+        toast.success('Adventure created successfully!')
+        router.push(`/adventures/${result.adventureId}`)
+      } else {
+        toast.error(result.error || 'Failed to generate adventure')
+      }
+    } catch (error) {
+      console.error('Generation error:', error)
+      toast.error('Something went wrong. Please try again.')
+    } finally {
+      setGenerating(false)
     }
   }
 
@@ -73,6 +111,24 @@ export default function NewAdventurePage() {
 
   if (loading) {
     return <div>Loading...</div>
+  }
+
+  if (generating) {
+    return (
+      <div className="container max-w-2xl mx-auto py-8 text-center">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="space-y-4">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+              <h2 className="text-xl font-semibold">Generating Your Adventure</h2>
+              <p className="text-muted-foreground">
+                Our AI is crafting your perfect Daggerheart adventure...
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
   const step = ADVENTURE_STEPS[currentStep]

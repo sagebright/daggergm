@@ -6,6 +6,8 @@ import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.share
 import NewAdventurePage from '@/app/adventures/new/page'
 import { createClient } from '@/lib/supabase/client'
 import { createMockSupabaseClient } from '@/test/mocks/supabase'
+import { generateAdventure } from '@/app/actions/adventures'
+import { toast } from 'sonner'
 
 // Mock next/navigation
 vi.mock('next/navigation', () => ({
@@ -16,6 +18,20 @@ vi.mock('next/navigation', () => ({
 // Mock Supabase client
 vi.mock('@/lib/supabase/client', () => ({
   createClient: vi.fn(),
+}))
+
+// Mock the server action
+vi.mock('@/app/actions/adventures', () => ({
+  generateAdventure: vi.fn(),
+}))
+
+// Mock sonner
+vi.mock('sonner', () => ({
+  toast: {
+    info: vi.fn(),
+    success: vi.fn(),
+    error: vi.fn(),
+  },
 }))
 
 describe('NewAdventurePage', () => {
@@ -34,7 +50,9 @@ describe('NewAdventurePage', () => {
     vi.clearAllMocks()
     vi.mocked(useRouter).mockReturnValue(mockRouter)
     vi.mocked(createClient).mockReturnValue(mockSupabaseClient)
-    mockSupabaseClient.auth.getUser = vi.fn().mockResolvedValue({ data: { user: null }, error: null })
+    mockSupabaseClient.auth.getUser = vi
+      .fn()
+      .mockResolvedValue({ data: { user: null }, error: null })
   })
 
   describe('guest user flow', () => {
@@ -182,6 +200,109 @@ describe('NewAdventurePage', () => {
       // This covers the console.log line in the completion path
 
       consoleSpy.mockRestore()
+    })
+  })
+
+  describe('adventure generation', () => {
+    it('should call generateAdventure when wizard completes', async () => {
+      const user = userEvent.setup()
+      vi.mocked(generateAdventure).mockResolvedValueOnce({
+        success: true,
+        adventureId: 'adv-123',
+      })
+
+      render(<NewAdventurePage />)
+
+      await waitFor(() => {
+        expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
+      })
+
+      // Complete wizard steps
+      await user.click(screen.getByText('One-shot'))
+      await waitFor(() => {
+        expect(screen.getByText('Primary Motif')).toBeInTheDocument()
+      })
+      await user.click(screen.getByText('High Fantasy'))
+
+      // Wait for server action to be called
+      await waitFor(() => {
+        expect(generateAdventure).toHaveBeenCalledWith({
+          length: 'oneshot',
+          primary_motif: 'high_fantasy',
+          party_size: 4,
+          party_level: 1,
+          difficulty: 'standard',
+          stakes: 'personal',
+        })
+      })
+
+      // Should show success toast
+      expect(toast.success).toHaveBeenCalledWith('Adventure created successfully!')
+
+      // Should navigate to the adventure page
+      expect(mockPush).toHaveBeenCalledWith('/adventures/adv-123')
+    })
+
+    it('should handle generation errors gracefully', async () => {
+      const user = userEvent.setup()
+      vi.mocked(generateAdventure).mockResolvedValueOnce({
+        success: false,
+        error: 'Insufficient credits',
+      })
+
+      render(<NewAdventurePage />)
+
+      await waitFor(() => {
+        expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
+      })
+
+      // Complete wizard steps
+      await user.click(screen.getByText('One-shot'))
+      await waitFor(() => {
+        expect(screen.getByText('Primary Motif')).toBeInTheDocument()
+      })
+      await user.click(screen.getByText('High Fantasy'))
+
+      // Should show error toast
+      await waitFor(() => {
+        expect(toast.error).toHaveBeenCalledWith('Insufficient credits')
+      })
+
+      // Should not navigate
+      expect(mockPush).not.toHaveBeenCalled()
+    })
+
+    it('should show loading state during generation', async () => {
+      const user = userEvent.setup()
+
+      // Mock a slow server action
+      vi.mocked(generateAdventure).mockImplementation(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 100))
+        return { success: true, adventureId: 'adv-123' }
+      })
+
+      render(<NewAdventurePage />)
+
+      await waitFor(() => {
+        expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
+      })
+
+      // Complete wizard steps
+      await user.click(screen.getByText('One-shot'))
+      await waitFor(() => {
+        expect(screen.getByText('Primary Motif')).toBeInTheDocument()
+      })
+      await user.click(screen.getByText('High Fantasy'))
+
+      // Should show generating state
+      await waitFor(() => {
+        expect(screen.getByText('Generating Your Adventure')).toBeInTheDocument()
+      })
+
+      // Wait for generation to complete
+      await waitFor(() => {
+        expect(mockPush).toHaveBeenCalledWith('/adventures/adv-123')
+      })
     })
   })
 
