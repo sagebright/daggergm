@@ -162,6 +162,18 @@ jobs:
     steps:
       - name: Trigger Vercel Deploy Hook
         run: |
-          curl -X POST ${{ secrets.VERCEL_DEPLOY_HOOK_URL }}
-          echo "✅ Deployment triggered via webhook"
+          echo "Triggering Vercel deployment..."
+          RESPONSE=$(curl -X POST -s -w "\n%{http_code}" ${{ secrets.VERCEL_DEPLOY_HOOK_URL }})
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | sed '$d')
+          
+          echo "Response code: $HTTP_CODE"
+          echo "Response body: $BODY"
+          
+          if [ "$HTTP_CODE" -eq 200 ] || [ "$HTTP_CODE" -eq 201 ]; then
+            echo "✅ Deployment triggered successfully"
+          else
+            echo "❌ Deployment trigger failed with code $HTTP_CODE"
+            exit 1
+          fi
 
