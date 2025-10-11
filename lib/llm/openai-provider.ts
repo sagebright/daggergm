@@ -54,7 +54,7 @@ export class OpenAIProvider implements LLMProvider {
   private async _generateAdventureScaffold(params: ScaffoldParams): Promise<ScaffoldResult> {
     // Check cache first
     const cached = await this.checkCache(params)
-    if (cached) return cached
+    if (cached) return cached as ScaffoldResult
 
     const systemPrompt = await this.loadFramePrompt(params.frame, 'scaffold')
 
@@ -68,7 +68,7 @@ export class OpenAIProvider implements LLMProvider {
       response_format: { type: 'json_object' },
     })
 
-    const result = JSON.parse(completion.choices[0].message.content!)
+    const result = JSON.parse(completion.choices[0].message.content!) as ScaffoldResult
 
     // Cache the response
     await this.cacheResponse(params, result, completion.usage?.total_tokens)
@@ -91,7 +91,7 @@ export class OpenAIProvider implements LLMProvider {
   private async _expandMovement(params: ExpansionParams): Promise<MovementResult> {
     // Check cache first
     const cached = await this.checkCache(params)
-    if (cached) return cached
+    if (cached) return cached as MovementResult
 
     const temperature = this.getTemperatureForMovementType(params.movement.type)
     const systemPrompt = await this.loadFramePrompt(
@@ -191,11 +191,11 @@ export class OpenAIProvider implements LLMProvider {
         .from('llm_cache')
         .update({
           accessed_at: new Date().toISOString(),
-          access_count: data.access_count + 1,
+          access_count: (data.access_count || 0) + 1,
         })
         .eq('id', data.id)
 
-      return JSON.parse(data.response)
+      return JSON.parse(data.response as string)
     }
 
     return null
@@ -211,12 +211,12 @@ export class OpenAIProvider implements LLMProvider {
 
     await supabase.from('llm_cache').insert({
       prompt_hash: promptHash,
-      prompt_params: params,
+      prompt_params: params as Record<string, unknown>,
       response: JSON.stringify(response),
       response_metadata: {
         timestamp: new Date().toISOString(),
         provider: 'openai',
-      },
+      } as Record<string, unknown>,
       model: 'gpt-4-turbo-preview',
       temperature: this.temperatures.scaffoldGeneration,
       token_count: tokenCount || 0,
@@ -232,8 +232,10 @@ export class OpenAIProvider implements LLMProvider {
   }
 
   private async loadFramePrompt(frame: string, type: string): Promise<string> {
-    const framePrompts = FRAME_PROMPTS[frame.toLowerCase()] || FRAME_PROMPTS.default
-    return framePrompts[type] || framePrompts.scaffold
+    const frameLower = frame.toLowerCase() as keyof typeof FRAME_PROMPTS
+    const framePrompts = FRAME_PROMPTS[frameLower] || FRAME_PROMPTS.default
+    const promptType = type as keyof typeof framePrompts
+    return framePrompts[promptType] || framePrompts.scaffold
   }
 
   private buildScaffoldPrompt(params: ScaffoldParams): string {

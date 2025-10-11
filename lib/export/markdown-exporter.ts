@@ -23,13 +23,13 @@ export class MarkdownExporter {
       if (adventure.metadata.party_size) {
         lines.push(`**Party Size:** ${adventure.metadata.party_size}`)
       }
-      if (adventure.metadata.party_level) {
+      if (adventure.metadata.party_level && typeof adventure.metadata.party_level === 'number') {
         lines.push(`**Party Level:** ${adventure.metadata.party_level}`)
       }
-      if (adventure.metadata.difficulty) {
+      if (adventure.metadata.difficulty && typeof adventure.metadata.difficulty === 'string') {
         lines.push(`**Difficulty:** ${this.capitalize(adventure.metadata.difficulty)}`)
       }
-      if (adventure.metadata.stakes) {
+      if (adventure.metadata.stakes && typeof adventure.metadata.stakes === 'string') {
         lines.push(`**Stakes:** ${this.capitalize(adventure.metadata.stakes)}`)
       }
       if (adventure.metadata.estimated_duration) {
@@ -39,10 +39,10 @@ export class MarkdownExporter {
     lines.push('')
 
     // Description
-    if (adventure.description) {
+    if (adventure.metadata?.description && typeof adventure.metadata.description === 'string') {
       lines.push('## Description')
       lines.push('')
-      lines.push(adventure.description)
+      lines.push(adventure.metadata.description)
       lines.push('')
     }
 
@@ -66,7 +66,7 @@ export class MarkdownExporter {
         lines.push('')
 
         // GM Notes
-        if (movement.metadata?.gm_notes) {
+        if (movement.metadata?.gm_notes && typeof movement.metadata.gm_notes === 'string') {
           lines.push('<details>')
           lines.push('<summary>🎭 GM Notes</summary>')
           lines.push('')
@@ -77,12 +77,12 @@ export class MarkdownExporter {
         }
 
         // Mechanics
-        if (movement.metadata?.mechanics) {
-          const mechanics = movement.metadata.mechanics
-          if (mechanics.difficulty) {
+        if (movement.metadata?.mechanics && typeof movement.metadata.mechanics === 'object') {
+          const mechanics = movement.metadata.mechanics as Record<string, unknown>
+          if (mechanics.difficulty && typeof mechanics.difficulty === 'string') {
             lines.push(`**Difficulty:** ${mechanics.difficulty}`)
           }
-          if (mechanics.consequences) {
+          if (mechanics.consequences && typeof mechanics.consequences === 'string') {
             lines.push(`**Consequences:** ${mechanics.consequences}`)
           }
           lines.push('')

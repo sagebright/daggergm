@@ -6,28 +6,39 @@ describe('MarkdownExporter', () => {
   const mockAdventure: Adventure = {
     id: 'adv-123',
     title: 'The Lost Mine',
-    description: 'A thrilling adventure in abandoned mines',
     frame: 'grimdark',
-    user_id: 'user-123',
+    focus: 'mystery',
+    state: 'draft',
+    config: {
+      frame: 'witherwild',
+      focus: 'mystery',
+      partySize: 4,
+      partyLevel: 3,
+      difficulty: 'standard',
+      stakes: 'high',
+    },
+    movements: [],
     metadata: {
       party_size: 4,
       party_level: 3,
       difficulty: 'standard',
       stakes: 'high',
       estimated_duration: '4 hours',
+      description: 'A thrilling adventure in abandoned mines',
     },
     created_at: '2024-01-01T00:00:00Z',
     updated_at: '2024-01-01T00:00:00Z',
+    exported_at: null,
   }
 
   const mockMovements: Movement[] = [
     {
       id: 'mov-1',
-      adventure_id: 'adv-123',
       title: 'The Abandoned Entrance',
       type: 'exploration',
       content: '## Description\n\nThe mine entrance yawns before you...',
-      order_index: 0,
+      estimatedTime: '30 minutes',
+      isLocked: false,
       metadata: {
         estimated_time: '30 minutes',
         gm_notes: 'Hidden trap at entrance',
@@ -35,15 +46,15 @@ describe('MarkdownExporter', () => {
     },
     {
       id: 'mov-2',
-      adventure_id: 'adv-123',
       title: 'Cave-in!',
-      type: 'action',
+      type: 'social',
       content: '## Challenge\n\nThe ceiling begins to crumble...',
-      order_index: 1,
+      estimatedTime: '45 minutes',
+      isLocked: false,
       metadata: {
         estimated_time: '45 minutes',
         mechanics: {
-          difficulty: 15,
+          difficulty: '15',
           consequences: 'Trapped inside if failed',
         },
       },
@@ -81,7 +92,7 @@ describe('MarkdownExporter', () => {
       expect(result).toContain('The mine entrance yawns before you...')
 
       expect(result).toContain('## Movement 2: Cave-in!')
-      expect(result).toContain('**Type:** Action')
+      expect(result).toContain('**Type:** Social')
       expect(result).toContain('**Estimated Time:** 45 minutes')
       expect(result).toContain('The ceiling begins to crumble...')
     })

@@ -23,8 +23,8 @@ export class Roll20Exporter {
     lines.push('')
 
     // Description
-    if (adventure.description) {
-      lines.push(adventure.description)
+    if (adventure.metadata?.description && typeof adventure.metadata.description === 'string') {
+      lines.push(adventure.metadata.description)
       lines.push('')
     }
 
@@ -45,15 +45,15 @@ export class Roll20Exporter {
       // GM notes for the scene
       if (movement.metadata?.gm_notes || movement.metadata?.mechanics) {
         lines.push('[GM ONLY]')
-        if (movement.metadata.gm_notes) {
+        if (movement.metadata.gm_notes && typeof movement.metadata.gm_notes === 'string') {
           lines.push(movement.metadata.gm_notes)
         }
-        if (movement.metadata.mechanics) {
-          const mechanics = movement.metadata.mechanics
-          if (mechanics.difficulty) {
+        if (movement.metadata.mechanics && typeof movement.metadata.mechanics === 'object') {
+          const mechanics = movement.metadata.mechanics as Record<string, unknown>
+          if (mechanics.difficulty && typeof mechanics.difficulty === 'string') {
             lines.push(`DC: ${mechanics.difficulty}`)
           }
-          if (mechanics.consequences) {
+          if (mechanics.consequences && typeof mechanics.consequences === 'string') {
             lines.push(`Consequences: ${mechanics.consequences}`)
           }
         }

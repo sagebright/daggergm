@@ -109,13 +109,13 @@ export class PDFExporter {
         }
 
         let mechanicsHtml = ''
-        if (movement.metadata?.mechanics) {
-          const mechanics = movement.metadata.mechanics
+        if (movement.metadata?.mechanics && typeof movement.metadata.mechanics === 'object') {
+          const mechanics = movement.metadata.mechanics as Record<string, unknown>
           mechanicsHtml = '<p>'
-          if (mechanics.difficulty) {
+          if (mechanics.difficulty && typeof mechanics.difficulty === 'string') {
             mechanicsHtml += `<strong>Difficulty:</strong> ${mechanics.difficulty}<br>`
           }
-          if (mechanics.consequences) {
+          if (mechanics.consequences && typeof mechanics.consequences === 'string') {
             mechanicsHtml += `<strong>Consequences:</strong> ${mechanics.consequences}`
           }
           mechanicsHtml += '</p>'
@@ -147,7 +147,7 @@ export class PDFExporter {
         <body>
           <h1>${adventure.title}</h1>
           ${metadataHtml}
-          ${adventure.description ? `<h2>Overview</h2><p>${adventure.description}</p>` : ''}
+          ${adventure.metadata?.description && typeof adventure.metadata.description === 'string' ? `<h2>Overview</h2><p>${adventure.metadata.description}</p>` : ''}
           ${movementsHtml}
         </body>
       </html>

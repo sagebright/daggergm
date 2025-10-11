@@ -74,16 +74,20 @@ describe('Adventure Server Actions', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.mocked(createServerSupabaseClient).mockResolvedValue(
-      mockSupabaseClient as ReturnType<typeof createServerSupabaseClient>,
+      mockSupabaseClient as unknown as Awaited<ReturnType<typeof createServerSupabaseClient>>,
     )
     vi.mocked(createServiceRoleClient).mockResolvedValue(
-      mockSupabaseClient as ReturnType<typeof createServiceRoleClient>,
+      mockSupabaseClient as unknown as Awaited<ReturnType<typeof createServiceRoleClient>>,
     )
-    vi.mocked(OpenAI).mockImplementation(() => mockOpenAIInstance as InstanceType<typeof OpenAI>)
+    vi.mocked(OpenAI).mockImplementation(
+      () => mockOpenAIInstance as unknown as InstanceType<typeof OpenAI>,
+    )
     vi.mocked(CreditManager).mockImplementation(
-      () => mockCreditManager as InstanceType<typeof CreditManager>,
+      () => mockCreditManager as unknown as InstanceType<typeof CreditManager>,
     )
-    vi.mocked(getLLMProvider).mockReturnValue(mockLLMProvider as ReturnType<typeof getLLMProvider>)
+    vi.mocked(getLLMProvider).mockReturnValue(
+      mockLLMProvider as unknown as ReturnType<typeof getLLMProvider>,
+    )
   })
 
   describe('generateAdventure', () => {

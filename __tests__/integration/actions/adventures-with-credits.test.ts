@@ -92,7 +92,10 @@ vi.mock('@/lib/llm/provider', () => ({
 }))
 
 describe('Adventure Generation with Credits', () => {
-  let mockCreditManager: Pick<InstanceType<typeof CreditManager>, 'consumeCredit' | 'refundCredit'>
+  let mockCreditManager: {
+    consumeCredit: ReturnType<typeof vi.fn>
+    refundCredit: ReturnType<typeof vi.fn>
+  }
 
   beforeEach(() => {
     vi.clearAllMocks()
@@ -101,7 +104,7 @@ describe('Adventure Generation with Credits', () => {
       refundCredit: vi.fn(),
     }
     vi.mocked(CreditManager).mockImplementation(
-      () => mockCreditManager as InstanceType<typeof CreditManager>,
+      () => mockCreditManager as unknown as InstanceType<typeof CreditManager>,
     )
   })
 
@@ -146,7 +149,9 @@ describe('Adventure Generation with Credits', () => {
     })
 
     expect(result.success).toBe(false)
-    expect(result.error).toBe('Insufficient credits to generate adventure')
+    if (!result.success) {
+      expect(result.error).toBe('Insufficient credits to generate adventure')
+    }
   })
 
   it('should refund credit if adventure generation fails after consumption', async () => {
@@ -200,7 +205,7 @@ describe('Adventure Generation with Credits', () => {
           error: null,
         }),
       },
-    } as Awaited<ReturnType<typeof createServerSupabaseClient>>)
+    } as unknown as Awaited<ReturnType<typeof createServerSupabaseClient>>)
 
     const result = await generateAdventure({
       length: 'oneshot',
@@ -214,7 +219,9 @@ describe('Adventure Generation with Credits', () => {
     })
 
     expect(result.success).toBe(false)
-    expect(result.error).toBe('Authentication required')
+    if (!result.success) {
+      expect(result.error).toBe('Authentication required')
+    }
     expect(mockCreditManager.consumeCredit).not.toHaveBeenCalled()
   })
 })

@@ -59,16 +59,16 @@ describe('Movement Server Actions', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.mocked(createServerSupabaseClient).mockResolvedValue(
-      mockSupabaseClient as ReturnType<typeof createServerSupabaseClient>,
+      mockSupabaseClient as unknown as Awaited<ReturnType<typeof createServerSupabaseClient>>,
     )
     vi.mocked(createServiceRoleClient).mockResolvedValue(
-      mockSupabaseClient as ReturnType<typeof createServiceRoleClient>,
+      mockSupabaseClient as unknown as Awaited<ReturnType<typeof createServiceRoleClient>>,
     )
     vi.mocked(OpenAIProvider).mockImplementation(
-      () => mockLLMProvider as InstanceType<typeof OpenAIProvider>,
+      () => mockLLMProvider as unknown as InstanceType<typeof OpenAIProvider>,
     )
     vi.mocked(CreditManager).mockImplementation(
-      () => mockCreditManager as InstanceType<typeof CreditManager>,
+      () => mockCreditManager as unknown as InstanceType<typeof CreditManager>,
     )
   })
 

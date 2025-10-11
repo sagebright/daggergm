@@ -49,15 +49,17 @@ describe('Adventure Actions - Validation', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.mocked(createServerSupabaseClient).mockResolvedValue(
-      mockSupabaseClient as Awaited<ReturnType<typeof createServerSupabaseClient>>,
+      mockSupabaseClient as unknown as Awaited<ReturnType<typeof createServerSupabaseClient>>,
     )
     vi.mocked(createServiceRoleClient).mockResolvedValue(
-      mockSupabaseClient as Awaited<ReturnType<typeof createServiceRoleClient>>,
+      mockSupabaseClient as unknown as Awaited<ReturnType<typeof createServiceRoleClient>>,
     )
     vi.mocked(CreditManager).mockImplementation(
-      () => mockCreditManager as InstanceType<typeof CreditManager>,
+      () => mockCreditManager as unknown as InstanceType<typeof CreditManager>,
     )
-    vi.mocked(getLLMProvider).mockReturnValue(mockLLMProvider as ReturnType<typeof getLLMProvider>)
+    vi.mocked(getLLMProvider).mockReturnValue(
+      mockLLMProvider as unknown as ReturnType<typeof getLLMProvider>,
+    )
   })
 
   describe('generateAdventure', () => {
@@ -78,7 +80,9 @@ describe('Adventure Actions - Validation', () => {
       const result = await generateAdventure(config)
 
       expect(result.success).toBe(false)
-      expect(result.error).toContain('Invalid option')
+      if (!result.success) {
+        expect((result as { success: false; error: string }).error).toContain('Invalid option')
+      }
       expect(mockCreditManager.consumeCredit).not.toHaveBeenCalled()
     })
 
@@ -96,7 +100,9 @@ describe('Adventure Actions - Validation', () => {
       const result = await generateAdventure(config)
 
       expect(result.success).toBe(false)
-      expect(result.error).toContain('Invalid input')
+      if (!result.success) {
+        expect((result as { success: false; error: string }).error).toContain('Invalid input')
+      }
       expect(mockCreditManager.consumeCredit).not.toHaveBeenCalled()
     })
 
@@ -114,7 +120,11 @@ describe('Adventure Actions - Validation', () => {
       const result = await generateAdventure(config)
 
       expect(result.success).toBe(false)
-      expect(result.error).toContain('Party size must be 8 or less')
+      if (!result.success) {
+        expect((result as { success: false; error: string }).error).toContain(
+          'Party size must be 8 or less',
+        )
+      }
       expect(mockCreditManager.consumeCredit).not.toHaveBeenCalled()
     })
 
@@ -132,7 +142,9 @@ describe('Adventure Actions - Validation', () => {
       const result = await generateAdventure(config)
 
       expect(result.success).toBe(false)
-      expect(result.error).toContain('Invalid option')
+      if (!result.success) {
+        expect((result as { success: false; error: string }).error).toContain('Invalid option')
+      }
       expect(mockCreditManager.consumeCredit).not.toHaveBeenCalled()
     })
 
@@ -150,7 +162,9 @@ describe('Adventure Actions - Validation', () => {
       const result = await generateAdventure(config)
 
       expect(result.success).toBe(false)
-      expect(result.error).toContain('Invalid option')
+      if (!result.success) {
+        expect((result as { success: false; error: string }).error).toContain('Invalid option')
+      }
       expect(mockCreditManager.consumeCredit).not.toHaveBeenCalled()
     })
 
@@ -168,7 +182,11 @@ describe('Adventure Actions - Validation', () => {
       const result = await generateAdventure(config)
 
       expect(result.success).toBe(false)
-      expect(result.error).toContain('Invalid email address')
+      if (!result.success) {
+        expect((result as { success: false; error: string }).error).toContain(
+          'Invalid email address',
+        )
+      }
       expect(mockCreditManager.consumeCredit).not.toHaveBeenCalled()
     })
 
