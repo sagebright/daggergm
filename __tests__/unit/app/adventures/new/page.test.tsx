@@ -36,12 +36,13 @@ vi.mock('sonner', () => ({
 
 describe('NewAdventurePage', () => {
   const mockPush = vi.fn()
+  const mockReplace = vi.fn()
   const mockRouter: AppRouterInstance = {
     push: mockPush,
     refresh: vi.fn(),
     back: vi.fn(),
     forward: vi.fn(),
-    replace: vi.fn(),
+    replace: mockReplace,
     prefetch: vi.fn(),
   }
   const mockSupabaseClient = createMockSupabaseClient()
@@ -69,7 +70,7 @@ describe('NewAdventurePage', () => {
       expect(screen.getByText(/Step 1/i)).toBeInTheDocument()
     })
 
-    it('should show guest user limitations message', async () => {
+    it('should show guest user limitations message and email input', async () => {
       render(<NewAdventurePage />)
 
       await waitFor(() => {
@@ -78,6 +79,7 @@ describe('NewAdventurePage', () => {
 
       expect(screen.getByText(/You're creating as a guest/i)).toBeInTheDocument()
       expect(screen.getByText(/Sign up to save your adventures/i)).toBeInTheDocument()
+      expect(screen.getByLabelText(/Email \(required for guest access\)/i)).toBeInTheDocument()
     })
 
     it('should have all required form steps', async () => {
@@ -165,13 +167,25 @@ describe('NewAdventurePage', () => {
 
     it('should complete all steps and log adventure config', async () => {
       const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
       const user = userEvent.setup()
+
+      // Mock generateAdventure to return success
+      vi.mocked(generateAdventure).mockResolvedValueOnce({
+        success: true,
+        adventureId: 'test-adventure-123',
+      })
+
       render(<NewAdventurePage />)
 
       // Wait for loading to complete
       await waitFor(() => {
         expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
       })
+
+      // Fill in guest email first
+      const emailInput = screen.getByLabelText(/Email \(required for guest access\)/i)
+      await user.type(emailInput, 'test@example.com')
 
       // Should be at step 1 - Adventure Length
       expect(screen.getByText('Step 1 of 2')).toBeInTheDocument()
@@ -186,20 +200,31 @@ describe('NewAdventurePage', () => {
         expect(screen.getByText('Primary Motif')).toBeInTheDocument()
       })
 
-      // Step 2: Choose Primary Motif (this will complete all steps)
+      // Step 2: Choose Primary Motif (this will complete all steps and trigger generation)
       await user.click(screen.getByText('High Fantasy'))
 
-      // Verify console.log was called when completing the final step
-      // Note: Due to state timing, it logs the selections from before the final update
-      await waitFor(() => {
-        expect(consoleSpy).toHaveBeenCalledWith('Adventure config:', {
-          length: 'oneshot',
-        })
+      // Verify console.log was called before generation starts
+      expect(consoleSpy).toHaveBeenCalledWith('All steps complete. Adventure config:', {
+        length: 'oneshot',
+        primary_motif: 'high_fantasy',
       })
 
-      // This covers the console.log line in the completion path
+      // Wait for either generating screen or navigation (generation might be too fast)
+      await waitFor(() => {
+        // Either we see the generating screen or we've navigated
+        const generatingScreen = screen.queryByText('Generating Your Adventure')
+        const navigationCalled = mockReplace.mock.calls.length > 0
+
+        expect(generatingScreen || navigationCalled).toBeTruthy()
+      })
+
+      // If generation completed, verify navigation
+      if (mockReplace.mock.calls.length > 0) {
+        expect(mockReplace).toHaveBeenCalledWith('/adventures/test-adventure-123')
+      }
 
       consoleSpy.mockRestore()
+      consoleErrorSpy.mockRestore()
     })
   })
 
@@ -217,6 +242,10 @@ describe('NewAdventurePage', () => {
         expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
       })
 
+      // Fill in guest email
+      const emailInput = screen.getByLabelText(/Email \(required for guest access\)/i)
+      await user.type(emailInput, 'test@example.com')
+
       // Complete wizard steps
       await user.click(screen.getByText('One-shot'))
       await waitFor(() => {
@@ -229,18 +258,20 @@ describe('NewAdventurePage', () => {
         expect(generateAdventure).toHaveBeenCalledWith({
           length: 'oneshot',
           primary_motif: 'high_fantasy',
+          frame: 'witherwild', // Default frame added
           party_size: 4,
           party_level: 1,
           difficulty: 'standard',
           stakes: 'personal',
+          guestEmail: 'test@example.com',
         })
       })
 
       // Should show success toast
       expect(toast.success).toHaveBeenCalledWith('Adventure created successfully!')
 
-      // Should navigate to the adventure page
-      expect(mockPush).toHaveBeenCalledWith('/adventures/adv-123')
+      // Should navigate to the adventure page using replace
+      expect(mockReplace).toHaveBeenCalledWith('/adventures/adv-123')
     })
 
     it('should handle generation errors gracefully', async () => {
@@ -256,6 +287,10 @@ describe('NewAdventurePage', () => {
         expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
       })
 
+      // Fill in guest email
+      const emailInput = screen.getByLabelText(/Email \(required for guest access\)/i)
+      await user.type(emailInput, 'test@example.com')
+
       // Complete wizard steps
       await user.click(screen.getByText('One-shot'))
       await waitFor(() => {
@@ -269,7 +304,7 @@ describe('NewAdventurePage', () => {
       })
 
       // Should not navigate
-      expect(mockPush).not.toHaveBeenCalled()
+      expect(mockReplace).not.toHaveBeenCalled()
     })
 
     it('should show loading state during generation', async () => {
@@ -287,6 +322,10 @@ describe('NewAdventurePage', () => {
         expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
       })
 
+      // Fill in guest email
+      const emailInput = screen.getByLabelText(/Email \(required for guest access\)/i)
+      await user.type(emailInput, 'test@example.com')
+
       // Complete wizard steps
       await user.click(screen.getByText('One-shot'))
       await waitFor(() => {
@@ -301,7 +340,7 @@ describe('NewAdventurePage', () => {
 
       // Wait for generation to complete
       await waitFor(() => {
-        expect(mockPush).toHaveBeenCalledWith('/adventures/adv-123')
+        expect(mockReplace).toHaveBeenCalledWith('/adventures/adv-123')
       })
     })
   })

@@ -43,3 +43,6 @@ export async function createServiceRoleClient() {
     },
   )
 }
+
+// Alias for backward compatibility
+export const createClient = createServerSupabaseClient

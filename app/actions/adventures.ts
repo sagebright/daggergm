@@ -1,26 +1,57 @@
 'use server'
 
-import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { createServerSupabaseClient, createServiceRoleClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
-import { OpenAI } from 'openai'
+import { CreditManager } from '@/lib/credits/credit-manager'
+import { InsufficientCreditsError } from '@/lib/credits/errors'
+import { getLLMProvider } from '@/lib/llm/provider'
+import { adventureConfigSchema } from '@/lib/validation/schemas'
+import { withRateLimit, getRateLimitContext } from '@/lib/rate-limiting/middleware'
+import { RateLimitError } from '@/lib/rate-limiting/rate-limiter'
+import { analytics, ANALYTICS_EVENTS } from '@/lib/analytics/analytics'
+import crypto from 'crypto'
 
 export interface AdventureConfig {
-  length: string
-  primary_motif: string
+  length?: string
+  primary_motif?: string
+  focus?: string
   frame?: string
+  partySize?: number
   party_size?: number
+  partyLevel?: number
   party_level?: number
   difficulty?: string
   stakes?: string
-}
-
-function getOpenAIClient() {
-  return new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-  })
+  guestEmail?: string
 }
 
 export async function generateAdventure(config: AdventureConfig) {
+  // Validate and transform input
+  const validationResult = adventureConfigSchema.safeParse({
+    length: config.length,
+    primary_motif: config.primary_motif || config.focus,
+    focus: config.focus,
+    frame: config.frame,
+    party_size: config.party_size || config.partySize,
+    party_level: config.party_level || config.partyLevel,
+    difficulty: config.difficulty,
+    stakes: config.stakes,
+    guestEmail: config.guestEmail,
+  })
+
+  if (!validationResult.success) {
+    return {
+      success: false,
+      error: validationResult.error.issues[0].message,
+    }
+  }
+
+  const validatedConfig = validationResult.data
+  const creditManager = new CreditManager()
+  let userId: string | null = null
+  let adventureId: string | null = null
+  let isGuest = false
+
   try {
     const supabase = await createServerSupabaseClient()
 
@@ -28,75 +59,160 @@ export async function generateAdventure(config: AdventureConfig) {
     const {
       data: { user },
     } = await supabase.auth.getUser()
-    const userId = user?.id || null
+    userId = user?.id || null
 
-    // Check credits for authenticated users
-    if (userId) {
-      const { data: profile } = await supabase
-        .from('user_profiles')
-        .select('credits')
-        .eq('id', userId)
-        .single()
-
-      if (!profile || profile.credits === null || profile.credits <= 0) {
-        return { success: false, error: 'Insufficient credits' }
+    // Apply rate limiting
+    try {
+      const rateLimitContext = await getRateLimitContext(userId || undefined)
+      await withRateLimit('adventure_generation', rateLimitContext, async () => {
+        // Rate limiting wrapper - the actual work will be done below
+      })
+    } catch (error) {
+      if (error instanceof RateLimitError) {
+        return {
+          success: false,
+          error: error.message,
+          retryAfter: error.retryAfter,
+        }
       }
-
-      // Consume credit
-      await supabase
-        .from('user_profiles')
-        .update({ credits: profile.credits - 1 })
-        .eq('id', userId)
+      throw error
     }
 
-    // Generate adventure using OpenAI
-    const openai = getOpenAIClient()
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4',
-      messages: [
-        {
-          role: 'system',
-          content:
-            'Return JSON only with structure: {"title":"string","description":"string","movements":[]}',
-        },
-        {
-          role: 'user',
-          content: `Create adventure: ${JSON.stringify(config)}`,
-        },
-      ],
-      temperature: 0.7,
-    })
+    // Check if this is a guest user
+    if (!userId && validatedConfig.guestEmail) {
+      isGuest = true
+      // For guests, we'll create one free adventure
+      // In a full implementation, you'd check if this email has already created a free adventure
+    } else if (!userId) {
+      return { success: false, error: 'Authentication required' }
+    }
 
-    const content = completion.choices[0]?.message?.content || '{}'
-    const scaffoldData = JSON.parse(content)
+    // Generate a temporary adventure ID for credit metadata
+    adventureId = crypto.randomUUID()
+    console.log('Generated adventure ID:', adventureId)
 
-    // Save to database
-    const { data: adventure, error } = await supabase
-      .from('adventures')
-      .insert({
-        user_id: userId,
-        title: scaffoldData.title,
-        frame: config.frame || 'witherwild',
-        focus: config.primary_motif,
-        state: 'draft',
-        config: {
-          length: config.length,
-          primary_motif: config.primary_motif,
-          party_size: config.party_size,
-          party_level: config.party_level,
-          difficulty: config.difficulty,
-          stakes: config.stakes,
-        },
-        movements: scaffoldData.movements,
+    // Only consume credit for authenticated users
+    if (userId && !isGuest) {
+      try {
+        await creditManager.consumeCredit(userId, 'adventure', { adventureId })
+      } catch (error) {
+        if (error instanceof InsufficientCreditsError) {
+          return { success: false, error: 'Insufficient credits to generate adventure' }
+        }
+        throw error
+      }
+    }
+
+    // Track adventure start event
+    if (userId || isGuest) {
+      await analytics.track(ANALYTICS_EVENTS.ADVENTURE_STARTED, {
+        userId: userId ?? undefined,
+        sessionId: crypto.randomUUID(), // Generate session ID for tracking
+        frame: validatedConfig.frame || 'witherwild',
+        partySize: validatedConfig.party_size,
+        partyLevel: validatedConfig.party_level,
+        difficulty: validatedConfig.difficulty,
+        stakes: validatedConfig.stakes,
+        isGuest,
       })
+    }
+
+    // Generate adventure using LLM provider
+    const llmProvider = getLLMProvider()
+    const startTime = Date.now()
+    const scaffoldData = await llmProvider.generateAdventureScaffold({
+      frame: validatedConfig.frame || 'witherwild',
+      focus: validatedConfig.focus || validatedConfig.primary_motif,
+      partySize: validatedConfig.party_size,
+      partyLevel: validatedConfig.party_level,
+      difficulty: validatedConfig.difficulty,
+      stakes: validatedConfig.stakes,
+    })
+    const duration = (Date.now() - startTime) / 1000
+
+    // Track scaffold generation completion
+    if (userId || isGuest) {
+      await analytics.track(ANALYTICS_EVENTS.SCAFFOLD_GENERATED, {
+        userId: userId ?? undefined,
+        adventureId,
+        duration,
+        frame: validatedConfig.frame || 'witherwild',
+        movementCount: scaffoldData.movements?.length || 0,
+      })
+    }
+
+    // Save to database with the pre-generated ID
+    const adventureData = {
+      id: adventureId,
+      title: scaffoldData.title,
+      frame: validatedConfig.frame || 'witherwild',
+      focus: validatedConfig.focus || validatedConfig.primary_motif,
+      state: 'draft',
+      config: {
+        length: validatedConfig.length,
+        primary_motif: validatedConfig.primary_motif,
+        party_size: validatedConfig.party_size,
+        party_level: validatedConfig.party_level,
+        difficulty: validatedConfig.difficulty,
+        stakes: validatedConfig.stakes,
+      },
+      movements: scaffoldData.movements,
+      user_id: null as string | null,
+      guest_email: null as string | null,
+      guest_token: null as string | null,
+    }
+
+    // Add user_id for authenticated users, guest_email for guests
+    if (isGuest) {
+      adventureData.guest_email = validatedConfig.guestEmail || null
+      adventureData.guest_token = crypto.randomUUID()
+    } else {
+      adventureData.user_id = userId
+    }
+
+    // Use service role client for insert to bypass RLS
+    const serviceClient = await createServiceRoleClient()
+    const { data: adventure, error } = await serviceClient
+      .from('adventures')
+      .insert(adventureData)
       .select()
       .single()
 
     if (error) throw error
 
+    console.log('Adventure saved to database:', adventure.id)
+
     revalidatePath('/dashboard')
-    return { success: true, adventureId: adventure.id }
+    // For guest users, return the guest token along with the adventure ID
+    if (isGuest && adventure.guest_token) {
+      console.log('Returning guest adventure with token')
+      return {
+        success: true,
+        adventureId: adventure.id,
+        guestToken: adventure.guest_token,
+        isGuest: true,
+      }
+    }
+
+    console.log('Returning authenticated adventure')
+    const response = { success: true, adventureId: adventure.id }
+    console.log('Final response:', response)
+    return response
   } catch (error) {
+    console.error('Error in generateAdventure:', error)
+    // Refund credit if generation failed after consumption (only for authenticated users)
+    if (userId && adventureId && !isGuest) {
+      try {
+        await creditManager.refundCredit(userId, 'adventure', {
+          adventureId,
+          reason: 'Generation failed',
+          error: error instanceof Error ? error.message : 'Unknown error',
+        })
+      } catch (refundError) {
+        console.error('Failed to refund credit:', refundError)
+      }
+    }
+
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -104,17 +220,44 @@ export async function generateAdventure(config: AdventureConfig) {
   }
 }
 
-export async function getAdventure(id: string) {
-  const supabase = await createServerSupabaseClient()
-
-  const { data, error } = await supabase.from('adventures').select('*').eq('id', id).single()
-
-  if (error) {
-    console.error('Error fetching adventure:', error)
+export async function getAdventure(id: string, guestToken?: string) {
+  // Validate adventure ID format
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  if (!uuidRegex.test(id)) {
+    console.error('Invalid adventure ID format:', id)
     return null
   }
 
-  return data
+  const supabase = await createServerSupabaseClient()
+
+  // First try to get as authenticated user
+  const { data: authData, error: authError } = await supabase
+    .from('adventures')
+    .select('*')
+    .eq('id', id)
+    .single()
+
+  if (!authError && authData) {
+    return authData
+  }
+
+  // If not found or error, try with guest token using service role
+  if (guestToken) {
+    const serviceClient = await createServiceRoleClient()
+    const { data: guestData, error: guestError } = await serviceClient
+      .from('adventures')
+      .select('*')
+      .eq('id', id)
+      .eq('guest_token', guestToken)
+      .single()
+
+    if (!guestError && guestData) {
+      return guestData
+    }
+  }
+
+  console.error('Error fetching adventure:', authError || 'Not found')
+  return null
 }
 
 export async function getUserAdventures() {
@@ -139,4 +282,75 @@ export async function getUserAdventures() {
   }
 
   return data || []
+}
+
+export async function updateAdventureState(
+  adventureId: string,
+  newState: 'draft' | 'ready' | 'archived',
+  guestToken?: string,
+) {
+  console.log('updateAdventureState called:', {
+    adventureId,
+    newState,
+    hasGuestToken: !!guestToken,
+  })
+
+  try {
+    const supabase = await createServerSupabaseClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    // Get adventure - use service role for guest access
+    let adventure
+    if (!user && guestToken) {
+      // Guest user with token
+      const serviceClient = await createServiceRoleClient()
+      const { data } = await serviceClient
+        .from('adventures')
+        .select('*')
+        .eq('id', adventureId)
+        .eq('guest_token', guestToken)
+        .single()
+
+      adventure = data
+    } else if (user) {
+      // Authenticated user
+      const { data } = await supabase
+        .from('adventures')
+        .select('*')
+        .eq('id', adventureId)
+        .eq('user_id', user.id)
+        .single()
+
+      adventure = data
+    } else {
+      return { success: false, error: 'Unauthorized' }
+    }
+
+    if (!adventure) {
+      return { success: false, error: 'Adventure not found or unauthorized' }
+    }
+
+    // Update state using service role
+    const serviceClient = await createServiceRoleClient()
+    const { error } = await serviceClient
+      .from('adventures')
+      .update({
+        state: newState,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', adventureId)
+
+    if (error) throw error
+
+    revalidatePath(`/adventures/${adventureId}`)
+
+    return { success: true }
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to update adventure state',
+    }
+  }
 }

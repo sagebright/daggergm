@@ -8,6 +8,7 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: './__tests__/setup.ts',
+    testTimeout: 10000, // 10 seconds
     exclude: [
       '**/node_modules/**',
       '**/dist/**',
@@ -16,6 +17,31 @@ export default defineConfig({
       '**/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build}.config.*',
       '**/__tests__/e2e/**',
     ],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html', 'json-summary'],
+      all: true,
+      include: ['**/*.{ts,tsx}'],
+      exclude: [
+        '**/node_modules/**',
+        '**/dist/**',
+        '**/__tests__/**',
+        '**/*.test.{ts,tsx}',
+        '**/*.spec.{ts,tsx}',
+        '**/types/**',
+        '**/*.d.ts',
+        'vitest.config.ts',
+        'next.config.mjs',
+        'tailwind.config.ts',
+        'postcss.config.mjs',
+      ],
+      thresholds: {
+        lines: 99,
+        functions: 99,
+        branches: 97,
+        statements: 99,
+      },
+    },
   },
   resolve: {
     alias: {

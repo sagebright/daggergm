@@ -1,17 +1,45 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { generateAdventure, getAdventure, getUserAdventures } from '@/app/actions/adventures'
-import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { createServerSupabaseClient, createServiceRoleClient } from '@/lib/supabase/server'
 import { OpenAI } from 'openai'
+import { CreditManager } from '@/lib/credits/credit-manager'
+import { InsufficientCreditsError } from '@/lib/credits/errors'
+import { getLLMProvider } from '@/lib/llm/provider'
 
 // Mock dependencies
 vi.mock('@/lib/supabase/server', () => ({
   createServerSupabaseClient: vi.fn(),
+  createServiceRoleClient: vi.fn(),
+  createClient: vi.fn(() =>
+    Promise.resolve({
+      from: vi.fn(() => ({
+        insert: vi.fn().mockResolvedValue({ error: null }),
+        select: vi.fn().mockResolvedValue({ data: [], error: null }),
+        update: vi.fn().mockResolvedValue({ error: null }),
+        delete: vi.fn().mockResolvedValue({ error: null }),
+      })),
+      rpc: vi.fn().mockResolvedValue({ data: null, error: null }),
+      auth: {
+        getUser: vi.fn().mockResolvedValue({ data: { user: null }, error: null }),
+      },
+    }),
+  ),
 }))
 vi.mock('next/cache', () => ({
   revalidatePath: vi.fn(),
 }))
 vi.mock('next/navigation', () => ({
   redirect: vi.fn(),
+}))
+vi.mock('@/lib/credits/credit-manager')
+vi.mock('@/lib/llm/provider')
+
+// Mock crypto
+vi.mock('crypto', () => ({
+  default: {
+    randomUUID: vi.fn(() => 'test-uuid'),
+  },
+  randomUUID: vi.fn(() => 'test-uuid'),
 }))
 
 // Mock OpenAI module
@@ -33,21 +61,37 @@ describe('Adventure Server Actions', () => {
     },
   }
 
+  const mockCreditManager = {
+    consumeCredit: vi.fn(),
+    refundCredit: vi.fn(),
+    getUserCredits: vi.fn(),
+  }
+
+  const mockLLMProvider = {
+    generateAdventureScaffold: vi.fn(),
+  }
+
   beforeEach(() => {
     vi.clearAllMocks()
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    vi.mocked(createServerSupabaseClient).mockResolvedValue(mockSupabaseClient as any)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    vi.mocked(OpenAI).mockImplementation(() => mockOpenAIInstance as any)
+    vi.mocked(createServerSupabaseClient).mockResolvedValue(
+      mockSupabaseClient as ReturnType<typeof createServerSupabaseClient>,
+    )
+    vi.mocked(createServiceRoleClient).mockResolvedValue(
+      mockSupabaseClient as ReturnType<typeof createServiceRoleClient>,
+    )
+    vi.mocked(OpenAI).mockImplementation(() => mockOpenAIInstance as InstanceType<typeof OpenAI>)
+    vi.mocked(CreditManager).mockImplementation(
+      () => mockCreditManager as InstanceType<typeof CreditManager>,
+    )
+    vi.mocked(getLLMProvider).mockReturnValue(mockLLMProvider as ReturnType<typeof getLLMProvider>)
   })
 
   describe('generateAdventure', () => {
     it('should generate adventure for authenticated user with credits', async () => {
       // Arrange
       const mockUser = { id: 'user-123' }
-      const mockProfile = { credits: 5 }
       const mockAdventure = {
-        id: 'adv-123',
+        id: 'test-uuid',
         title: 'The Lost Temple',
         description: 'An epic quest',
         movements: [],
@@ -57,39 +101,26 @@ describe('Adventure Server Actions', () => {
         data: { user: mockUser },
       })
 
-      mockSupabaseClient.from
-        .mockReturnValueOnce({
-          select: vi.fn().mockReturnValue({
-            eq: vi.fn().mockReturnValue({
-              single: vi.fn().mockResolvedValueOnce({ data: mockProfile }),
-            }),
-          }),
-        })
-        .mockReturnValueOnce({
-          update: vi.fn().mockReturnValue({
-            eq: vi.fn().mockResolvedValueOnce({ data: null, error: null }),
-          }),
-        })
-        .mockReturnValueOnce({
-          insert: vi.fn().mockReturnValue({
-            select: vi.fn().mockReturnValue({
-              single: vi.fn().mockResolvedValueOnce({ data: mockAdventure, error: null }),
-            }),
-          }),
-        })
+      // Mock credit consumption
+      mockCreditManager.consumeCredit.mockResolvedValueOnce({
+        success: true,
+        remainingCredits: 4,
+      })
 
-      mockOpenAIInstance.chat.completions.create.mockResolvedValueOnce({
-        choices: [
-          {
-            message: {
-              content: JSON.stringify({
-                title: 'The Lost Temple',
-                description: 'An epic quest',
-                movements: [],
-              }),
-            },
-          },
-        ],
+      // Mock LLM provider
+      mockLLMProvider.generateAdventureScaffold.mockResolvedValueOnce({
+        title: 'The Lost Temple',
+        description: 'An epic quest',
+        estimatedDuration: '3-4 hours',
+        movements: [],
+      })
+
+      mockSupabaseClient.from.mockReturnValueOnce({
+        insert: vi.fn().mockReturnValue({
+          select: vi.fn().mockReturnValue({
+            single: vi.fn().mockResolvedValueOnce({ data: mockAdventure, error: null }),
+          }),
+        }),
       })
 
       // Act
@@ -105,29 +136,25 @@ describe('Adventure Server Actions', () => {
       // Assert
       expect(result).toEqual({
         success: true,
-        adventureId: 'adv-123',
+        adventureId: 'test-uuid',
       })
 
       // Verify credit was consumed
-      expect(mockSupabaseClient.from).toHaveBeenCalledWith('user_profiles')
+      expect(mockCreditManager.consumeCredit).toHaveBeenCalledWith('user-123', 'adventure', {
+        adventureId: 'test-uuid',
+      })
     })
 
     it('should fail if user has insufficient credits', async () => {
       // Arrange
       const mockUser = { id: 'user-123' }
-      const mockProfile = { credits: 0 }
 
       mockSupabaseClient.auth.getUser.mockResolvedValueOnce({
         data: { user: mockUser },
       })
 
-      mockSupabaseClient.from.mockReturnValueOnce({
-        select: vi.fn().mockReturnValue({
-          eq: vi.fn().mockReturnValue({
-            single: vi.fn().mockResolvedValueOnce({ data: mockProfile }),
-          }),
-        }),
-      })
+      // Mock insufficient credits error
+      mockCreditManager.consumeCredit.mockRejectedValueOnce(new InsufficientCreditsError())
 
       // Act
       const result = await generateAdventure({
@@ -138,42 +165,14 @@ describe('Adventure Server Actions', () => {
       // Assert
       expect(result).toEqual({
         success: false,
-        error: 'Insufficient credits',
+        error: 'Insufficient credits to generate adventure',
       })
     })
 
-    it('should allow guest users to generate adventures', async () => {
+    it('should require authentication for adventure generation', async () => {
       // Arrange
       mockSupabaseClient.auth.getUser.mockResolvedValueOnce({
         data: { user: null },
-      })
-
-      const mockAdventure = {
-        id: 'adv-guest-123',
-        title: 'Guest Adventure',
-        user_id: null,
-      }
-
-      mockSupabaseClient.from.mockReturnValueOnce({
-        insert: vi.fn().mockReturnValue({
-          select: vi.fn().mockReturnValue({
-            single: vi.fn().mockResolvedValueOnce({ data: mockAdventure, error: null }),
-          }),
-        }),
-      })
-
-      mockOpenAIInstance.chat.completions.create.mockResolvedValueOnce({
-        choices: [
-          {
-            message: {
-              content: JSON.stringify({
-                title: 'Guest Adventure',
-                description: 'A guest adventure',
-                movements: [],
-              }),
-            },
-          },
-        ],
       })
 
       // Act
@@ -184,20 +183,35 @@ describe('Adventure Server Actions', () => {
 
       // Assert
       expect(result).toEqual({
-        success: true,
-        adventureId: 'adv-guest-123',
+        success: false,
+        error: 'Authentication required',
       })
     })
 
-    it('should handle OpenAI API errors gracefully', async () => {
+    it('should handle LLM errors gracefully and refund credits', async () => {
       // Arrange
+      const mockUser = { id: 'user-123' }
+
       mockSupabaseClient.auth.getUser.mockResolvedValueOnce({
-        data: { user: null },
+        data: { user: mockUser },
       })
 
-      mockOpenAIInstance.chat.completions.create.mockRejectedValueOnce(
+      // Mock successful credit consumption
+      mockCreditManager.consumeCredit.mockResolvedValueOnce({
+        success: true,
+        remainingCredits: 4,
+      })
+
+      // Mock LLM error
+      mockLLMProvider.generateAdventureScaffold.mockRejectedValueOnce(
         new Error('API rate limit exceeded'),
       )
+
+      // Mock credit refund
+      mockCreditManager.refundCredit.mockResolvedValueOnce({
+        success: true,
+        newBalance: 5,
+      })
 
       // Act
       const result = await generateAdventure({
@@ -210,6 +224,16 @@ describe('Adventure Server Actions', () => {
         success: false,
         error: 'API rate limit exceeded',
       })
+
+      // Verify credit was refunded
+      expect(mockCreditManager.refundCredit).toHaveBeenCalledWith(
+        'user-123',
+        'adventure',
+        expect.objectContaining({
+          adventureId: 'test-uuid',
+          reason: 'Generation failed',
+        }),
+      )
     })
   })
 
@@ -217,7 +241,7 @@ describe('Adventure Server Actions', () => {
     it('should fetch adventure by id', async () => {
       // Arrange
       const mockAdventure = {
-        id: 'adv-123',
+        id: '123e4567-e89b-12d3-a456-426614174000',
         title: 'Test Adventure',
         created_at: '2024-01-01',
       }
@@ -231,7 +255,7 @@ describe('Adventure Server Actions', () => {
       })
 
       // Act
-      const result = await getAdventure('adv-123')
+      const result = await getAdventure('123e4567-e89b-12d3-a456-426614174000')
 
       // Assert
       expect(result).toEqual(mockAdventure)
@@ -251,7 +275,7 @@ describe('Adventure Server Actions', () => {
       })
 
       // Act
-      const result = await getAdventure('non-existent')
+      const result = await getAdventure('00000000-0000-0000-0000-000000000000')
 
       // Assert
       expect(result).toBeNull()

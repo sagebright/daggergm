@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { generateAdventure, type AdventureConfig } from '@/app/actions/adventures'
 import { toast } from 'sonner'
 
@@ -44,11 +46,17 @@ export default function NewAdventurePage() {
   const [currentStep, setCurrentStep] = useState(0)
   const [selections, setSelections] = useState<Record<string, string>>({})
   const [isGuest, setIsGuest] = useState(true)
+  const [guestEmail, setGuestEmail] = useState('')
   const [loading, setLoading] = useState(true)
   const [generating, setGenerating] = useState(false)
 
   useEffect(() => {
+    console.log('NewAdventurePage mounted')
     checkAuth()
+
+    return () => {
+      console.log('NewAdventurePage unmounted')
+    }
   }, [])
 
   async function checkAuth() {
@@ -59,19 +67,35 @@ export default function NewAdventurePage() {
   }
 
   const handleSelection = async (value: string) => {
+    console.log('handleSelection called with:', value, 'at step:', currentStep)
     const newSelections = { ...selections, [ADVENTURE_STEPS[currentStep].id]: value }
+    console.log('New selections:', newSelections)
     setSelections(newSelections)
 
     if (currentStep < ADVENTURE_STEPS.length - 1) {
+      console.log('Moving to next step:', currentStep + 1)
       setCurrentStep(currentStep + 1)
     } else {
       // All steps completed, generate adventure
-      console.log('Adventure config:', selections)
+      console.log('All steps complete. Adventure config:', newSelections)
       await handleAdventureGeneration(newSelections)
     }
   }
 
   const handleAdventureGeneration = async (config: Record<string, string>) => {
+    // Prevent multiple calls
+    if (generating) {
+      console.log('Already generating, ignoring duplicate call')
+      return
+    }
+
+    // For guest users, validate email first
+    if (isGuest && !guestEmail) {
+      toast.error('Please enter your email to continue')
+      return
+    }
+
+    console.log('Starting adventure generation')
     setGenerating(true)
 
     try {
@@ -81,24 +105,44 @@ export default function NewAdventurePage() {
         length: config.length,
         primary_motif: config.primary_motif,
         // Add defaults for missing fields
+        frame: 'witherwild', // Default frame
         party_size: 4,
         party_level: 1,
         difficulty: 'standard',
         stakes: 'personal',
+        // Add guest email if guest
+        ...(isGuest && { guestEmail }),
       }
 
       const result = await generateAdventure(adventureConfig)
+      console.log('generateAdventure result:', result)
 
       if (result.success) {
+        console.log('Success! Adventure ID:', result.adventureId)
         toast.success('Adventure created successfully!')
-        router.push(`/adventures/${result.adventureId}`)
+
+        // Store guest token if present
+        if (result.isGuest && result.guestToken) {
+          console.log('Storing guest token for adventure:', result.adventureId)
+          localStorage.setItem(`guest_token_${result.adventureId}`, result.guestToken)
+          localStorage.setItem('guest_email', guestEmail)
+        }
+
+        // Don't reset generating state on success to prevent UI flicker
+        const redirectUrl = `/adventures/${result.adventureId}`
+        console.log('Attempting to redirect to:', redirectUrl)
+
+        // Use replace to prevent back button issues
+        router.replace(redirectUrl)
+        return // Exit early to avoid resetting generating state
       } else {
+        console.log('Generation failed:', result.error)
         toast.error(result.error || 'Failed to generate adventure')
+        setGenerating(false)
       }
     } catch (error) {
       console.error('Generation error:', error)
       toast.error('Something went wrong. Please try again.')
-    } finally {
       setGenerating(false)
     }
   }
@@ -138,12 +182,26 @@ export default function NewAdventurePage() {
       <h1 className="text-3xl font-bold mb-2">Create Your Adventure</h1>
 
       {isGuest && (
-        <Card className="mb-6 bg-muted">
-          <CardContent className="pt-6">
+        <Card className="mb-6">
+          <CardContent className="pt-6 space-y-4">
             <p className="text-sm text-muted-foreground">
               You&apos;re creating as a guest. Sign up to save your adventures and access premium
               features.
             </p>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email (required for guest access)</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="your@email.com"
+                value={guestEmail}
+                onChange={(e) => setGuestEmail(e.target.value)}
+                required
+              />
+              <p className="text-xs text-muted-foreground">
+                We&apos;ll use this to save your adventure. You can claim it later by signing up.
+              </p>
+            </div>
           </CardContent>
         </Card>
       )}
