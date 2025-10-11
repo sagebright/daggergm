@@ -106,7 +106,7 @@ function trackCustomMetrics(): void {
 /**
  * Track a custom performance event
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 export function trackCustomEvent(
   name: string,
   duration: number,

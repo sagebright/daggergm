@@ -270,5 +270,24 @@ describe('Export Server Actions', () => {
       expect(result.success).toBe(true)
       expect(orderSpy).toHaveBeenCalledWith('order_index')
     })
+
+    it('should handle movements fetch error', async () => {
+      mockSupabase.from
+        .mockReturnValueOnce({
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          single: vi.fn().mockResolvedValue({ data: mockAdventure, error: null }),
+        })
+        .mockReturnValueOnce({
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          order: vi.fn().mockResolvedValue({ data: null, error: { message: 'DB error' } }),
+        })
+
+      const result = await exportAdventure('123e4567-e89b-12d3-a456-426614174000', 'markdown')
+
+      expect(result.success).toBe(false)
+      expect(result.error).toBe('Failed to fetch movements')
+    })
   })
 })
