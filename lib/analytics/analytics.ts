@@ -151,50 +151,55 @@ export class Analytics {
     timestamp: string,
   ): Promise<void> {
     try {
-      const supabase = await this.getSupabase()
-      const { error } = await supabase.from('analytics_events').insert({
-        event_name: eventName,
-        user_id: data.userId,
-        session_id: data.sessionId,
-        properties: {
-          adventure_id: data.adventureId,
-          movement_id: data.movementId,
-          frame: data.frame,
-          party_size: data.partySize,
-          duration: data.duration,
-          token_count: data.tokenCount,
-          cost: data.cost,
-          amount: data.amount,
-          price: data.price,
-          payment_method: data.paymentMethod,
-          movement_type: data.movementType,
-          ...Object.fromEntries(
-            Object.entries(data).filter(
-              ([key]) =>
-                ![
-                  'userId',
-                  'sessionId',
-                  'adventureId',
-                  'movementId',
-                  'frame',
-                  'partySize',
-                  'duration',
-                  'tokenCount',
-                  'cost',
-                  'amount',
-                  'price',
-                  'paymentMethod',
-                  'movementType',
-                ].includes(key),
-            ),
-          ),
-        },
-        timestamp,
-      })
-
-      if (error) {
-        console.error('Failed to store analytics event:', error)
+      // TODO: Implement analytics_events table in database
+      // For now, just log to console in development
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[Analytics Event]', eventName, { data, timestamp })
       }
+      // const supabase = await this.getSupabase()
+      // const { error } = await supabase.from('analytics_events').insert({
+      //   event_name: eventName,
+      //   user_id: data.userId,
+      //   session_id: data.sessionId,
+      //   properties: {
+      //     adventure_id: data.adventureId,
+      //     movement_id: data.movementId,
+      //     frame: data.frame,
+      //     party_size: data.partySize,
+      //     duration: data.duration,
+      //     token_count: data.tokenCount,
+      //     cost: data.cost,
+      //     amount: data.amount,
+      //     price: data.price,
+      //     payment_method: data.paymentMethod,
+      //     movement_type: data.movementType,
+      //     ...Object.fromEntries(
+      //       Object.entries(data).filter(
+      //         ([key]) =>
+      //           ![
+      //             'userId',
+      //             'sessionId',
+      //             'adventureId',
+      //             'movementId',
+      //             'frame',
+      //             'partySize',
+      //             'duration',
+      //             'tokenCount',
+      //             'cost',
+      //             'amount',
+      //             'price',
+      //             'paymentMethod',
+      //             'movementType',
+      //           ].includes(key),
+      //       ),
+      //     ),
+      //   },
+      //   timestamp,
+      // })
+      //
+      // if (error) {
+      //   console.error('Failed to store analytics event:', error)
+      // }
     } catch (error) {
       console.error('Failed to store analytics event:', error)
     }
@@ -205,20 +210,25 @@ export class Analytics {
     timestamp: string,
   ): Promise<void> {
     try {
-      const supabase = await this.getSupabase()
-      const { error } = await supabase.from('performance_metrics').insert({
-        operation: data.operation,
-        duration: data.duration,
-        success: data.success,
-        token_count: data.tokenCount,
-        cost: data.cost,
-        metadata: data.metadata || {},
-        timestamp,
-      })
-
-      if (error) {
-        console.error('Failed to store performance metric:', error)
+      // TODO: Implement performance_metrics table in database
+      // For now, just log to console in development
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[Performance Metric]', { data, timestamp })
       }
+      // const supabase = await this.getSupabase()
+      // const { error } = await supabase.from('performance_metrics').insert({
+      //   operation: data.operation,
+      //   duration: data.duration,
+      //   success: data.success,
+      //   token_count: data.tokenCount,
+      //   cost: data.cost,
+      //   metadata: data.metadata || {},
+      //   timestamp,
+      // })
+      //
+      // if (error) {
+      //   console.error('Failed to store performance metric:', error)
+      // }
     } catch (error) {
       console.error('Failed to store performance metric:', error)
     }

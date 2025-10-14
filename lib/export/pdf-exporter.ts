@@ -86,11 +86,11 @@ export class PDFExporter {
     const metadataHtml = `
       <div class="metadata">
         <strong>Frame:</strong> ${this.capitalize(adventure.frame)}<br>
-        ${adventure.metadata?.party_size ? `<strong>Party Size:</strong> ${adventure.metadata.party_size}<br>` : ''}
-        ${adventure.metadata?.party_level ? `<strong>Party Level:</strong> ${adventure.metadata.party_level}<br>` : ''}
-        ${adventure.metadata?.difficulty ? `<strong>Difficulty:</strong> ${this.capitalize(adventure.metadata.difficulty)}<br>` : ''}
-        ${adventure.metadata?.stakes ? `<strong>Stakes:</strong> ${this.capitalize(adventure.metadata.stakes)}<br>` : ''}
-        ${adventure.metadata?.estimated_duration ? `<strong>Duration:</strong> ${adventure.metadata.estimated_duration}` : ''}
+        ${adventure.config?.partySize ? `<strong>Party Size:</strong> ${adventure.config.partySize}<br>` : ''}
+        ${adventure.config?.partyLevel ? `<strong>Party Level:</strong> ${adventure.config.partyLevel}<br>` : ''}
+        ${adventure.config?.difficulty ? `<strong>Difficulty:</strong> ${this.capitalize(adventure.config.difficulty)}<br>` : ''}
+        ${adventure.config?.stakes ? `<strong>Stakes:</strong> ${this.capitalize(adventure.config.stakes)}<br>` : ''}
+        ${adventure.metadata?.estimated_duration ? `<strong>Duration:</strong> ${String(adventure.metadata.estimated_duration)}` : ''}
       </div>
     `
 

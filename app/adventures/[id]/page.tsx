@@ -22,7 +22,8 @@ interface Adventure {
     id?: string
     title: string
     type: string
-    content: string
+    content?: string
+    description?: string
     estimatedTime?: string
   }>
 }
@@ -48,7 +49,7 @@ export default function AdventureDetailPage({ params }: { params: Promise<{ id: 
       }
 
       console.log('Adventure loaded:', data)
-      setAdventure(data as Adventure)
+      setAdventure(data as unknown as Adventure)
       setLoading(false)
     }
 
@@ -81,7 +82,12 @@ export default function AdventureDetailPage({ params }: { params: Promise<{ id: 
     // Get guest token if needed
     const guestToken = localStorage.getItem(`guest_token_${adventure.id}`)
 
-    const result = await updateMovement(adventure.id, movementId, updates, guestToken || undefined)
+    const result = await updateMovement(
+      adventure.id,
+      movementId,
+      updates as Partial<import('@/lib/llm/types').Movement>,
+      guestToken || undefined,
+    )
 
     if (!result.success) {
       console.error('Failed to update movement:', result.error)
@@ -123,40 +129,39 @@ export default function AdventureDetailPage({ params }: { params: Promise<{ id: 
                   disabled={isUpdating}
                   onClick={() => {
                     console.log('Mark as Ready button clicked!')
-                    setIsUpdating(true)(
-                      // Use immediate async function
-                      async () => {
-                        try {
-                          console.log('Starting updateAdventureState...')
-                          const { updateAdventureState } = await import('@/app/actions/adventures')
-                          const guestToken = localStorage.getItem(`guest_token_${adventure.id}`)
-                          console.log('Got guestToken:', !!guestToken)
+                    setIsUpdating(true)
+                    // Use immediate async function
+                    ;(async () => {
+                      try {
+                        console.log('Starting updateAdventureState...')
+                        const { updateAdventureState } = await import('@/app/actions/adventures')
+                        const guestToken = localStorage.getItem(`guest_token_${adventure.id}`)
+                        console.log('Got guestToken:', !!guestToken)
 
-                          const result = await updateAdventureState(
-                            adventure.id,
-                            'ready',
-                            guestToken || undefined,
-                          )
-                          console.log('updateAdventureState result:', result)
+                        const result = await updateAdventureState(
+                          adventure.id,
+                          'ready',
+                          guestToken || undefined,
+                        )
+                        console.log('updateAdventureState result:', result)
 
-                          if (result.success) {
-                            setAdventure((prev) => (prev ? { ...prev, state: 'ready' } : prev))
-                            const { toast } = await import('sonner')
-                            toast.success('Adventure marked as ready!')
-                          } else {
-                            console.error('Failed to update adventure state:', result.error)
-                            const { toast } = await import('sonner')
-                            toast.error(result.error || 'Failed to update adventure')
-                          }
-                        } catch (error) {
-                          console.error('Error in Mark as Ready handler:', error)
+                        if (result.success) {
+                          setAdventure((prev) => (prev ? { ...prev, state: 'ready' } : prev))
                           const { toast } = await import('sonner')
-                          toast.error('An error occurred')
-                        } finally {
-                          setIsUpdating(false)
+                          toast.success('Adventure marked as ready!')
+                        } else {
+                          console.error('Failed to update adventure state:', result.error)
+                          const { toast } = await import('sonner')
+                          toast.error(result.error || 'Failed to update adventure')
                         }
-                      },
-                    )()
+                      } catch (error) {
+                        console.error('Error in Mark as Ready handler:', error)
+                        const { toast } = await import('sonner')
+                        toast.error('An error occurred')
+                      } finally {
+                        setIsUpdating(false)
+                      }
+                    })()
                   }}
                 >
                   {isUpdating ? 'Updating...' : 'Mark as Ready'}

@@ -14,6 +14,7 @@ import { CreditManager } from '@/lib/credits/credit-manager'
 import { InsufficientCreditsError } from '@/lib/credits/errors'
 import { analytics, ANALYTICS_EVENTS } from '@/lib/analytics/analytics'
 import type { Movement } from '@/lib/llm/types'
+import type { Json } from '@/types/database.generated'
 
 let llmProvider: OpenAIProvider | null = null
 
@@ -99,20 +100,22 @@ export async function expandMovement(adventureId: string, movementId: string) {
     }
 
     // Find the movement
-    const movement = adventure.movements?.find((m: { id: string }) => m.id === movementId)
+    const movements = adventure.movements as Movement[] | null
+    const movement = movements?.find((m) => m.id === movementId)
     if (!movement) {
       return { success: false, error: 'Movement not found' }
     }
 
     // Expand using LLM
     const startTime = Date.now()
+    const config = adventure.config as { party_size?: number; party_level?: number } | null
     const expansion = await getLLMProvider().expandMovement({
-      movement: movement as Movement,
+      movement,
       adventure: {
         frame: adventure.frame,
         focus: adventure.focus,
-        partySize: adventure.config?.party_size || 4,
-        partyLevel: adventure.config?.party_level || 2,
+        partySize: config?.party_size || 4,
+        partyLevel: config?.party_level || 2,
       },
       // Could add previous/next movements for context
     })
@@ -129,7 +132,7 @@ export async function expandMovement(adventureId: string, movementId: string) {
     })
 
     // Update movement with expanded content
-    const updatedMovements = adventure.movements.map((m: { id: string }) =>
+    const updatedMovements = movements?.map((m) =>
       m.id === movementId
         ? {
             ...m,
@@ -143,7 +146,7 @@ export async function expandMovement(adventureId: string, movementId: string) {
     const { error } = await supabase
       .from('adventures')
       .update({
-        movements: updatedMovements,
+        movements: updatedMovements as unknown as Json[],
         updated_at: new Date().toISOString(),
       })
       .eq('id', adventureId)
@@ -256,7 +259,8 @@ export async function refineMovementContent(
     }
 
     // Find movement
-    const movement = adventure.movements?.find((m: { id: string }) => m.id === movementId)
+    const movements = adventure.movements as Movement[] | null
+    const movement = movements?.find((m) => m.id === movementId)
     if (!movement) {
       return { success: false, error: 'Movement not found' }
     }
@@ -335,7 +339,7 @@ export async function updateMovement(
     // Validate updates
     const validated = movementUpdateSchema.safeParse(updates)
     if (!validated.success) {
-      const firstError = validated.error?.errors?.[0]?.message
+      const firstError = validated.error.issues[0]?.message
       return {
         success: false,
         error: firstError ? `Validation error: ${firstError}` : 'Validation error: Invalid input',
@@ -382,7 +386,8 @@ export async function updateMovement(
     }
 
     // Update movement
-    const updatedMovements = adventure.movements.map((m: { id: string }) =>
+    const movements = adventure.movements as Movement[] | null
+    const updatedMovements = movements?.map((m) =>
       m.id === movementId ? { ...m, ...validated.data } : m,
     )
 
@@ -396,7 +401,7 @@ export async function updateMovement(
     const { error } = await serviceClient
       .from('adventures')
       .update({
-        movements: updatedMovements,
+        movements: updatedMovements as unknown as Json[],
         updated_at: new Date().toISOString(),
       })
       .eq('id', adventureId)

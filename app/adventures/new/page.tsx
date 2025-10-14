@@ -122,7 +122,7 @@ export default function NewAdventurePage() {
         toast.success('Adventure created successfully!')
 
         // Store guest token if present
-        if (result.isGuest && result.guestToken) {
+        if ('isGuest' in result && result.isGuest && 'guestToken' in result && result.guestToken) {
           console.log('Storing guest token for adventure:', result.adventureId)
           localStorage.setItem(`guest_token_${result.adventureId}`, result.guestToken)
           localStorage.setItem('guest_email', guestEmail)
@@ -136,8 +136,8 @@ export default function NewAdventurePage() {
         router.replace(redirectUrl)
         return // Exit early to avoid resetting generating state
       } else {
-        console.log('Generation failed:', result.error)
-        toast.error(result.error || 'Failed to generate adventure')
+        console.log('Generation failed:', 'error' in result ? result.error : 'Unknown error')
+        toast.error('error' in result ? result.error : 'Failed to generate adventure')
         setGenerating(false)
       }
     } catch (error) {

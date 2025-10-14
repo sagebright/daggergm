@@ -10,7 +10,7 @@ export function WebVitalsTracker() {
     if (typeof window === 'undefined') return
 
     // Track web vitals using the web-vitals library
-    import('web-vitals').then(({ onCLS, onFID, onFCP, onLCP, onTTFB }) => {
+    import('web-vitals').then(({ onCLS, onINP, onFCP, onLCP, onTTFB }) => {
       const handleMetric = (metric: {
         name: string
         value: number
@@ -33,7 +33,7 @@ export function WebVitalsTracker() {
       }
 
       onCLS(handleMetric)
-      onFID(handleMetric)
+      onINP(handleMetric) // INP replaces FID in newer web-vitals
       onFCP(handleMetric)
       onLCP(handleMetric)
       onTTFB(handleMetric)

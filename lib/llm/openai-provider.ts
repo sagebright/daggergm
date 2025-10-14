@@ -2,6 +2,7 @@ import { OpenAI } from 'openai'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { performanceMonitor } from '@/lib/performance/performance-monitor'
 import crypto from 'crypto'
+import type { Json } from '@/types/database.generated'
 import type {
   LLMProvider,
   ScaffoldParams,
@@ -211,12 +212,12 @@ export class OpenAIProvider implements LLMProvider {
 
     await supabase.from('llm_cache').insert({
       prompt_hash: promptHash,
-      prompt_params: params as Record<string, unknown>,
+      prompt_params: params as Json,
       response: JSON.stringify(response),
       response_metadata: {
         timestamp: new Date().toISOString(),
         provider: 'openai',
-      } as Record<string, unknown>,
+      } as Json,
       model: 'gpt-4-turbo-preview',
       temperature: this.temperatures.scaffoldGeneration,
       token_count: tokenCount || 0,

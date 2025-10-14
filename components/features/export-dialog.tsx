@@ -10,7 +10,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { exportAdventure, type ExportFormat } from '@/app/actions/export'
+import { exportAdventure } from '@/app/actions/export'
+import type { ExportFormat } from '@/lib/validation/schemas'
 import { toast } from 'sonner'
 
 interface ExportDialogProps {

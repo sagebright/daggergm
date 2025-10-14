@@ -22,18 +22,15 @@ export function initWebVitals(): void {
 
   // Dynamic import to avoid SSR issues
   import('web-vitals')
-    .then(({ getCLS, getFCP, getFID, getLCP, getTTFB }) => {
-      getCLS(trackWebVital)
-      getFCP(trackWebVital)
-      getFID(trackWebVital)
-      getLCP(trackWebVital)
-      getTTFB(trackWebVital)
+    .then(({ onCLS, onFCP, onLCP, onTTFB, onINP }) => {
+      onCLS(trackWebVital)
+      onFCP(trackWebVital)
+      onLCP(trackWebVital)
+      onTTFB(trackWebVital)
 
-      // Track INP if available (newer browsers)
-      if ('getINP' in window) {
-        import('web-vitals').then(({ getINP }) => {
-          getINP?.(trackWebVital)
-        })
+      // Track INP if available (newer browsers) - replaces FID
+      if (onINP) {
+        onINP(trackWebVital)
       }
     })
     .catch((error) => {
