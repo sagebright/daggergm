@@ -1,8 +1,9 @@
 name: CI/CD Pipeline
 
+# Runs on all branches for push events, and on pull requests targeting main/develop
 on:
   push:
-    branches: [main, develop]
+    branches: ['**']  # Run on all branches
   pull_request:
     branches: [main, develop]
 

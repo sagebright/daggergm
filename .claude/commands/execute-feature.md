@@ -1,6 +1,6 @@
 # Execute FEATURE Implementation
 
-**Purpose**: Execute FEATURE documentation with phase awareness, Docker-first approach, and comprehensive validation between phases.
+**Purpose**: Execute FEATURE documentation for DaggerGM with TDD approach, phase awareness, and comprehensive validation between phases.
 
 ## FEATURE Target: $ARGUMENTS
 
@@ -20,6 +20,12 @@ git branch --show-current
 
 # 3. Recent Commits Check
 git log --oneline -5
+
+# 4. Test Coverage Check
+npm run test:coverage
+
+# 5. Current Branch Verification
+git branch --show-current
 ```
 
 ### Phase Detection & Planning
@@ -56,112 +62,116 @@ git log --oneline -5
 
 ---
 
-## ⚙️ **PHASE 1: DATABASE CHANGES** (if applicable)
+## ⚙️ **PHASE 1: TESTS FIRST (TDD)** (ALWAYS)
 
 ### Pre-Execution Checklist
 
 ```
-□ Verify on correct branch
-□ Check for existing migrations
-□ Backup current schema (if production)
+□ Feature requirements clear
+□ Test file structure planned
+□ Mock data prepared
+□ Coverage baseline recorded
 ```
 
 ### Execution
 
 ```bash
-# 1. Create migration file(s)
-# 2. Review SQL for tenant_id compliance
-# 3. Apply migration
-docker-compose exec backend npm run migrate
+# 1. Create test files FIRST
+# 2. Write failing tests (RED)
+# 3. Run tests to confirm failures
+npm test -- --watch
 
-# 4. Verify migration
-docker-compose exec backend npm run db:verify
+# 4. Check coverage baseline
+npm run test:coverage
 ```
 
 ### Validation
 
 ```
-□ Tables created successfully
-□ Indexes created
-□ Constraints active
-□ Test queries work
+□ Tests fail as expected
+□ Tests cover all requirements
+□ Coverage report generated
+□ Ready for implementation
 ```
 
 ---
 
-## 🔧 **PHASE 2: BACKEND SERVICES** (if applicable)
+## 🔧 **PHASE 2: IMPLEMENTATION (GREEN)**
 
 ### Pre-Execution Checklist
 
 ```
-□ Phase 1 migrations applied
-□ Docker containers healthy
-□ No failing tests
+□ Tests written and failing
+□ Implementation approach clear
+□ Type definitions ready
+□ CLAUDE.md patterns reviewed
 ```
 
 ### Execution Pattern
 
 ```bash
-# 1. Create service files
-# 2. Update routes
-# 3. Add middleware/validation
+# 1. Implement minimal code to pass tests
+# 2. Focus on making tests green
+# 3. Don't over-engineer
 
-# 4. Run backend tests
-docker-compose exec backend npm run test
+# 4. Run tests continuously
+npm test -- --watch
 
 # 5. Check linting
-docker-compose exec backend npm run lint:fix
+npm run lint:fix
 
-# 6. Verify CI
-docker-compose exec backend npm run test:ci
+# 6. Check types
+npm run typecheck
 ```
 
 ### Validation
 
 ```
-□ All tests pass (99% coverage)
+□ All tests pass (GREEN)
+□ Coverage maintained at 99%
 □ Linting clean
-□ API endpoints accessible
-□ Tenant isolation verified
+□ Types valid
+□ No console errors
 ```
 
 ---
 
-## 🎨 **PHASE 3: FRONTEND UPDATES** (if applicable)
+## 🎨 **PHASE 3: REFACTOR & OPTIMIZE**
 
 ### Pre-Execution Checklist
 
 ```
-□ Backend API endpoints working
-□ Component structure planned
-□ Vibe/Tremor patterns identified
+□ All tests green
+□ Code working but may be messy
+□ Performance baseline measured
+□ UI/UX patterns identified
 ```
 
 ### Execution Pattern
 
 ```bash
-# 1. Create components
-# 2. Update data transformations
-# 3. Integrate with container
+# 1. Refactor for clarity and performance
+# 2. Extract reusable components/functions
+# 3. Optimize bundle size
 
-# 4. Run frontend tests
-docker-compose exec frontend npm run test
+# 4. Ensure tests still pass
+npm test
 
-# 5. Check linting
-docker-compose exec frontend npm run lint:fix
+# 5. Check build size
+npm run build
 
-# 6. Build verification
-docker-compose exec frontend npm run build
+# 6. Verify in Docker
+docker-compose exec app npm test
 ```
 
 ### Validation
 
 ```
-□ Components render correctly
-□ Data flows properly
-□ Responsive on mobile
-□ No console errors
-□ Build succeeds
+□ Tests still pass
+□ Code cleaner/more maintainable
+□ Performance improved
+□ Bundle size acceptable
+□ Coverage still 99%
 ```
 
 ---
@@ -171,12 +181,15 @@ docker-compose exec frontend npm run build
 ### After EVERY Phase:
 
 ```bash
-# MANDATORY Docker CI/CD Check
-docker-compose exec frontend npm run lint:fix
-docker-compose exec backend npm run lint:fix
-docker-compose exec frontend npm run test:ci
-docker-compose exec backend npm run test:ci
-docker-compose exec frontend npm run build
+# MANDATORY Quality Checks
+npm run lint:fix
+npm run typecheck
+npm test
+npm run test:coverage
+
+# Docker verification
+docker-compose exec app npm test
+docker-compose exec app npm run build
 ```
 
 ### Phase Handoff Template
@@ -234,18 +247,20 @@ docker-compose down && docker-compose up -d
 ### TodoWrite Pattern
 
 ```
-Phase 1: Database Schema ✓
-├── Create migration files ✓
-├── Apply migrations ✓
-└── Verify schema ✓
+Phase 1: Write Tests (RED) ✓
+├── Create test files ✓
+├── Write failing tests ✓
+└── Verify coverage baseline ✓
 
-Phase 2: Backend Services [IN PROGRESS]
-├── Create snapshot service ⟳
-├── Update routes □
-└── Add tests □
+Phase 2: Implementation (GREEN) [IN PROGRESS]
+├── Write minimal code ⟳
+├── Make tests pass □
+└── Maintain coverage □
 
-Phase 3: Frontend Updates □
-Phase 4: Admin Features □
+Phase 3: Refactor (REFACTOR) □
+├── Clean up code □
+├── Optimize performance □
+└── Extract reusables □
 ```
 
 ### Status Indicators
@@ -304,9 +319,10 @@ Before marking phase complete:
 
 **REMEMBER**:
 
-- Always use Docker commands (never local npm)
-- Run CI/CD after EVERY change
+- TDD ALWAYS: Tests first, then implementation
+- Maintain 99% coverage at all times
+- Run tests after EVERY change
 - Update TodoWrite continuously
-- Provide clear next steps
+- Follow CLAUDE.md patterns exactly
 
-**Version**: 2025-09-07 | **Optimized for**: Multi-phase FEATURE execution with maximum validation
+**Version**: 2025-09-12 | **Optimized for**: DaggerGM TDD development with 99% coverage requirement

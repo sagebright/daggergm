@@ -22,3 +22,14 @@ export class InsufficientCreditsError extends CreditError {
     Object.setPrototypeOf(this, InsufficientCreditsError.prototype)
   }
 }
+
+/**
+ * Error thrown when credit consumption fails
+ */
+export class CreditConsumptionError extends CreditError {
+  constructor(message: string = 'Failed to consume credit') {
+    super(message, 'credit_consumption_failed')
+    this.name = 'CreditConsumptionError'
+    Object.setPrototypeOf(this, CreditConsumptionError.prototype)
+  }
+}
