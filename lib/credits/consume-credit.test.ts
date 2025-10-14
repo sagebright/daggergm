@@ -25,8 +25,11 @@ describe('consumeAdventureCredit', () => {
         data: {
           success: true,
           remaining_credits: expectedCredits,
-        },
+        } as never,
         error: null,
+        count: null,
+        status: 200,
+        statusText: 'OK',
       })
 
       // Act
@@ -60,7 +63,10 @@ describe('consumeAdventureCredit', () => {
 
       mockRpc.mockResolvedValueOnce({
         data: null,
-        error: null,
+        error: null as never,
+        count: null,
+        status: 200,
+        statusText: 'OK',
       })
 
       await expect(consumeAdventureCredit(validUserId, mockSupabase)).rejects.toThrow(
@@ -76,7 +82,13 @@ describe('consumeAdventureCredit', () => {
         error: {
           code: 'insufficient_credits',
           message: 'User has no credits remaining',
+          details: '',
+          hint: '',
+          name: 'PostgrestError',
         },
+        count: null,
+        status: 400,
+        statusText: 'Bad Request',
       })
 
       // Act & Assert
@@ -94,7 +106,13 @@ describe('consumeAdventureCredit', () => {
         error: {
           code: 'database_error',
           message: 'Connection failed',
+          details: '',
+          hint: '',
+          name: 'PostgrestError',
         },
+        count: null,
+        status: 500,
+        statusText: 'Internal Server Error',
       })
 
       // Act & Assert
@@ -113,8 +131,11 @@ describe('consumeAdventureCredit', () => {
       const userId = '123e4567-e89b-12d3-a456-426614174000'
 
       mockRpc.mockResolvedValueOnce({
-        data: { unexpected: 'format' },
+        data: { unexpected: 'format' } as never,
         error: null,
+        count: null,
+        status: 200,
+        statusText: 'OK',
       })
 
       // Act & Assert
@@ -133,8 +154,11 @@ describe('consumeAdventureCredit', () => {
         data: {
           success: true,
           remaining_credits: 4,
-        },
+        } as never,
         error: null,
+        count: null,
+        status: 200,
+        statusText: 'OK',
       })
 
       // Act
@@ -189,8 +213,11 @@ describe('consumeAdventureCredit', () => {
         data: {
           success: true,
           remaining_credits: 10,
-        },
+        } as never,
         error: null,
+        count: null,
+        status: 200,
+        statusText: 'OK',
       })
 
       // Act
@@ -214,8 +241,11 @@ describe('consumeAdventureCredit', () => {
           success: true,
           remaining_credits: 4,
           transaction_id: 'txn-123',
-        },
+        } as never,
         error: null,
+        count: null,
+        status: 200,
+        statusText: 'OK',
       })
 
       // Act

@@ -75,8 +75,11 @@ describe('CreditManager', () => {
   describe('consumeCredit', () => {
     it('should consume credit atomically for adventure', async () => {
       vi.mocked(mockSupabaseClient.rpc).mockResolvedValueOnce({
-        data: { success: true, remaining_credits: 4 },
+        data: { success: true, remaining_credits: 4 } as never,
         error: null,
+        count: null,
+        status: 200,
+        statusText: 'OK',
       })
 
       const result = await creditManager.consumeCredit('user-123', 'adventure', {
@@ -98,7 +101,16 @@ describe('CreditManager', () => {
     it('should throw InsufficientCreditsError when user has no credits', async () => {
       vi.mocked(mockSupabaseClient.rpc).mockResolvedValueOnce({
         data: null,
-        error: { code: 'P0001', message: 'Insufficient credits' },
+        error: {
+          code: 'P0001',
+          message: 'Insufficient credits',
+          details: '',
+          hint: '',
+          name: 'PostgrestError',
+        },
+        count: null,
+        status: 400,
+        statusText: 'Bad Request',
       })
 
       await expect(
@@ -109,7 +121,16 @@ describe('CreditManager', () => {
     it('should handle race conditions gracefully', async () => {
       vi.mocked(mockSupabaseClient.rpc).mockResolvedValueOnce({
         data: null,
-        error: { code: '23505', message: 'Duplicate key violation' },
+        error: {
+          code: '23505',
+          message: 'Duplicate key violation',
+          details: '',
+          hint: '',
+          name: 'PostgrestError',
+        },
+        count: null,
+        status: 409,
+        statusText: 'Conflict',
       })
 
       await expect(
@@ -119,8 +140,11 @@ describe('CreditManager', () => {
 
     it('should support different credit types', async () => {
       vi.mocked(mockSupabaseClient.rpc).mockResolvedValueOnce({
-        data: { success: true, remaining_credits: 9 },
+        data: { success: true, remaining_credits: 9 } as never,
         error: null,
+        count: null,
+        status: 200,
+        statusText: 'OK',
       })
 
       await creditManager.consumeCredit('user-123', 'expansion', {
@@ -138,8 +162,11 @@ describe('CreditManager', () => {
   describe('addCredits', () => {
     it('should add credits to user account', async () => {
       vi.mocked(mockSupabaseClient.rpc).mockResolvedValueOnce({
-        data: { new_balance: 15 },
+        data: { new_balance: 15 } as never,
         error: null,
+        count: null,
+        status: 200,
+        statusText: 'OK',
       })
 
       const result = await creditManager.addCredits('user-123', 5, {
@@ -173,7 +200,16 @@ describe('CreditManager', () => {
     it('should handle database errors', async () => {
       vi.mocked(mockSupabaseClient.rpc).mockResolvedValueOnce({
         data: null,
-        error: { message: 'Database error' },
+        error: {
+          code: 'DB_ERROR',
+          message: 'Database error',
+          details: '',
+          hint: '',
+          name: 'PostgrestError',
+        },
+        count: null,
+        status: 500,
+        statusText: 'Internal Server Error',
       })
 
       await expect(creditManager.addCredits('user-123', 5, { source: 'purchase' })).rejects.toThrow(
@@ -185,8 +221,11 @@ describe('CreditManager', () => {
   describe('refundCredit', () => {
     it('should refund credit for failed operations', async () => {
       vi.mocked(mockSupabaseClient.rpc).mockResolvedValueOnce({
-        data: { success: true, new_balance: 6 },
+        data: { success: true, new_balance: 6 } as never,
         error: null,
+        count: null,
+        status: 200,
+        statusText: 'OK',
       })
 
       const result = await creditManager.refundCredit('user-123', 'adventure', {
