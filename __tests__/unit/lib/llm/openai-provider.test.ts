@@ -12,6 +12,7 @@ vi.mock('openai', () => ({
           choices: [
             {
               message: {
+                role: 'assistant' as const,
                 content: JSON.stringify({
                   title: 'Test Adventure',
                   description: 'Test description',
@@ -19,6 +20,9 @@ vi.mock('openai', () => ({
                   movements: [],
                 }),
               },
+              finish_reason: 'stop' as const,
+              index: 0,
+              logprobs: null,
             },
           ],
         }),
@@ -70,6 +74,7 @@ describe('OpenAIProvider', () => {
             choices: [
               {
                 message: {
+                  role: 'assistant' as const,
                   content: JSON.stringify({
                     title: 'Test Adventure',
                     description: 'Test description',
@@ -77,12 +82,15 @@ describe('OpenAIProvider', () => {
                     movements: [],
                   }),
                 },
+                finish_reason: 'stop' as const,
+                index: 0,
+                logprobs: null,
               },
             ],
           }),
         },
       },
-    }
+    } as unknown as InstanceType<typeof OpenAI>
 
     vi.mocked(OpenAI).mockImplementation(() => mockOpenAI)
 
@@ -100,16 +108,24 @@ describe('OpenAIProvider', () => {
         stakes: 'personal',
       }
 
-      mockOpenAI.chat.completions.create.mockResolvedValueOnce({
+      vi.mocked(mockOpenAI.chat.completions.create).mockResolvedValueOnce({
+        id: 'test-completion-1',
+        object: 'chat.completion' as const,
+        created: Date.now(),
+        model: 'gpt-4-turbo-preview',
         choices: [
           {
             message: {
+              role: 'assistant' as const,
               content: JSON.stringify({
                 title: 'The Corrupted Grove',
                 description: 'A dark adventure',
                 movements: [],
               }),
             },
+            finish_reason: 'stop' as const,
+            index: 0,
+            logprobs: null,
           },
         ],
       })
@@ -141,12 +157,20 @@ describe('OpenAIProvider', () => {
         },
       }
 
-      mockOpenAI.chat.completions.create.mockResolvedValueOnce({
+      vi.mocked(mockOpenAI.chat.completions.create).mockResolvedValueOnce({
+        id: 'test-completion-2',
+        object: 'chat.completion' as const,
+        created: Date.now(),
+        model: 'gpt-4-turbo-preview',
         choices: [
           {
             message: {
+              role: 'assistant' as const,
               content: 'Expanded combat encounter...',
             },
+            finish_reason: 'stop' as const,
+            index: 0,
+            logprobs: null,
           },
         ],
       })
@@ -176,12 +200,20 @@ describe('OpenAIProvider', () => {
         },
       }
 
-      mockOpenAI.chat.completions.create.mockResolvedValueOnce({
+      vi.mocked(mockOpenAI.chat.completions.create).mockResolvedValueOnce({
+        id: 'test-completion-3',
+        object: 'chat.completion' as const,
+        created: Date.now(),
+        model: 'gpt-4-turbo-preview',
         choices: [
           {
             message: {
+              role: 'assistant' as const,
               content: 'Colorful NPC dialogue...',
             },
+            finish_reason: 'stop' as const,
+            index: 0,
+            logprobs: null,
           },
         ],
       })
@@ -207,15 +239,23 @@ describe('OpenAIProvider', () => {
         stakes: 'personal',
       }
 
-      mockOpenAI.chat.completions.create.mockResolvedValueOnce({
+      vi.mocked(mockOpenAI.chat.completions.create).mockResolvedValueOnce({
+        id: 'test-completion-4',
+        object: 'chat.completion' as const,
+        created: Date.now(),
+        model: 'gpt-4-turbo-preview',
         choices: [
           {
             message: {
+              role: 'assistant' as const,
               content: JSON.stringify({
                 title: 'Test Adventure',
                 movements: [],
               }),
             },
+            finish_reason: 'stop' as const,
+            index: 0,
+            logprobs: null,
           },
         ],
       })
@@ -223,7 +263,7 @@ describe('OpenAIProvider', () => {
       await provider.generateAdventureScaffold(params)
 
       // Check that system message includes Witherwild context
-      const call = mockOpenAI.chat.completions.create.mock.calls[0][0]
+      const call = vi.mocked(mockOpenAI.chat.completions.create).mock.calls[0][0]
       expect(call.messages[0].content).toContain('Witherwild')
       expect(call.messages[0].content).toContain('corruption')
       expect(call.messages[0].content).toContain('Ancient corruption spreading')
@@ -240,22 +280,30 @@ describe('OpenAIProvider', () => {
         stakes: 'low',
       }
 
-      mockOpenAI.chat.completions.create.mockResolvedValueOnce({
+      vi.mocked(mockOpenAI.chat.completions.create).mockResolvedValueOnce({
+        id: 'test-completion-5',
+        object: 'chat.completion' as const,
+        created: Date.now(),
+        model: 'gpt-4-turbo-preview',
         choices: [
           {
             message: {
+              role: 'assistant' as const,
               content: JSON.stringify({
                 title: 'Island Hopping',
                 movements: [],
               }),
             },
+            finish_reason: 'stop' as const,
+            index: 0,
+            logprobs: null,
           },
         ],
       })
 
       await provider.generateAdventureScaffold(params)
 
-      const call = mockOpenAI.chat.completions.create.mock.calls[0][0]
+      const call = vi.mocked(mockOpenAI.chat.completions.create).mock.calls[0][0]
       expect(call.messages[1].content).toContain('floating islands')
       expect(call.messages[0].content).not.toContain('Witherwild')
     })
@@ -304,7 +352,7 @@ describe('OpenAIProvider', () => {
       }
 
       vi.mocked(createServerSupabaseClient).mockResolvedValue(
-        mockSupabase as Awaited<ReturnType<typeof createServerSupabaseClient>>,
+        mockSupabase as unknown as Awaited<ReturnType<typeof createServerSupabaseClient>>,
       )
 
       const result = await provider.generateAdventureScaffold(params)
@@ -324,19 +372,29 @@ describe('OpenAIProvider', () => {
         stakes: 'low',
       }
 
-      mockOpenAI.chat.completions.create.mockResolvedValueOnce({
+      vi.mocked(mockOpenAI.chat.completions.create).mockResolvedValueOnce({
+        id: 'test-completion-6',
+        object: 'chat.completion' as const,
+        created: Date.now(),
+        model: 'gpt-4-turbo-preview',
         choices: [
           {
             message: {
+              role: 'assistant' as const,
               content: JSON.stringify({
                 title: 'New Adventure',
                 movements: [],
               }),
             },
+            finish_reason: 'stop' as const,
+            index: 0,
+            logprobs: null,
           },
         ],
         usage: {
           total_tokens: 500,
+          prompt_tokens: 300,
+          completion_tokens: 200,
         },
       })
 
@@ -361,7 +419,7 @@ describe('OpenAIProvider', () => {
       }
 
       vi.mocked(createServerSupabaseClient).mockResolvedValue(
-        mockSupabase as Awaited<ReturnType<typeof createServerSupabaseClient>>,
+        mockSupabase as unknown as Awaited<ReturnType<typeof createServerSupabaseClient>>,
       )
 
       await provider.generateAdventureScaffold(params)
@@ -427,7 +485,7 @@ describe('OpenAIProvider', () => {
       }
 
       vi.mocked(createServerSupabaseClient).mockResolvedValue(
-        mockSupabase as Awaited<ReturnType<typeof createServerSupabaseClient>>,
+        mockSupabase as unknown as Awaited<ReturnType<typeof createServerSupabaseClient>>,
       )
 
       await provider.generateAdventureScaffold(params)
@@ -461,9 +519,11 @@ describe('OpenAIProvider', () => {
           single: vi.fn().mockResolvedValue({ data: null }),
           insert: vi.fn(),
         }),
-      } as Awaited<ReturnType<typeof createServerSupabaseClient>>)
+      } as unknown as Awaited<ReturnType<typeof createServerSupabaseClient>>)
 
-      mockOpenAI.chat.completions.create.mockRejectedValueOnce(new Error('API rate limit exceeded'))
+      vi.mocked(mockOpenAI.chat.completions.create).mockRejectedValueOnce(
+        new Error('API rate limit exceeded'),
+      )
 
       await expect(provider.generateAdventureScaffold(params)).rejects.toThrow(
         'API rate limit exceeded',
@@ -480,12 +540,20 @@ describe('OpenAIProvider', () => {
         stakes: 'personal',
       }
 
-      mockOpenAI.chat.completions.create.mockResolvedValueOnce({
+      vi.mocked(mockOpenAI.chat.completions.create).mockResolvedValueOnce({
+        id: 'test-completion-7',
+        object: 'chat.completion' as const,
+        created: Date.now(),
+        model: 'gpt-4-turbo-preview',
         choices: [
           {
             message: {
+              role: 'assistant' as const,
               content: 'Not valid JSON',
             },
+            finish_reason: 'stop' as const,
+            index: 0,
+            logprobs: null,
           },
         ],
       })
@@ -511,12 +579,20 @@ describe('OpenAIProvider', () => {
         },
       }
 
-      mockOpenAI.chat.completions.create.mockResolvedValueOnce({
+      vi.mocked(mockOpenAI.chat.completions.create).mockResolvedValueOnce({
+        id: 'test-completion-8',
+        object: 'chat.completion' as const,
+        created: Date.now(),
+        model: 'gpt-4-turbo-preview',
         choices: [
           {
             message: {
+              role: 'assistant' as const,
               content: 'The party pushes through the heavy oak door...',
             },
+            finish_reason: 'stop' as const,
+            index: 0,
+            logprobs: null,
           },
         ],
       })
