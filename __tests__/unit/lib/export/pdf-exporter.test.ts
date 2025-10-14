@@ -6,9 +6,18 @@ describe('PDFExporter', () => {
   const mockAdventure: Adventure = {
     id: 'adv-123',
     title: 'The Lost Mine',
-    description: 'A thrilling adventure in abandoned mines',
     frame: 'grimdark',
-    user_id: 'user-123',
+    focus: 'grimdark',
+    state: 'draft',
+    config: {
+      frame: 'witherwild',
+      focus: 'grimdark',
+      partySize: 4,
+      partyLevel: 3,
+      difficulty: 'standard',
+      stakes: 'high',
+    },
+    movements: [],
     metadata: {
       party_size: 4,
       party_level: 3,
@@ -18,18 +27,18 @@ describe('PDFExporter', () => {
     },
     created_at: '2024-01-01T00:00:00Z',
     updated_at: '2024-01-01T00:00:00Z',
+    exported_at: null,
   }
 
   const mockMovements: Movement[] = [
     {
       id: 'mov-1',
-      adventure_id: 'adv-123',
       title: 'The Abandoned Entrance',
       type: 'exploration',
       content: '## Description\n\nThe mine entrance yawns before you...',
-      order_index: 0,
+      estimatedTime: '30 minutes',
+      isLocked: false,
       metadata: {
-        estimated_time: '30 minutes',
         gm_notes: 'Hidden trap at entrance',
       },
     },

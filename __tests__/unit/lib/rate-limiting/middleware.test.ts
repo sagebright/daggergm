@@ -29,7 +29,7 @@ describe('Rate Limiting Middleware', () => {
             return null
         }
       }),
-    } as ReturnType<typeof headers>)
+    } as unknown as ReturnType<typeof headers>)
   })
 
   afterEach(() => {
@@ -48,7 +48,7 @@ describe('Rate Limiting Middleware', () => {
     it('should use fallback IP when no headers present', async () => {
       mockHeaders.mockReturnValue({
         get: vi.fn(() => null),
-      } as ReturnType<typeof headers>)
+      } as unknown as ReturnType<typeof headers>)
 
       const context = await getRateLimitContext()
 

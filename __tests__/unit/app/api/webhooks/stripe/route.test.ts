@@ -33,7 +33,7 @@ describe('Stripe Webhook Handler', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.mocked(createClient).mockReturnValue(
-      Promise.resolve(mockSupabase as Awaited<ReturnType<typeof CreateClientType>>),
+      Promise.resolve(mockSupabase as unknown as Awaited<ReturnType<typeof CreateClientType>>),
     )
     vi.mocked(CreditManager).mockImplementation(
       () => mockCreditManager as unknown as InstanceType<typeof CreditManager>,

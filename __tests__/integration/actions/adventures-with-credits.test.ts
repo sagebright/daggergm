@@ -149,7 +149,7 @@ describe('Adventure Generation with Credits', () => {
     })
 
     expect(result.success).toBe(false)
-    if (!result.success) {
+    if (!result.success && 'error' in result) {
       expect(result.error).toBe('Insufficient credits to generate adventure')
     }
   })
@@ -219,7 +219,7 @@ describe('Adventure Generation with Credits', () => {
     })
 
     expect(result.success).toBe(false)
-    if (!result.success) {
+    if (!result.success && 'error' in result) {
       expect(result.error).toBe('Authentication required')
     }
     expect(mockCreditManager.consumeCredit).not.toHaveBeenCalled()

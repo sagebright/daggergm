@@ -166,8 +166,8 @@ describe('RateLimiter', () => {
         expect.fail('Should have thrown RateLimitError')
       } catch (error) {
         expect(error).toBeInstanceOf(RateLimitError)
-        expect(error.resetTime).toBeGreaterThan(Date.now())
-        expect(error.retryAfter).toBeGreaterThan(0)
+        expect((error as RateLimitError).resetTime).toBeGreaterThan(Date.now())
+        expect((error as RateLimitError).retryAfter).toBeGreaterThan(0)
       }
     })
 

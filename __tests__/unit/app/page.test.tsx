@@ -40,7 +40,7 @@ describe('HomePage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.mocked(createServerSupabaseClient).mockResolvedValue(
-      mockSupabaseClient as Awaited<ReturnType<typeof createServerSupabaseClient>>,
+      mockSupabaseClient as unknown as Awaited<ReturnType<typeof createServerSupabaseClient>>,
     )
   })
 

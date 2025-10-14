@@ -18,7 +18,7 @@ describe('CreditManager', () => {
     mockSupabaseClient = {
       from: vi.fn(),
       rpc: vi.fn(),
-    }
+    } as unknown as Awaited<ReturnType<typeof createServerSupabaseClient>>
 
     vi.mocked(createServerSupabaseClient).mockResolvedValue(mockSupabaseClient)
     creditManager = new CreditManager()
@@ -26,14 +26,14 @@ describe('CreditManager', () => {
 
   describe('getUserCredits', () => {
     it('should return user credit balance', async () => {
-      mockSupabaseClient.from.mockReturnValueOnce({
+      vi.mocked(mockSupabaseClient.from).mockReturnValueOnce({
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
         single: vi.fn().mockResolvedValueOnce({
           data: { credits: 10 },
           error: null,
         }),
-      })
+      } as ReturnType<typeof mockSupabaseClient.from>)
 
       const credits = await creditManager.getUserCredits('user-123')
 
@@ -42,7 +42,7 @@ describe('CreditManager', () => {
     })
 
     it('should return 0 for users with no profile', async () => {
-      mockSupabaseClient.from.mockReturnValueOnce({
+      vi.mocked(mockSupabaseClient.from).mockReturnValueOnce({
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
         single: vi.fn().mockResolvedValueOnce({
@@ -57,7 +57,7 @@ describe('CreditManager', () => {
     })
 
     it('should handle database errors', async () => {
-      mockSupabaseClient.from.mockReturnValueOnce({
+      vi.mocked(mockSupabaseClient.from).mockReturnValueOnce({
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
         single: vi.fn().mockResolvedValueOnce({
@@ -74,7 +74,7 @@ describe('CreditManager', () => {
 
   describe('consumeCredit', () => {
     it('should consume credit atomically for adventure', async () => {
-      mockSupabaseClient.rpc.mockResolvedValueOnce({
+      vi.mocked(mockSupabaseClient.rpc).mockResolvedValueOnce({
         data: { success: true, remaining_credits: 4 },
         error: null,
       })
@@ -96,7 +96,7 @@ describe('CreditManager', () => {
     })
 
     it('should throw InsufficientCreditsError when user has no credits', async () => {
-      mockSupabaseClient.rpc.mockResolvedValueOnce({
+      vi.mocked(mockSupabaseClient.rpc).mockResolvedValueOnce({
         data: null,
         error: { code: 'P0001', message: 'Insufficient credits' },
       })
@@ -107,7 +107,7 @@ describe('CreditManager', () => {
     })
 
     it('should handle race conditions gracefully', async () => {
-      mockSupabaseClient.rpc.mockResolvedValueOnce({
+      vi.mocked(mockSupabaseClient.rpc).mockResolvedValueOnce({
         data: null,
         error: { code: '23505', message: 'Duplicate key violation' },
       })
@@ -118,7 +118,7 @@ describe('CreditManager', () => {
     })
 
     it('should support different credit types', async () => {
-      mockSupabaseClient.rpc.mockResolvedValueOnce({
+      vi.mocked(mockSupabaseClient.rpc).mockResolvedValueOnce({
         data: { success: true, remaining_credits: 9 },
         error: null,
       })
@@ -137,7 +137,7 @@ describe('CreditManager', () => {
 
   describe('addCredits', () => {
     it('should add credits to user account', async () => {
-      mockSupabaseClient.rpc.mockResolvedValueOnce({
+      vi.mocked(mockSupabaseClient.rpc).mockResolvedValueOnce({
         data: { new_balance: 15 },
         error: null,
       })
@@ -171,7 +171,7 @@ describe('CreditManager', () => {
     })
 
     it('should handle database errors', async () => {
-      mockSupabaseClient.rpc.mockResolvedValueOnce({
+      vi.mocked(mockSupabaseClient.rpc).mockResolvedValueOnce({
         data: null,
         error: { message: 'Database error' },
       })
@@ -184,7 +184,7 @@ describe('CreditManager', () => {
 
   describe('refundCredit', () => {
     it('should refund credit for failed operations', async () => {
-      mockSupabaseClient.rpc.mockResolvedValueOnce({
+      vi.mocked(mockSupabaseClient.rpc).mockResolvedValueOnce({
         data: { success: true, new_balance: 6 },
         error: null,
       })
@@ -231,7 +231,7 @@ describe('CreditManager', () => {
         },
       ]
 
-      mockSupabaseClient.from.mockReturnValueOnce({
+      vi.mocked(mockSupabaseClient.from).mockReturnValueOnce({
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
         order: vi.fn().mockReturnThis(),
@@ -250,7 +250,7 @@ describe('CreditManager', () => {
 
   describe('checkCreditSufficiency', () => {
     it('should return true when user has enough credits', async () => {
-      mockSupabaseClient.from.mockReturnValueOnce({
+      vi.mocked(mockSupabaseClient.from).mockReturnValueOnce({
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
         single: vi.fn().mockResolvedValueOnce({
@@ -265,7 +265,7 @@ describe('CreditManager', () => {
     })
 
     it('should return false when user has insufficient credits', async () => {
-      mockSupabaseClient.from.mockReturnValueOnce({
+      vi.mocked(mockSupabaseClient.from).mockReturnValueOnce({
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
         single: vi.fn().mockResolvedValueOnce({
@@ -280,7 +280,7 @@ describe('CreditManager', () => {
     })
 
     it('should handle different credit costs per type', async () => {
-      mockSupabaseClient.from.mockReturnValueOnce({
+      vi.mocked(mockSupabaseClient.from).mockReturnValueOnce({
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
         single: vi.fn().mockResolvedValueOnce({

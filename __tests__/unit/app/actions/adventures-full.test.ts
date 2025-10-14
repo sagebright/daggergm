@@ -76,7 +76,7 @@ describe('Adventure Actions - Full Coverage', () => {
     })
     vi.mocked(rateLimitMiddleware.getRateLimitContext).mockResolvedValue({
       userId: 'user-123',
-    } as unknown)
+    } as unknown as rateLimitMiddleware.RateLimitContext)
   })
 
   describe('generateAdventure - Rate Limiting', () => {
@@ -93,7 +93,7 @@ describe('Adventure Actions - Full Coverage', () => {
       // Mock the rate limit middleware to reject with RateLimitError
       vi.mocked(rateLimitMiddleware.getRateLimitContext).mockResolvedValue({
         userId: 'user-123',
-      } as unknown)
+      } as unknown as rateLimitMiddleware.RateLimitContext)
       vi.mocked(rateLimitMiddleware.withRateLimit).mockRejectedValue(rateLimitError)
 
       const config = {
@@ -104,9 +104,11 @@ describe('Adventure Actions - Full Coverage', () => {
       const result = await generateAdventure(config)
 
       expect(result.success).toBe(false)
-      if (!result.success) {
+      if (!result.success && 'error' in result) {
         expect(result.error).toBe('Rate limit exceeded')
-        expect((result as unknown).retryAfter).toBe(60)
+        if ('retryAfter' in result) {
+          expect(result.retryAfter).toBe(60)
+        }
       }
     })
 
@@ -118,7 +120,7 @@ describe('Adventure Actions - Full Coverage', () => {
       const otherError = new Error('Network error')
       vi.mocked(rateLimitMiddleware.getRateLimitContext).mockResolvedValue({
         userId: 'user-123',
-      } as unknown)
+      } as unknown as rateLimitMiddleware.RateLimitContext)
       vi.mocked(rateLimitMiddleware.withRateLimit).mockRejectedValue(otherError)
 
       const config = {
@@ -129,7 +131,7 @@ describe('Adventure Actions - Full Coverage', () => {
       // The function catches all errors and returns success: false after re-throwing
       const result = await generateAdventure(config)
       expect(result.success).toBe(false)
-      if (!result.success) {
+      if (!result.success && 'error' in result) {
         expect(result.error).toBe('Network error')
       }
     })
@@ -186,7 +188,7 @@ describe('Adventure Actions - Full Coverage', () => {
       const result = await generateAdventure(config)
 
       expect(result.success).toBe(false)
-      if (!result.success) {
+      if (!result.success && 'error' in result) {
         expect(result.error).toBe('Authentication required')
       }
     })
@@ -210,7 +212,7 @@ describe('Adventure Actions - Full Coverage', () => {
       const result = await generateAdventure(config)
 
       expect(result.success).toBe(false)
-      if (!result.success) {
+      if (!result.success && 'error' in result) {
         expect(result.error).toBe('Insufficient credits to generate adventure')
       }
     })
@@ -230,7 +232,7 @@ describe('Adventure Actions - Full Coverage', () => {
       // The function catches all errors and returns success: false
       const result = await generateAdventure(config)
       expect(result.success).toBe(false)
-      if (!result.success) {
+      if (!result.success && 'error' in result) {
         expect(result.error).toBe('Database error')
       }
     })
@@ -270,7 +272,7 @@ describe('Adventure Actions - Full Coverage', () => {
       const result = await generateAdventure(config)
 
       expect(result.success).toBe(false)
-      if (!result.success) {
+      if (!result.success && 'error' in result) {
         // The error message comes from the caught error
         expect(result.error).toBeDefined()
       }

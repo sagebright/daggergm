@@ -6,7 +6,7 @@ vi.mock('@/lib/supabase/server', () => ({
 }))
 
 describe('Analytics', () => {
-  let mockSupabase: ReturnType<typeof createClient>
+  let mockSupabase: Awaited<ReturnType<typeof createClient>>
 
   beforeEach(() => {
     vi.clearAllMocks()
@@ -26,7 +26,7 @@ describe('Analytics', () => {
         from: vi.fn(() => ({
           insert: vi.fn().mockResolvedValue({ error: null }),
         })),
-      }
+      } as unknown as Awaited<ReturnType<typeof createClient>>
       vi.mocked(createClient).mockResolvedValue(mockSupabase)
 
       const { Analytics } = await import('@/lib/analytics/analytics')
@@ -44,7 +44,7 @@ describe('Analytics', () => {
         from: vi.fn(() => ({
           insert: vi.fn().mockResolvedValue({ error: null }),
         })),
-      }
+      } as unknown as Awaited<ReturnType<typeof createClient>>
       vi.mocked(createClient).mockResolvedValue(mockSupabase)
 
       const { Analytics } = await import('@/lib/analytics/analytics')
@@ -62,7 +62,7 @@ describe('Analytics', () => {
 
       const mockInsert = vi.fn().mockResolvedValue({ error: null })
       const mockFrom = vi.fn(() => ({ insert: mockInsert }))
-      mockSupabase = { from: mockFrom }
+      mockSupabase = { from: mockFrom } as unknown as Awaited<ReturnType<typeof createClient>>
 
       vi.mocked(createClient).mockResolvedValue(mockSupabase)
 
@@ -98,7 +98,7 @@ describe('Analytics', () => {
         from: vi.fn(() => ({
           insert: vi.fn().mockResolvedValue({ error: null }),
         })),
-      }
+      } as unknown as Awaited<ReturnType<typeof createClient>>
       vi.mocked(createClient).mockResolvedValue(mockSupabase)
 
       const { Analytics, ANALYTICS_EVENTS } = await import('@/lib/analytics/analytics')
@@ -121,7 +121,7 @@ describe('Analytics', () => {
             error: { message: 'Database error' },
           }),
         })),
-      }
+      } as unknown as Awaited<ReturnType<typeof createClient>>
       vi.mocked(createClient).mockResolvedValue(mockSupabase)
 
       const { Analytics, ANALYTICS_EVENTS } = await import('@/lib/analytics/analytics')
@@ -145,7 +145,7 @@ describe('Analytics', () => {
         from: vi.fn(() => ({
           insert: vi.fn().mockResolvedValue({ error: null }),
         })),
-      }
+      } as unknown as Awaited<ReturnType<typeof createClient>>
       vi.mocked(createClient).mockResolvedValue(mockSupabase)
 
       const { Analytics } = await import('@/lib/analytics/analytics')
@@ -168,7 +168,7 @@ describe('Analytics', () => {
         from: vi.fn(() => ({
           insert: vi.fn().mockResolvedValue({ error: null }),
         })),
-      }
+      } as unknown as Awaited<ReturnType<typeof createClient>>
       vi.mocked(createClient).mockResolvedValue(mockSupabase)
 
       const { Analytics } = await import('@/lib/analytics/analytics')
@@ -186,7 +186,7 @@ describe('Analytics', () => {
 
       const mockInsert = vi.fn().mockResolvedValue({ error: null })
       const mockFrom = vi.fn(() => ({ insert: mockInsert }))
-      mockSupabase = { from: mockFrom }
+      mockSupabase = { from: mockFrom } as unknown as Awaited<ReturnType<typeof createClient>>
 
       vi.mocked(createClient).mockResolvedValue(mockSupabase)
 
@@ -223,7 +223,7 @@ describe('Analytics', () => {
         from: vi.fn(() => ({
           insert: vi.fn().mockResolvedValue({ error: null }),
         })),
-      }
+      } as unknown as Awaited<ReturnType<typeof createClient>>
       vi.mocked(createClient).mockResolvedValue(mockSupabase)
 
       const { Analytics } = await import('@/lib/analytics/analytics')

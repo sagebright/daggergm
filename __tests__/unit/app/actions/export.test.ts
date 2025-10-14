@@ -110,7 +110,7 @@ describe('Export Server Actions', () => {
         }),
       }
       vi.mocked(MarkdownExporter).mockImplementation(
-        () => mockExporter as InstanceType<typeof MarkdownExporter>,
+        () => mockExporter as unknown as InstanceType<typeof MarkdownExporter>,
       )
 
       const result = await exportAdventure('123e4567-e89b-12d3-a456-426614174000', 'markdown')
@@ -131,7 +131,7 @@ describe('Export Server Actions', () => {
         }),
       }
       vi.mocked(PDFExporter).mockImplementation(
-        () => mockExporter as InstanceType<typeof PDFExporter>,
+        () => mockExporter as unknown as InstanceType<typeof PDFExporter>,
       )
 
       const result = await exportAdventure('123e4567-e89b-12d3-a456-426614174000', 'pdf')
@@ -150,7 +150,7 @@ describe('Export Server Actions', () => {
         }),
       }
       vi.mocked(Roll20Exporter).mockImplementation(
-        () => mockExporter as InstanceType<typeof Roll20Exporter>,
+        () => mockExporter as unknown as InstanceType<typeof Roll20Exporter>,
       )
 
       const result = await exportAdventure('123e4567-e89b-12d3-a456-426614174000', 'roll20')
@@ -220,7 +220,7 @@ describe('Export Server Actions', () => {
         }),
       }
       vi.mocked(MarkdownExporter).mockImplementation(
-        () => mockExporter as InstanceType<typeof MarkdownExporter>,
+        () => mockExporter as unknown as InstanceType<typeof MarkdownExporter>,
       )
 
       const result = await exportAdventure('123e4567-e89b-12d3-a456-426614174000', 'markdown')
@@ -248,7 +248,7 @@ describe('Export Server Actions', () => {
         }),
       }
       vi.mocked(MarkdownExporter).mockImplementation(
-        () => mockExporter as InstanceType<typeof MarkdownExporter>,
+        () => mockExporter as unknown as InstanceType<typeof MarkdownExporter>,
       )
 
       // Create a spy for the order method

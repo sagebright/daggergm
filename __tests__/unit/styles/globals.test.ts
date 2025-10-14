@@ -29,7 +29,7 @@ describe('CSS Variables', () => {
       }
 
       mockComputedStyle.getPropertyValue.mockImplementation(
-        (prop: string) => mockVariables[prop] || '',
+        (prop: string) => (mockVariables as Record<string, string>)[prop] || '',
       )
 
       const variables = getCSSVariables()

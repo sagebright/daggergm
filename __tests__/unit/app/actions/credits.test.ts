@@ -37,7 +37,9 @@ describe('credits actions', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    vi.mocked(createServerSupabaseClient).mockResolvedValue(mockSupabaseClient as unknown)
+    vi.mocked(createServerSupabaseClient).mockResolvedValue(
+      mockSupabaseClient as unknown as Awaited<ReturnType<typeof createServerSupabaseClient>>,
+    )
     mockSupabaseClient.auth.getUser.mockResolvedValue({
       data: { user: mockUser },
       error: null,
@@ -51,7 +53,9 @@ describe('credits actions', () => {
         url: 'https://checkout.stripe.com/session-123',
       }
 
-      vi.mocked(stripe.checkout.sessions.create).mockResolvedValue(mockSession as unknown)
+      vi.mocked(stripe.checkout.sessions.create).mockResolvedValue(
+        mockSession as unknown as Awaited<ReturnType<typeof stripe.checkout.sessions.create>>,
+      )
 
       const input: CreditPurchase = {
         packageId: 'credits_5',
@@ -100,7 +104,9 @@ describe('credits actions', () => {
         url: 'https://checkout.stripe.com/session-456',
       }
 
-      vi.mocked(stripe.checkout.sessions.create).mockResolvedValue(mockSession as unknown)
+      vi.mocked(stripe.checkout.sessions.create).mockResolvedValue(
+        mockSession as unknown as Awaited<ReturnType<typeof stripe.checkout.sessions.create>>,
+      )
 
       const input: CreditPurchase = {
         packageId: 'credits_15',
@@ -145,7 +151,9 @@ describe('credits actions', () => {
         url: 'https://checkout.stripe.com/session-789',
       }
 
-      vi.mocked(stripe.checkout.sessions.create).mockResolvedValue(mockSession as unknown)
+      vi.mocked(stripe.checkout.sessions.create).mockResolvedValue(
+        mockSession as unknown as Awaited<ReturnType<typeof stripe.checkout.sessions.create>>,
+      )
 
       const input: CreditPurchase = {
         packageId: 'credits_30',
@@ -245,7 +253,7 @@ describe('credits actions', () => {
         packageId: 'invalid_package' as unknown,
         amount: 5,
         price: 500,
-      }
+      } as CreditPurchase
 
       const result = await purchaseCredits(input)
 
@@ -259,7 +267,7 @@ describe('credits actions', () => {
         packageId: 'credits_5',
         amount: -5, // Invalid negative amount
         price: 500,
-      } as unknown
+      } as unknown as CreditPurchase
 
       const result = await purchaseCredits(input)
 
@@ -310,7 +318,9 @@ describe('credits actions', () => {
         url: 'https://checkout.stripe.com/session-url-test',
       }
 
-      vi.mocked(stripe.checkout.sessions.create).mockResolvedValue(mockSession as unknown)
+      vi.mocked(stripe.checkout.sessions.create).mockResolvedValue(
+        mockSession as unknown as Awaited<ReturnType<typeof stripe.checkout.sessions.create>>,
+      )
 
       const input: CreditPurchase = {
         packageId: 'credits_5',

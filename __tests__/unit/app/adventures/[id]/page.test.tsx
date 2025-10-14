@@ -44,10 +44,15 @@ describe('AdventureDetailPage', () => {
   const mockAdventure = {
     id: 'adv-123',
     title: 'The Lost Temple',
-    description: 'An epic quest to find the ancient temple',
     frame: 'witherwild',
     focus: 'high_fantasy',
     state: 'draft',
+    config: {},
+    metadata: null,
+    exported_at: null,
+    guest_email: null,
+    guest_token: null,
+    user_id: 'user-123',
     movements: [
       {
         id: 'mov-1',
@@ -79,7 +84,6 @@ describe('AdventureDetailPage', () => {
 
     await waitFor(() => {
       expect(screen.getByText('The Lost Temple')).toBeInTheDocument()
-      expect(screen.getByText('An epic quest to find the ancient temple')).toBeInTheDocument()
     })
   })
 

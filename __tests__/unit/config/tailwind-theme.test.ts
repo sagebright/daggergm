@@ -13,7 +13,9 @@ describe('Tailwind Theme Configuration', () => {
     })
 
     it('should define purple color shades', () => {
-      const purpleColors = fullConfig.theme.colors['dagger-purple']
+      const purpleColors = (fullConfig.theme.colors as unknown as Record<string, unknown>)[
+        'dagger-purple'
+      ]
       expect(purpleColors).toMatchObject({
         900: 'oklch(var(--dagger-purple-900) / <alpha-value>)',
         800: 'oklch(var(--dagger-purple-800) / <alpha-value>)',
@@ -21,14 +23,18 @@ describe('Tailwind Theme Configuration', () => {
     })
 
     it('should define teal accent color', () => {
-      const tealColors = fullConfig.theme.colors['dagger-teal']
+      const tealColors = (fullConfig.theme.colors as unknown as Record<string, unknown>)[
+        'dagger-teal'
+      ]
       expect(tealColors).toMatchObject({
         400: 'oklch(var(--dagger-teal-400) / <alpha-value>)',
       })
     })
 
     it('should define gold highlight color', () => {
-      const goldColors = fullConfig.theme.colors['dagger-gold']
+      const goldColors = (fullConfig.theme.colors as unknown as Record<string, unknown>)[
+        'dagger-gold'
+      ]
       expect(goldColors).toMatchObject({
         400: 'oklch(var(--dagger-gold-400) / <alpha-value>)',
       })
@@ -52,7 +58,7 @@ describe('Tailwind Theme Configuration', () => {
     })
 
     it('should configure display text size', () => {
-      const displaySize = fullConfig.theme.fontSize.display
+      const displaySize = (fullConfig.theme.fontSize as Record<string, unknown>).display
       expect(displaySize).toEqual([
         '24px',
         {
@@ -63,7 +69,7 @@ describe('Tailwind Theme Configuration', () => {
     })
 
     it('should configure medium text size', () => {
-      const mediumSize = fullConfig.theme.fontSize.medium
+      const mediumSize = (fullConfig.theme.fontSize as Record<string, unknown>).medium
       expect(mediumSize).toEqual([
         '18px',
         {
@@ -84,13 +90,17 @@ describe('Tailwind Theme Configuration', () => {
 
   describe('OKLCH Color Support', () => {
     it('should use OKLCH color function format', () => {
-      const primaryColor = fullConfig.theme.colors.primary.DEFAULT
+      const primaryColor = (
+        fullConfig.theme.colors as unknown as Record<string, Record<string, string>>
+      ).primary.DEFAULT
       expect(primaryColor).toContain('oklch(')
       expect(primaryColor).toContain('var(')
     })
 
     it('should support alpha values in OKLCH colors', () => {
-      const purpleColor = fullConfig.theme.colors['dagger-purple']['800']
+      const purpleColor = (
+        fullConfig.theme.colors as unknown as Record<string, Record<string, string>>
+      )['dagger-purple']['800']
       expect(purpleColor).toContain('<alpha-value>')
     })
   })
