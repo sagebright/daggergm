@@ -53,28 +53,39 @@ vi.mock('@/lib/rate-limiting/rate-limiter', () => ({
 }))
 
 describe('Export Server Actions', () => {
-  const mockAdventure = {
-    id: '123e4567-e89b-12d3-a456-426614174000',
-    title: 'The Lost Mine',
-    description: 'A thrilling adventure',
-    frame: 'grimdark',
-    user_id: 'user-123',
-    metadata: {},
-    created_at: '2024-01-01',
-    updated_at: '2024-01-01',
-  }
-
   const mockMovements = [
     {
       id: 'mov-1',
-      adventure_id: 'adv-123',
       title: 'First Movement',
       type: 'exploration',
       content: 'Content here',
-      order_index: 0,
+      estimatedTime: '30 minutes',
+      isLocked: false,
       metadata: {},
     },
   ]
+
+  const mockAdventure = {
+    id: '123e4567-e89b-12d3-a456-426614174000',
+    title: 'The Lost Mine',
+    frame: 'grimdark',
+    focus: 'Exploration',
+    state: 'draft',
+    user_id: 'user-123',
+    config: {
+      frame: 'witherwild',
+      focus: 'Exploration',
+      partySize: 4,
+      partyLevel: 2,
+      difficulty: 'standard',
+      stakes: 'high',
+    },
+    movements: mockMovements,
+    metadata: {},
+    created_at: '2024-01-01',
+    updated_at: '2024-01-01',
+    exported_at: null,
+  }
 
   beforeEach(() => {
     vi.clearAllMocks()
@@ -119,7 +130,18 @@ describe('Export Server Actions', () => {
       expect(result.data).toBeInstanceOf(Blob)
       expect(result.filename).toBe('adventure.md')
 
-      expect(mockExporter.exportToFile).toHaveBeenCalledWith(mockAdventure, mockMovements)
+      // Check that exportToFile was called with the transformed adventure data
+      expect(mockExporter.exportToFile).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: mockAdventure.id,
+          title: mockAdventure.title,
+          frame: mockAdventure.frame,
+          focus: mockAdventure.focus,
+          state: mockAdventure.state,
+          movements: mockMovements,
+        }),
+        mockMovements,
+      )
     })
 
     it('should export adventure as PDF', async () => {
@@ -239,7 +261,7 @@ describe('Export Server Actions', () => {
       expect(result.error).toContain('Invalid option')
     })
 
-    it('should sort movements by order_index', async () => {
+    it('should include movements from adventure JSONB array', async () => {
       const mockExporter = {
         exportToFile: vi.fn().mockReturnValue({
           filename: 'adventure.md',
@@ -251,43 +273,51 @@ describe('Export Server Actions', () => {
         () => mockExporter as unknown as InstanceType<typeof MarkdownExporter>,
       )
 
-      // Create a spy for the order method
-      const orderSpy = vi.fn().mockResolvedValue({ data: mockMovements, error: null })
-      mockSupabase.from
-        .mockReturnValueOnce({
-          select: vi.fn().mockReturnThis(),
-          eq: vi.fn().mockReturnThis(),
-          single: vi.fn().mockResolvedValue({ data: mockAdventure, error: null }),
-        })
-        .mockReturnValueOnce({
-          select: vi.fn().mockReturnThis(),
-          eq: vi.fn().mockReturnThis(),
-          order: orderSpy,
-        })
+      const result = await exportAdventure('123e4567-e89b-12d3-a456-426614174000', 'markdown')
+
+      expect(result.success).toBe(true)
+      // Verify movements are extracted from the adventure's movements JSONB array
+      expect(mockExporter.exportToFile).toHaveBeenCalledWith(
+        expect.objectContaining({
+          movements: mockMovements,
+        }),
+        mockMovements,
+      )
+    })
+
+    it('should handle empty movements array', async () => {
+      const adventureWithoutMovements = {
+        ...mockAdventure,
+        movements: null,
+      }
+
+      mockSupabase.from.mockReturnValue({
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        single: vi.fn().mockResolvedValue({ data: adventureWithoutMovements, error: null }),
+      })
+
+      const mockExporter = {
+        exportToFile: vi.fn().mockReturnValue({
+          filename: 'adventure.md',
+          content: '# Adventure',
+          mimeType: 'text/markdown',
+        }),
+      }
+      vi.mocked(MarkdownExporter).mockImplementation(
+        () => mockExporter as unknown as InstanceType<typeof MarkdownExporter>,
+      )
 
       const result = await exportAdventure('123e4567-e89b-12d3-a456-426614174000', 'markdown')
 
       expect(result.success).toBe(true)
-      expect(orderSpy).toHaveBeenCalledWith('order_index')
-    })
-
-    it('should handle movements fetch error', async () => {
-      mockSupabase.from
-        .mockReturnValueOnce({
-          select: vi.fn().mockReturnThis(),
-          eq: vi.fn().mockReturnThis(),
-          single: vi.fn().mockResolvedValue({ data: mockAdventure, error: null }),
-        })
-        .mockReturnValueOnce({
-          select: vi.fn().mockReturnThis(),
-          eq: vi.fn().mockReturnThis(),
-          order: vi.fn().mockResolvedValue({ data: null, error: { message: 'DB error' } }),
-        })
-
-      const result = await exportAdventure('123e4567-e89b-12d3-a456-426614174000', 'markdown')
-
-      expect(result.success).toBe(false)
-      expect(result.error).toBe('Failed to fetch movements')
+      // Should pass empty array when movements is null
+      expect(mockExporter.exportToFile).toHaveBeenCalledWith(
+        expect.objectContaining({
+          movements: [],
+        }),
+        [],
+      )
     })
   })
 })

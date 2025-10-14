@@ -15,6 +15,7 @@ export interface ExportResult {
   data?: Blob
   filename?: string
   error?: string
+  retryAfter?: number
 }
 
 export async function exportAdventure(
@@ -95,18 +96,22 @@ export async function exportAdventure(
       }
     }
 
-    // Fetch movements
-    const { data: movements, error: movementsError } = await supabase
-      .from('movements')
-      .select('*')
-      .eq('adventure_id', adventureId)
-      .order('order_index')
+    // Movements are stored in the adventure.movements JSONB array
+    const movements = (adventure.movements as unknown as Movement[]) || []
 
-    if (movementsError) {
-      return {
-        success: false,
-        error: 'Failed to fetch movements',
-      }
+    // Convert database types to application types
+    const adventureData: Adventure = {
+      id: adventure.id,
+      title: adventure.title,
+      frame: adventure.frame,
+      focus: adventure.focus,
+      state: (adventure.state as 'draft' | 'finalized' | 'exported') || 'draft',
+      config: adventure.config as unknown as Adventure['config'],
+      movements: movements,
+      metadata: (adventure.metadata as Record<string, unknown>) || {},
+      created_at: adventure.created_at || new Date().toISOString(),
+      updated_at: adventure.updated_at || new Date().toISOString(),
+      exported_at: adventure.exported_at,
     }
 
     // Export based on format
@@ -115,23 +120,23 @@ export async function exportAdventure(
     switch (format) {
       case 'markdown': {
         const exporter = new MarkdownExporter()
-        file = exporter.exportToFile(adventure as Adventure, movements as Movement[])
+        file = exporter.exportToFile(adventureData, movements)
         break
       }
       case 'pdf': {
         const exporter = new PDFExporter()
-        file = await exporter.exportToFile(adventure as Adventure, movements as Movement[])
+        file = await exporter.exportToFile(adventureData, movements)
         break
       }
       case 'roll20': {
         const exporter = new Roll20Exporter()
-        file = exporter.exportToFile(adventure as Adventure, movements as Movement[])
+        file = exporter.exportToFile(adventureData, movements)
         break
       }
     }
 
     // Convert to Blob
-    const blob = new Blob([file.content], { type: file.mimeType })
+    const blob = new Blob([file.content as BlobPart], { type: file.mimeType })
 
     // Track export completion
     await analytics.track(ANALYTICS_EVENTS.ADVENTURE_EXPORTED, {

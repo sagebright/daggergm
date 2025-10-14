@@ -348,8 +348,7 @@ describe('credits actions', () => {
     it('should successfully get user credits', async () => {
       mockSupabaseClient.single.mockResolvedValue({
         data: {
-          adventure_credits: 10,
-          expansion_credits: 5,
+          credits: 10,
         },
         error: null,
       })
@@ -359,12 +358,12 @@ describe('credits actions', () => {
       expect(result).toEqual({
         success: true,
         adventureCredits: 10,
-        expansionCredits: 5,
+        expansionCredits: 0,
       })
 
-      expect(mockSupabaseClient.from).toHaveBeenCalledWith('user_credits')
-      expect(mockSupabaseClient.select).toHaveBeenCalledWith('adventure_credits, expansion_credits')
-      expect(mockSupabaseClient.eq).toHaveBeenCalledWith('user_id', 'user-123')
+      expect(mockSupabaseClient.from).toHaveBeenCalledWith('user_profiles')
+      expect(mockSupabaseClient.select).toHaveBeenCalledWith('credits')
+      expect(mockSupabaseClient.eq).toHaveBeenCalledWith('id', 'user-123')
     })
 
     it('should fail when user is not authenticated', async () => {

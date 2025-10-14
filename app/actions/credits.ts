@@ -96,9 +96,9 @@ export async function getUserCredits() {
     }
 
     const { data, error } = await supabase
-      .from('user_credits')
-      .select('adventure_credits, expansion_credits')
-      .eq('user_id', user.id)
+      .from('user_profiles')
+      .select('credits')
+      .eq('id', user.id)
       .single()
 
     if (error) {
@@ -115,8 +115,8 @@ export async function getUserCredits() {
 
     return {
       success: true,
-      adventureCredits: data?.adventure_credits || 0,
-      expansionCredits: data?.expansion_credits || 0,
+      adventureCredits: data?.credits || 0,
+      expansionCredits: 0, // Not yet implemented
     }
   } catch (error) {
     console.error('Get credits error:', error)
