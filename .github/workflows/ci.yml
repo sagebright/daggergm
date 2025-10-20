@@ -1,180 +1,236 @@
 name: CI/CD Pipeline
 
-# Runs on all branches for push events, and on pull requests targeting main/develop
 on:
   push:
-    branches: ['**']  # Run on all branches
+    branches: [main, dev]
   pull_request:
-    branches: [main, develop]
+    branches: [main, dev]
 
-env:
-  NODE_VERSION: '22'
+# Cancel in-progress runs for same PR
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  # Linting and type checking
-  quality:
-    name: Code Quality
+  # Job 1: Lint & Type Check (Fast)
+  lint:
+    name: Lint & Type Check
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+
     steps:
-      - uses: actions/checkout@v5
-      
+      - uses: actions/checkout@v4
+
       - name: Setup Node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: '20'
           cache: 'npm'
-      
+
       - name: Install dependencies
         run: npm ci
-      
-      - name: Run linter
+
+      - name: Run ESLint
         run: npm run lint
-      
-      - name: Run type check
-        run: npm run typecheck
 
-  # Unit and integration tests
-  test:
-    name: Test Coverage
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v5
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-      
-      - name: Install dependencies
-        run: npm ci
-      
-      - name: Run tests with coverage
-        run: npm run test:coverage
-      
-      - name: Check coverage thresholds
-        run: |
-          # Run coverage and capture output
-          COVERAGE_OUTPUT=$(npm run test:coverage 2>&1)
-          
-          # Extract coverage percentages from the "All files" line
-          COVERAGE_LINE=$(echo "$COVERAGE_OUTPUT" | grep "All files" | head -1)
-          
-          # Parse the coverage values
-          LINES=$(echo "$COVERAGE_LINE" | awk -F'|' '{print $5}' | tr -d ' ')
-          BRANCHES=$(echo "$COVERAGE_LINE" | awk -F'|' '{print $3}' | tr -d ' ')
-          FUNCTIONS=$(echo "$COVERAGE_LINE" | awk -F'|' '{print $4}' | tr -d ' ')
-          
-          echo "Coverage - Lines: $LINES%, Functions: $FUNCTIONS%, Branches: $BRANCHES%"
-          
-          # Temporarily very low thresholds for initial MVP
-          if (( $(echo "$LINES < 5" | bc -l) )); then
-            echo "❌ Line coverage is below 5%"
-            exit 1
-          fi
-          
-          if (( $(echo "$FUNCTIONS < 5" | bc -l) )); then
-            echo "❌ Function coverage is below 5%"
-            exit 1
-          fi
-          
-          if (( $(echo "$BRANCHES < 5" | bc -l) )); then
-            echo "❌ Branch coverage is below 5%"
-            exit 1
-          fi
-          
-          echo "✅ Coverage thresholds met!"
-      
-      # Codecov upload disabled until token is configured
-      # - name: Upload coverage reports
-      #   uses: codecov/codecov-action@v5
-      #   with:
-      #     token: ${{ secrets.CODECOV_TOKEN }}
-      #     fail_ci_if_error: true
+      - name: Run TypeScript Type Check
+        run: npx tsc --noEmit
 
-  # E2E tests
-  e2e:
-    name: E2E Tests
+      - name: Check Formatting
+        run: npx prettier --check .
+
+  # Job 2: Unit & Integration Tests (Vitest)
+  test-unit:
+    name: Unit & Integration Tests
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v5
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-      
-      - name: Install dependencies
-        run: npm ci
-      
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps
-      
-      - name: Run E2E tests
-        run: npm run test:e2e
+    timeout-minutes: 10
+
+    services:
+      postgres:
+        image: supabase/postgres:15.1.0.117
         env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-      
-      - name: Upload Playwright report
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: daggergm_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Setup Test Database
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/daggergm_test
+        run: |
+          npm run db:migrate
+          npm run db:seed:test
+
+      - name: Run Vitest Tests
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/daggergm_test
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.TEST_SUPABASE_SERVICE_ROLE_KEY }}
+          OPENAI_API_KEY: sk-test-mock-key
+        run: npm run test:coverage
+
+      - name: Upload Coverage
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./coverage/lcov.info
+          flags: unittests
+
+      - name: Enforce Coverage Threshold
+        run: |
+          COVERAGE=$(jq '.total.lines.pct' coverage/coverage-summary.json)
+          if [ $(echo "$COVERAGE < 90" | bc) -eq 1 ]; then
+            echo "❌ Coverage below 90% threshold (actual: $COVERAGE%)"
+            exit 1
+          fi
+          echo "✅ Coverage: $COVERAGE% (target: ≥90%)"
+
+  # Job 3: E2E Tests (Playwright)
+  test-e2e:
+    name: E2E Tests (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium firefox
+
+      - name: Run Playwright Tests
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.TEST_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.TEST_SUPABASE_ANON_KEY }}
+          PLAYWRIGHT_TEST_BASE_URL: http://localhost:3000
+        run: npm run test:e2e
+
+      - name: Upload Playwright Report
+        if: always()
         uses: actions/upload-artifact@v4
-        if: failure()
         with:
           name: playwright-report
           path: playwright-report/
+          retention-days: 7
 
-  # Build verification
+  # Job 4: Build Check
   build:
-    name: Build Verification
+    name: Build Check
     runs-on: ubuntu-latest
-    needs: [quality, test]
+    timeout-minutes: 10
+    needs: [lint, test-unit]
+
     steps:
-      - uses: actions/checkout@v5
-      
+      - uses: actions/checkout@v4
+
       - name: Setup Node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: '20'
           cache: 'npm'
-      
+
       - name: Install dependencies
         run: npm ci
-      
-      - name: Build application
-        run: npm run build
+
+      - name: Build Next.js App
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-      
-      - name: Check build output
+        run: npm run build
+
+      - name: Check Bundle Size
         run: |
-          if [ ! -d ".next" ]; then
-            echo "Build failed - .next directory not found"
+          # Fail if JS bundle exceeds 300KB (adjust as needed)
+          MAX_SIZE=307200
+          ACTUAL_SIZE=$(du -sb .next/static/chunks/pages/_app-*.js | cut -f1)
+          if [ $ACTUAL_SIZE -gt $MAX_SIZE ]; then
+            echo "❌ Bundle size exceeds limit: $ACTUAL_SIZE > $MAX_SIZE"
             exit 1
           fi
 
-  # Deploy to Vercel via webhook after all checks pass
-  deploy-vercel:
-    name: Trigger Vercel Deployment
+  # Job 5: Security Scan
+  security:
+    name: Security Scan
     runs-on: ubuntu-latest
-    needs: [quality, test, build, e2e]
-    if: github.ref == 'refs/heads/main'
-    steps:
-      - name: Trigger Vercel Deploy Hook
-        run: |
-          echo "Triggering Vercel deployment..."
-          RESPONSE=$(curl -X POST -s -w "\n%{http_code}" ${{ secrets.VERCEL_DEPLOY_HOOK_URL }})
-          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
-          BODY=$(echo "$RESPONSE" | sed '$d')
-          
-          echo "Response code: $HTTP_CODE"
-          echo "Response body: $BODY"
-          
-          if [ "$HTTP_CODE" -eq 200 ] || [ "$HTTP_CODE" -eq 201 ]; then
-            echo "✅ Deployment triggered successfully"
-          else
-            echo "❌ Deployment trigger failed with code $HTTP_CODE"
-            exit 1
-          fi
+    timeout-minutes: 5
 
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run npm audit
+        run: npm audit --audit-level=high
+
+      - name: Run Snyk Security Scan
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
+
+  # Job 6: Deploy to Vercel (Production)
+  deploy:
+    name: Deploy to Vercel
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [lint, test-unit, test-e2e, build, security]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: '--prod'
+
+  # Job 7: Notify on Failure
+  notify:
+    name: Notify on Failure
+    runs-on: ubuntu-latest
+    needs: [lint, test-unit, test-e2e, build, security]
+    if: failure()
+
+    steps:
+      - name: Send Slack Notification
+        uses: slackapi/slack-github-action@v1.25.0
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          payload: |
+            {
+              "text": "❌ DaggerGM CI/CD Failed",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Build Failed*\n<${{ github.event.head_commit.url }}|View Commit>"
+                  }
+                }
+              ]
+            }

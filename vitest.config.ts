@@ -1,74 +1,95 @@
-import { defineConfig } from 'vitest/config'
-import react from '@vitejs/plugin-react'
 import path from 'path'
+
+import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
   plugins: [react()],
+
   test: {
-    environment: 'jsdom',
-    globals: true,
-    setupFiles: './__tests__/setup.ts',
-    testTimeout: 10000, // 10 seconds
-    exclude: [
-      '**/node_modules/**',
-      '**/dist/**',
-      '**/cypress/**',
-      '**/.{idea,git,cache,output,temp}/**',
-      '**/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build}.config.*',
-      '**/__tests__/e2e/**',
-    ],
+    // Environment
+    environment: 'jsdom', // Support both client and server components
+    globals: true, // No need to import describe/it/expect
+
+    // Coverage Configuration (90% target)
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'html', 'json-summary'],
-      all: true,
+      reporter: ['text', 'json', 'html', 'lcov'],
       include: ['**/*.{ts,tsx}'],
       exclude: [
-        '**/node_modules/**',
-        '**/dist/**',
         '**/__tests__/**',
         '**/*.test.{ts,tsx}',
-        '**/*.spec.{ts,tsx}',
-        '**/types/**',
-        '**/*.d.ts',
-        'vitest.config.ts',
-        'next.config.mjs',
-        'next.config.ts',
-        'tailwind.config.ts',
-        'postcss.config.mjs',
-        '**/middleware.ts', // Root middleware is framework code
-        '**/components/analytics/**', // Client-side only analytics components
-        '**/lib/analytics/web-vitals.tsx', // Client-side only web vitals
-        '**/lib/analytics/analytics.ts', // Analytics wrapper with external dependencies
-        '**/hooks/use-analytics.ts', // Client-side only hook
-        '**/hooks/use-hotkeys.ts', // Client-side only hook
-        '**/components/features/ai-chat.tsx', // Complex client-side component, tested via integration
-        '**/lib/stripe/server.ts', // Simple re-export
-        '**/lib/llm/types.ts', // Type definitions only
-        '**/lib/llm/provider.ts', // Simple factory function
-        '**/lib/performance/performance-monitor.ts', // Performance monitoring, tested via integration
-        '**/lib/rate-limiting/middleware.ts', // Tested via integration tests
-        '**/test/mocks/**', // Test utilities
-        '**/app/layout.tsx', // Next.js framework file
-        '**/app/adventures/[id]/page.tsx', // Page component, tested via integration
-        '**/app/adventures/new/page.tsx', // Page component, tested via integration
-        '**/lib/theme/css-variables.ts', // Theme configuration, mostly type definitions
-        '**/lib/export/pdf-exporter.ts', // PDF generation with external library, complex integration
-        '**/lib/export/roll20-exporter.ts', // Roll20 JSON format generator
-        '**/components/features/credit-purchase-dialog.tsx', // UI component tested via integration
-        '**/components/features/export-dialog.tsx', // UI component tested via integration
-        '**/components/features/focus-mode.tsx', // UI component tested via integration
+        '**/types/**', // Generated types
+        '**/components/ui/**', // shadcn components (tested via integration)
+        '**/app/layout.tsx', // Next.js framework files
+        '**/app/page.tsx', // Page components (tested via E2E)
+        '**/node_modules/**',
+        '**/.next/**',
+        '**/dist/**',
+        '*.config.{ts,mjs,js}',
+        '**/middleware.ts',
       ],
+
+      // 🎯 DaggerGM Coverage Thresholds
+      // MVP: 90% overall, 100% for security-critical code
       thresholds: {
-        lines: 92,
-        functions: 95,
-        branches: 83, // Adjusted due to added type guards in TypeScript fixes
-        statements: 92,
+        lines: 90,
+        functions: 90,
+        branches: 90,
+        statements: 90,
+      },
+
+      // Fail if uncovered files exist
+      all: true,
+      skipFull: false,
+    },
+
+    // Test Organization
+    include: ['**/__tests__/**/*.test.{ts,tsx}', '**/tests/integration/**/*.test.{ts,tsx}'],
+    exclude: [
+      'node_modules',
+      '.next',
+      'tests/e2e', // Playwright handles E2E
+      '__tests__/e2e/**',
+    ],
+
+    // Setup Files
+    setupFiles: ['./__tests__/setup.ts', './tests/setup.ts'],
+
+    // Timeouts
+    testTimeout: 10000, // 10s for integration tests
+    hookTimeout: 10000,
+
+    // Performance
+    isolate: true, // Run each test file in isolation
+    pool: 'threads',
+    poolOptions: {
+      threads: {
+        singleThread: false,
+        maxThreads: 4, // Adjust based on CI
       },
     },
+
+    // Reporter
+    reporters: ['verbose'],
+
+    // Watch Mode
+    watchExclude: ['**/node_modules/**', '**/.next/**', '**/coverage/**'],
   },
+
+  // Path Resolution (match tsconfig.json)
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './'),
+      '@/features': path.resolve(__dirname, './features'),
+      '@/lib': path.resolve(__dirname, './lib'),
+      '@/components': path.resolve(__dirname, './components'),
+      '@/types': path.resolve(__dirname, './types'),
+      '@/stores': path.resolve(__dirname, './stores'),
+      '@/tests': path.resolve(__dirname, './tests'),
+      '@/app': path.resolve(__dirname, './app'),
+      '@/hooks': path.resolve(__dirname, './hooks'),
+      '@/test': path.resolve(__dirname, './test'),
     },
   },
 })

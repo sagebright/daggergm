@@ -2,316 +2,287 @@
 
 ## 🚨 CRITICAL - READ FIRST
 
-### After ANY Code Changes (MANDATORY):
+### Development Workflow (MANDATORY):
 
 ```bash
-☐ Check git status & current branch
-☐ Run tests: npm test (99% coverage required)
-☐ Run linter: npm run lint:fix
-☐ Type check: npm run typecheck
-☐ Use TodoWrite for multi-step tasks
+☐ Work in feature/* branches
+☐ Write tests BEFORE code (TDD: RED → GREEN → REFACTOR)
+☐ Run npm run test:watch during development
+☐ Verify coverage: npm run test:coverage (must be ≥90%)
+☐ Push to GitHub for CI/CD validation
+☐ Monitor with: gh run watch
 ```
 
-### Testing Standards (NON-NEGOTIABLE):
+### Tech Stack (First Next.js + TypeScript Project!)
 
-```bash
-# 99% coverage requirements:
-- Lines: 99%
-- Functions: 99%
-- Statements: 99%
-- Branches: 97%
-
-# TDD workflow:
-☐ Write failing test first (RED)
-☐ Implement minimal code (GREEN)
-☐ Refactor while keeping tests green
-☐ Run coverage: npm run test:coverage
-```
+- **Frontend**: Next.js 15 (App Router) + React 19 + TypeScript (strict mode)
+- **Backend**: Next.js Server Actions (NO separate Express server)
+- **Database**: Supabase (PostgreSQL + RLS + Auth)
+- **AI**: OpenAI GPT-4 (structured outputs with Zod validation)
+- **UI**: shadcn/ui components
+- **State**: Zustand (Focus Mode) + React Query (server state)
+- **Testing**: Vitest (80% integration) + Playwright (15% E2E) + 5% unit
+- **Payments**: Stripe (one-time credit purchases)
 
 ---
 
 ## 🔄 Project Context
 
-**DaggerGM** - AI-powered adventure generator for Daggerheart TTRPG
+**DaggerGM** is an AI-powered adventure generator for Daggerheart TTRPG
 
-- **Stack**: Next.js 14 + Supabase + GPT-4 + TypeScript
 - **Domain**: Frame-aware adventure generation with Focus Mode editing
-- **Architecture**: Server Actions, RLS everywhere, Credits-based monetization
-- **Testing**: 99% coverage requirement with TDD approach
-- **Status**: Database ready, implementing MVP features
+- **Users**: Game Masters creating 1-3 hour sessions
+- **Business Model**: Credits (not subscriptions) - 1 credit = 1 adventure
+- **Architecture**: Multi-tenant with guest access (no auth required for first adventure)
+- **Target Coverage**: 90% lines/functions/statements/branches (100% for security-critical code)
 
 ---
 
-## 🚦 TASK ROUTING - Choose Your Path
+## 🚦 TASK ROUTING
 
 ### 🏗️ Development Workflows
 
-- **Test-Driven Development** → Always start here for new features
-- **Bug Investigation** → Check tests first, then implementation
-- **Performance Issues** → Profile first, optimize second
-- **LLM Integration** → Mock first, implement second
+- **Test-Driven Development** → `documentation/TESTING_STRATEGY.md`
+- **Focus Mode Implementation** → `documentation/FOCUS_MODE.md`
+- **LLM Integration** → `documentation/LLM_INTEGRATION.md`
+- **RLS Security** → `.claude/skills/rls-verification/SKILL.md`
 
 ### 📚 Technical References
 
-- **PRP Document** → `/PRPs/daggergm_mvp_implementation.md`
-- **Initial Requirements** → `/INITIAL_daggergm.md`
-- **Database Schema** → `/supabase/migrations/`
-- **Type Definitions** → `/types/database.generated.ts`
+- **Architecture Overview** → `documentation/ARCHITECTURE.md`
+- **Server Actions Patterns** → `documentation/SERVER_ACTIONS.md`
+- **State Management (Zustand)** → `documentation/STATE_MANAGEMENT_DECISION.md`
+- **Type Generation** → `.claude/commands/generate-types.md`
+
+### 🤖 Slash Commands (Automation)
+
+- `/setup-testing` → Initialize test infrastructure
+- `/execute-feature` → Implement feature with TDD workflow
+- `/verify-rls` → Audit RLS policies for security
+- `/generate-types` → Regenerate TypeScript types from Supabase schema
+
+### ⚡ Claude Code Skills (Auto-Applied)
+
+Skills are located in `.claude/skills/` and provide reusable testing/validation patterns:
+
+- **llm-integration/** → MSW mocking patterns for OpenAI
+- **rls-verification/** → Automated RLS policy testing
+- **focus-mode-testing/** → E2E patterns for Focus Mode UX
 
 ---
 
-## ⚡ QUICK PATTERNS
+## ⚡ QUICK PATTERNS (Critical Rules)
 
-### 🔐 Security & Data Access (ALWAYS):
+### 🔐 Security & Multi-tenancy (ALWAYS):
 
-- **All queries**: Must respect RLS policies
-- **Guest users**: Use token-based access, no auth required
-- **Credits**: Atomic consumption with Stripe integration
-- **API keys**: Never exposed client-side
+- **All database queries**: Include `tenant_id` filter (tenant = user in DaggerGM)
+- **All mutations**: Use Server Actions (NEVER client-side fetch to /api)
+- **API keys**: Server-only (validate with `src/lib/validators/env.ts`)
+- **Guest tokens**: 24-hour expiry, single-use, no PII storage
+- **RLS testing**: Required for every new database operation
 
-### 🎨 UI/UX Standards:
+### 🎨 UI Component Standards:
 
-- **Components**: shadcn/ui only (no custom components)
-- **Focus Mode**: Collapse other sections when editing
-- **Mobile-first**: Touch-friendly interactions
-- **Loading states**: Every async operation needs feedback
+- **Components**: Use shadcn/ui exclusively (no custom HTML)
+- **State**: Zustand for Focus Mode, React Query for server data
+- **Responsive**: Mobile-first (card resellers use phones/tablets)
+- **Accessibility**: ARIA labels, keyboard navigation
+- **File limit**: 300 lines max (refactor beyond this)
 
 ### 📏 Code Quality (ENFORCE):
 
-- **File size**: 300 lines max (split if larger)
-- **Test coverage**: 99% minimum for all code
-- **Type safety**: No `any` types allowed
-- **Error handling**: Every edge case covered
+- **TypeScript**: Strict mode (see `tsconfig.json`)
+- **File size**: 300 lines max (ESLint enforced)
+- **Test coverage**: 90% minimum (CI blocks merge if below)
+- **Security-critical**: 100% coverage (credits, RLS, guest tokens)
+- **Zero tolerance**: 0 test failures, 0 lint errors/warnings
+- **Imports**: Use path aliases (`@/features`, `@/lib`, etc.)
+- **Naming**: `camelCase` for variables, `PascalCase` for components/types
 
-### 🧪 TDD Checkpoint (BEFORE CODING):
+### 🧪 Testing Requirements (TDD):
 
-```bash
-☐ Create test file first
-☐ Write test describing desired behavior
-☐ Run test to see it fail (RED)
-☐ Write minimal implementation (GREEN)
-☐ Refactor for clarity (REFACTOR)
-☐ Check coverage remains at 99%
-```
+- **Write tests FIRST**: RED → GREEN → REFACTOR
+- **Distribution**: 80% integration / 15% E2E / 5% unit
+- **Real database**: Always use test Supabase instance (never mock DB)
+- **Mock LLM**: Use MSW to mock OpenAI responses
+- **Coverage gate**: CI fails if coverage < 90%
+- **Security code**: 100% coverage required (credits, RLS, auth)
+- **Quick validation**: `npm run test:watch` during development
 
-### 🧠 Development Patterns:
+### 🤖 LLM Integration:
 
-- **Server Actions**: All data mutations (no API routes)
-- **Frame-aware**: Every feature respects Frame context
-- **Credits model**: Not subscriptions
-- **Guest-first**: One free adventure before signup
+- **Structured outputs**: Always use Zod schemas for validation
+- **Temperature settings**:
+  - Scaffold: 0.7 (creative but coherent)
+  - Combat: 0.5 (mechanical accuracy)
+  - Dialogue: 0.9 (personality)
+  - Description: 0.8 (vivid)
+- **Cost management**: Cache prompts, monitor token usage
+- **Error handling**: Retry with exponential backoff (3 attempts max)
+- **Validation**: Never trust LLM output without Zod validation
+
+### ⚠️ Next.js Specific Gotchas:
+
+- **Server Components**: Default in App Router (no `useState`, `useEffect`)
+- **Client Components**: Add `'use client'` directive at top of file
+- **Server Actions**: Add `'use server'` directive at top of file
+- **Environment vars**: `NEXT_PUBLIC_` prefix for client-side access
+- **Middleware**: Runs on Edge runtime (limited Node.js APIs)
+- **Streaming**: Use `<Suspense>` for progressive rendering
 
 ---
 
 ## 🔧 ESSENTIAL COMMANDS
 
-### Local Development:
+### Development Workflow:
 
 ```bash
-npm run dev              # Start Next.js dev server
-npm test                 # Run tests in watch mode
-npm run test:coverage    # Check coverage (must be 99%)
-npm run lint:fix         # Fix linting issues
-npm run typecheck        # TypeScript validation
-npm run db:types         # Generate Supabase types
+npm run dev                 # Start Next.js dev server (port 3000)
+npm run test:watch          # Watch mode for TDD (auto-runs affected tests)
+npm run test:coverage       # Full coverage report (must be ≥90%)
+npm run test:e2e            # Run Playwright E2E tests
+npm run lint                # ESLint + TypeScript check
+npm run format              # Prettier format all files
 ```
 
-### Docker Operations:
+### Database Management:
 
 ```bash
-npm run docker:up        # Start all containers
-npm run docker:down      # Stop containers
-npm run docker:test      # Run tests in Docker
-npm run docker:logs      # View container logs
+npm run db:start            # Start local Supabase (Docker)
+npm run db:migrate          # Run migrations
+npm run db:seed             # Seed test data
+npm run db:reset            # Reset test database
+npm run db:types            # Generate TypeScript types from schema
 ```
 
-### Database Commands:
+### CI/CD Workflow:
 
 ```bash
-npm run db:setup         # Run migrations (already done)
-npm run db:types         # Generate TypeScript types
+git checkout -b feature/[description]    # Create feature branch
+npm run test:coverage                    # Verify tests pass
+git push origin feature/[description]    # Trigger CI/CD
+gh run watch                             # Monitor GitHub Actions
 ```
 
 ---
 
-## 📊 DaggerGM-Specific Patterns
+## 📚 DETAILED REFERENCES
 
-### Frame-Aware Generation:
+### File Organization (Feature-Based):
 
-```typescript
-// ALWAYS include Frame context
-interface GenerationContext {
-  frame: 'witherwild' | 'custom' | string
-  focus: string // Frame-specific focus
-  partySize: number
-  partyLevel: number
-  difficulty: 'easier' | 'standard' | 'harder'
-  stakes: 'low' | 'personal' | 'high' | 'world'
-}
+```
+src/
+├── app/                     # Next.js App Router (routes)
+├── features/                # Feature modules (self-contained)
+│   ├── adventure/           # Adventure CRUD + Focus Mode
+│   ├── generation/          # LLM generation logic
+│   ├── credits/             # Credit system
+│   ├── frames/              # Frame management
+│   ├── export/              # PDF/Markdown export
+│   └── guest/               # Guest user flows
+├── lib/                     # Shared utilities
+│   ├── supabase/            # Database clients
+│   ├── openai/              # LLM client + retry logic
+│   ├── stripe/              # Payment processing
+│   └── validators/          # Runtime validation (env, Zod)
+├── stores/                  # Zustand stores
+├── components/              # Shared UI components
+└── types/                   # Global TypeScript types
 ```
 
-### Focus Mode Editor:
+### Critical Project Alerts:
 
-```typescript
-// Collapse non-active movements
-interface FocusModeState {
-  activeMovementId: string | null
-  sidePanel: 'chat' | 'preview' | 'actions' | null
-  isGenerating: boolean
-}
-```
+- **First Next.js project**: Expect learning curve with App Router
+- **First TypeScript project**: Strict mode is challenging but worth it
+- **Server Actions**: Replaces traditional API routes (different mental model)
+- **Focus Mode complexity**: Most sophisticated UX feature (needs E2E tests)
+- **Guest system**: Requires careful token management (security risk if wrong)
 
-### Credits System:
+### Common Pitfalls (Next.js):
 
-```typescript
-// Atomic credit consumption
-async function consumeCredit(userId: string) {
-  const { data, error } = await supabase.rpc('consume_adventure_credit', { user_id: userId })
-
-  if (error) throw new CreditError(error)
-  return data
-}
-```
-
-### LLM Integration:
-
-```typescript
-// Variable temperature by content type
-const TEMPERATURES = {
-  scaffold: 0.7, // Creative but coherent
-  combat: 0.5, // Mechanical accuracy
-  dialogue: 0.9, // Personality and flair
-  description: 0.8, // Vivid but grounded
-} as const
-```
+1. **Using client hooks in Server Components** → Add `'use client'` directive
+2. **Accessing `window` in Server Actions** → Server-only code (no browser APIs)
+3. **Forgetting NEXT*PUBLIC* prefix** → Env vars won't be exposed to client
+4. **Mocking database in tests** → Always use real test database (catches RLS bugs)
+5. **Not validating LLM output** → AI can return malformed data (use Zod!)
 
 ---
 
-## 🧪 Testing Patterns
+## 🎯 Development Approach
 
-### Component Testing:
+### When Starting a New Feature:
 
-```typescript
-describe('MovementEditor', () => {
-  it('should collapse other movements in focus mode', async () => {
-    const { rerender } = render(
-      <MovementEditor movements={mockMovements} />
-    );
+1. **Understand requirements** → Ask questions if unclear
+2. **Write failing test first** → TDD workflow (RED)
+3. **Implement minimal code** → Make test pass (GREEN)
+4. **Refactor** → Improve while keeping tests green
+5. **Verify coverage** → `npm run test:coverage` (must be ≥90%)
+6. **Push to CI/CD** → GitHub Actions validates everything
 
-    // Click to focus
-    await userEvent.click(screen.getByText('Movement 2'));
+### When Debugging:
 
-    // Others should be collapsed
-    expect(screen.getByTestId('movement-1')).toHaveClass('collapsed');
-    expect(screen.getByTestId('movement-3')).toHaveClass('collapsed');
-    expect(screen.getByTestId('movement-2')).not.toHaveClass('collapsed');
-  });
-});
-```
+1. **Check TypeScript errors** → `npx tsc --noEmit`
+2. **Review test failures** → `npm run test:watch`
+3. **Inspect database** → Supabase Studio (http://localhost:54323)
+4. **Check RLS policies** → Use `/verify-rls` command
+5. **Review LLM calls** → Check MSW mock handlers
 
-### Server Action Testing:
+### When Stuck:
 
-```typescript
-describe('generateAdventure', () => {
-  it('should consume exactly one credit', async () => {
-    const mockSupabase = createMockSupabaseClient()
-    mockSupabase.rpc.mockResolvedValueOnce({ data: 1 })
-
-    await generateAdventure(mockConfig, 'user-123')
-
-    expect(mockSupabase.rpc).toHaveBeenCalledWith('consume_adventure_credit', {
-      user_id: 'user-123',
-    })
-  })
-})
-```
-
-### LLM Mock Testing:
-
-```typescript
-// Mock OpenAI responses for consistent tests
-vi.mock('openai', () => ({
-  OpenAI: vi.fn(() => ({
-    chat: {
-      completions: {
-        create: vi.fn().mockResolvedValue({
-          choices: [
-            {
-              message: {
-                content: mockAdventureScaffold,
-              },
-            },
-          ],
-        }),
-      },
-    },
-  })),
-}))
-```
+- **TypeScript errors** → Check `tsconfig.json` and path aliases
+- **Database errors** → Verify RLS policies with `assertRlsBlocks` helper
+- **LLM errors** → Validate response with Zod schema
+- **Test failures** → Check if mocking external services (not DB!)
+- **Build errors** → Verify environment variables (`src/lib/validators/env.ts`)
 
 ---
 
-## 🚨 Common Pitfalls
+## 📋 DOCUMENTATION UPDATES
 
-### RLS Violations:
+When updating documentation:
 
-- Always test with both anon and service keys
-- Guest users need special handling
-- Check policies after schema changes
-
-### Credit Race Conditions:
-
-- Use database transactions
-- Implement idempotency keys
-- Handle double-click scenarios
-
-### LLM Costs:
-
-- Cache responses aggressively
-- Use semantic similarity for deduplication
-- Monitor token usage per adventure
-
-### Focus Mode Edge Cases:
-
-- Handle browser back button
-- Preserve state on page refresh
-- Mobile keyboard interactions
+1. Update version date at bottom of file
+2. Create backup: `documentation/archive/FILENAME_YYYY-MM-DD.md`
+3. Update this hub if routing changes
+4. Run `/verify-docs` command to check broken links
 
 ---
 
-## 📋 Feature Implementation Checklist
+## 🎓 LEARNING RESOURCES
 
-When implementing new features:
+### Next.js 15 (App Router):
 
-1. [ ] Write user story first
-2. [ ] Create comprehensive test suite
-3. [ ] Mock external dependencies
-4. [ ] Implement with TDD approach
-5. [ ] Ensure 99% coverage
-6. [ ] Add proper TypeScript types
-7. [ ] Include loading/error states
-8. [ ] Test RLS policies
-9. [ ] Verify mobile responsiveness
-10. [ ] Document in code comments
+- Official Docs: https://nextjs.org/docs
+- Server Actions: https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations
+- Streaming: https://nextjs.org/docs/app/building-your-application/routing/loading-ui-and-streaming
 
----
+### TypeScript (Strict Mode):
 
-## 🎯 Success Metrics
+- Handbook: https://www.typescriptlang.org/docs/handbook/intro.html
+- Zod Validation: https://zod.dev/
 
-### Code Quality:
+### Supabase + Next.js:
 
-- Test coverage: 99% (lines, functions, statements), 97% (branches)
-- TypeScript strict mode: No errors
-- Bundle size: < 500KB for initial load
-- Lighthouse score: > 95 on all metrics
+- Integration Guide: https://supabase.com/docs/guides/getting-started/tutorials/with-nextjs
+- RLS Policies: https://supabase.com/docs/guides/auth/row-level-security
 
-### User Experience:
+### Testing:
 
-- Adventure generation: < 10 seconds total
-- Focus Mode transition: < 100ms
-- Credit purchase: < 3 clicks
-- Export generation: < 2 seconds
+- Vitest: https://vitest.dev/
+- Playwright: https://playwright.dev/
+- MSW (API Mocking): https://mswjs.io/
 
 ---
 
-**Version**: 2025-09-08 | **Updated**: When any patterns change | **Next**: Begin TDD implementation
+**Version**: 2025-10-18
+**Project Phase**: Rebuild from scratch
+**Team Experience**: First Next.js project, first TypeScript project
+**Previous Version**: N/A (new project)
+
+**Major Decisions**:
+
+- Next.js 15 over Express (simplifies stack)
+- TypeScript strict mode (quality over speed)
+- Server Actions over API routes (Next.js best practice)
+- Zustand over Context API (Focus Mode complexity)
+- 90% coverage target with zero tolerance (realistic for first Next.js/TypeScript project)
