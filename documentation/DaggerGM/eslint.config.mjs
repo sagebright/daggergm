@@ -26,8 +26,6 @@ export default [
       'dist/**',
       '*.config.js',
       '*.config.mjs',
-      'documentation/**',  // Reference documentation
-      '.backups/**',       // Timestamped backups
     ],
   },
 
@@ -84,6 +82,12 @@ export default [
       'react-hooks/exhaustive-deps': 'warn',
       'react/jsx-no-leaked-render': ['error', {
         validStrategies: ['ternary', 'coerce'],
+      }],
+
+      // Server Actions Safety
+      'no-restricted-syntax': ['error', {
+        selector: 'CallExpression[callee.name="fetch"][arguments.0.value=/^\\/api\\//]',
+        message: 'Use Server Actions instead of /api routes for mutations',
       }],
 
       // Code Quality

@@ -1,0 +1,22 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# 🎯 DaggerGM Pre-Commit Validation
+# Runs fast checks before allowing commit
+
+echo "🔍 Running pre-commit checks..."
+
+# 1. Lint staged files (fast)
+npx lint-staged
+
+# 2. Type check (critical for TypeScript)
+echo "📘 Type checking..."
+npx tsc --noEmit || {
+  echo "❌ Type errors found. Fix before committing."
+  exit 1
+}
+
+# 3. Run affected tests (Vitest watch mode handles this)
+# Skip in pre-commit for speed - CI will catch issues
+
+echo "✅ Pre-commit checks passed!"

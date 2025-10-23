@@ -1,0 +1,52 @@
+{
+  "compilerOptions": {
+    // Strict Mode (KEEP ALL OF THESE)
+    "strict": true, // Master switch
+    "noUncheckedIndexedAccess": true, // array[0] is T | undefined
+    "noImplicitOverride": true, // Explicit override keyword
+    "exactOptionalPropertyTypes": true, // undefined !== missing
+
+    // Module Resolution (Next.js specific)
+    "target": "ES2022",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "allowJs": true, // For .js config files
+    "checkJs": false, // Don't type-check .js
+
+    // Next.js Requirements
+    "jsx": "preserve",
+    "incremental": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "skipLibCheck": true, // Faster builds, ignore node_modules types
+
+    // Path Mappings (Critical for imports)
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@/features/*": ["./src/features/*"],
+      "@/lib/*": ["./src/lib/*"],
+      "@/components/*": ["./src/components/*"],
+      "@/types/*": ["./src/types/*"],
+      "@/stores/*": ["./src/stores/*"],
+      "@/tests/*": ["./tests/*"]
+    },
+
+    // Output Control
+    "noEmit": true, // Next.js handles compilation
+    "forceConsistentCasingInFileNames": true,
+
+    // Plugin Support
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
+  },
+
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+
+  "exclude": ["node_modules", ".next", "out", "dist"]
+}
