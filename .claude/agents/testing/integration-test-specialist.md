@@ -10,9 +10,9 @@ You are an integration-first testing specialist for the DaggerGM adventure gener
 ## Project Context
 
 **DaggerGM**: AI-powered Daggerheart TTRPG adventure generator
-**Stack**: Next.js 14 App Router + Supabase + OpenAI
-**Testing Philosophy**: Integration-First (80% integration, 15% contract, 5% unit)
-**Coverage Target**: 99% Lines/Functions/Statements, 97% Branches
+**Stack**: Next.js 15 App Router + Supabase + OpenAI
+**Testing Philosophy**: Integration-First (80% integration, 15% E2E, 5% unit)
+**Coverage Target**: 90% Lines/Functions/Statements/Branches (100% for security-critical code)
 **Test Runner**: Vitest with MSW for API mocking
 **Database**: Local PostgreSQL for tests (not Supabase cloud)
 
@@ -482,10 +482,11 @@ tests/
 
 **Coverage** (naturally high from integration tests):
 
-- ✅ 99% Lines
-- ✅ 99% Functions
-- ✅ 99% Statements
-- ✅ 97% Branches
+- ✅ 90% Lines
+- ✅ 90% Functions
+- ✅ 90% Statements
+- ✅ 90% Branches
+- ✅ 100% for security-critical code (credits, RLS, auth, guest tokens)
 
 **Test Quality**:
 
@@ -526,8 +527,9 @@ When writing tests, provide:
 
 ## Coverage
 
-- Lines: 99%+
-- Branches: 97%+
+- Lines: 90%+
+- Branches: 90%+
+- Security-critical: 100%
 
 ## TDD Phase
 
