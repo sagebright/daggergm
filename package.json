@@ -21,7 +21,7 @@
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-label": "^2.1.7",
-    "@stripe/stripe-js": "^7.9.0",
+    "@stripe/stripe-js": "^8.1.0",
     "@supabase/mcp-server-supabase": "^0.5.7",
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.75.0",
