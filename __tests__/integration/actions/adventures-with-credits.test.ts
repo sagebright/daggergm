@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+
 import { generateAdventure } from '@/app/actions/adventures'
 import { CreditManager } from '@/lib/credits/credit-manager'
 import { InsufficientCreditsError } from '@/lib/credits/errors'
@@ -166,6 +167,7 @@ describe('Adventure Generation with Credits', () => {
       generateAdventureScaffold: vi.fn().mockRejectedValueOnce(new Error('LLM Error')),
       expandMovement: vi.fn(),
       refineContent: vi.fn(),
+      regenerateMovement: vi.fn(),
     }))
 
     mockCreditManager.refundCredit.mockResolvedValueOnce({

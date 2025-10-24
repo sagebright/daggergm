@@ -269,8 +269,8 @@ describe('Scaffold Movement Regeneration', () => {
 
       // Verify update was called with incremented counter
       expect(mockUpdate).toHaveBeenCalled()
-      const updateCall = mockUpdate.mock.calls[0][0]
-      expect(updateCall.scaffold_regenerations_used).toBe(4)
+      const updateCall = mockUpdate.mock.calls[0]?.[0]
+      expect(updateCall?.scaffold_regenerations_used).toBe(4)
     })
 
     it('should NOT consume credits', async () => {
@@ -366,15 +366,15 @@ describe('Scaffold Movement Regeneration', () => {
 
       // Verify update was called
       expect(mockUpdate).toHaveBeenCalled()
-      const updateCall = mockUpdate.mock.calls[0][0]
-      const updatedMovements = updateCall.movements
+      const updateCall = mockUpdate.mock.calls[0]?.[0]
+      const updatedMovements = updateCall?.movements
 
       // Find the updated movement
-      const updatedMovement = updatedMovements.find((m: any) => m.id === originalMovementId)
+      const updatedMovement = updatedMovements?.find((m: any) => m.id === originalMovementId)
 
       // Verify id and orderIndex were preserved
-      expect(updatedMovement.id).toBe(originalMovementId)
-      expect(updatedMovement.orderIndex).toBe(2)
+      expect(updatedMovement?.id).toBe(originalMovementId)
+      expect(updatedMovement?.orderIndex).toBe(2)
     })
 
     it('should update movement content while preserving structure', async () => {
@@ -421,17 +421,17 @@ describe('Scaffold Movement Regeneration', () => {
       await regenerateScaffoldMovement(adventureId, movementId)
 
       // Verify update was called
-      const updateCall = mockUpdate.mock.calls[0][0]
-      const updatedMovements = updateCall.movements
-      const updatedMovement = updatedMovements.find((m: any) => m.id === movementId)
+      const updateCall = mockUpdate.mock.calls[0]?.[0]
+      const updatedMovements = updateCall?.movements
+      const updatedMovement = updatedMovements?.find((m: any) => m.id === movementId)
 
       // Content should be updated
-      expect(updatedMovement.title).toBe('Regenerated Movement Title')
-      expect(updatedMovement.description).toBe('Regenerated movement description with new content')
+      expect(updatedMovement?.title).toBe('Regenerated Movement Title')
+      expect(updatedMovement?.description).toBe('Regenerated movement description with new content')
 
       // Structure should be preserved
-      expect(updatedMovement.id).toBe(movementId)
-      expect(updatedMovement.orderIndex).toBe(0)
+      expect(updatedMovement?.id).toBe(movementId)
+      expect(updatedMovement?.orderIndex).toBe(0)
     })
   })
 
