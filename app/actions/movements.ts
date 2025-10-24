@@ -4,8 +4,7 @@
 import { revalidatePath } from 'next/cache'
 
 import { analytics, ANALYTICS_EVENTS } from '@/lib/analytics/analytics'
-import { CreditManager } from '@/lib/credits/credit-manager'
-import { InsufficientCreditsError } from '@/lib/credits/errors'
+import { REGENERATION_LIMITS, REGENERATION_LIMIT_ERRORS } from '@/lib/constants/regeneration'
 import { OpenAIProvider } from '@/lib/llm/openai-provider'
 import type { Movement } from '@/lib/llm/types'
 import { withRateLimit, getRateLimitContext } from '@/lib/rate-limiting/middleware'
@@ -40,8 +39,6 @@ export async function expandMovement(adventureId: string, movementId: string) {
       error: validationResult.error.issues[0]?.message || 'Validation failed',
     }
   }
-  const creditManager = new CreditManager()
-  let userId: string | null = null
 
   try {
     const supabase = await createServerSupabaseClient()
@@ -53,7 +50,7 @@ export async function expandMovement(adventureId: string, movementId: string) {
     if (!user) {
       return { success: false, error: 'Unauthorized' }
     }
-    userId = user.id
+    const userId = user.id
 
     // Apply rate limiting
     try {
@@ -72,19 +69,6 @@ export async function expandMovement(adventureId: string, movementId: string) {
       throw error
     }
 
-    // Consume credit for expansion
-    try {
-      await creditManager.consumeCredit(userId, 'expansion', {
-        adventureId,
-        movementId,
-      })
-    } catch (error) {
-      if (error instanceof InsufficientCreditsError) {
-        return { success: false, error: 'Insufficient credits to expand movement' }
-      }
-      throw error
-    }
-
     // Get adventure with movements
     const { data: adventure } = await supabase
       .from('adventures')
@@ -94,6 +78,16 @@ export async function expandMovement(adventureId: string, movementId: string) {
 
     if (!adventure) {
       return { success: false, error: 'Adventure not found' }
+    }
+
+    // Check expansion regeneration limit (20 max)
+    // Expansion/refinement is FREE but LIMITED
+    const expansionRegensUsed = adventure.expansion_regenerations_used ?? 0
+    if (expansionRegensUsed >= REGENERATION_LIMITS.EXPANSION) {
+      return {
+        success: false,
+        error: REGENERATION_LIMIT_ERRORS.EXPANSION,
+      }
     }
 
     // Check ownership
@@ -145,6 +139,7 @@ export async function expandMovement(adventureId: string, movementId: string) {
         : m,
     )
 
+    // Update movement with expanded content
     const { error } = await supabase
       .from('adventures')
       .update({
@@ -157,6 +152,14 @@ export async function expandMovement(adventureId: string, movementId: string) {
       throw error
     }
 
+    // Increment expansion regeneration counter after successful expansion
+    await supabase
+      .from('adventures')
+      .update({
+        expansion_regenerations_used: expansionRegensUsed + 1,
+      })
+      .eq('id', adventureId)
+
     revalidatePath(`/adventures/${adventureId}`)
 
     return {
@@ -166,20 +169,7 @@ export async function expandMovement(adventureId: string, movementId: string) {
       gmNotes: expansion.gmNotes,
     }
   } catch (error) {
-    // Refund credit if expansion failed after consumption
-    if (userId) {
-      try {
-        await creditManager.refundCredit(userId, 'expansion', {
-          adventureId,
-          movementId,
-          reason: 'Expansion failed',
-          error: error instanceof Error ? error.message : 'Unknown error',
-        })
-      } catch (refundError) {
-        console.error('Failed to refund credit:', refundError)
-      }
-    }
-
+    // No refund needed since expansion is free
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to expand movement',
@@ -205,8 +195,6 @@ export async function refineMovementContent(
       error: validationResult.error.issues[0]?.message || 'Validation failed',
     }
   }
-  const creditManager = new CreditManager()
-  let userId: string | null = null
 
   try {
     const supabase = await createServerSupabaseClient()
@@ -218,7 +206,7 @@ export async function refineMovementContent(
     if (!user) {
       return { success: false, error: 'Unauthorized' }
     }
-    userId = user.id
+    const userId = user.id
 
     // Apply rate limiting
     try {
@@ -237,20 +225,6 @@ export async function refineMovementContent(
       throw error
     }
 
-    // Consume credit for refinement
-    try {
-      await creditManager.consumeCredit(userId, 'expansion', {
-        adventureId,
-        movementId,
-        refinementType: 'refine',
-      })
-    } catch (error) {
-      if (error instanceof InsufficientCreditsError) {
-        return { success: false, error: 'Insufficient credits to refine content' }
-      }
-      throw error
-    }
-
     // Get adventure
     const { data: adventure } = await supabase
       .from('adventures')
@@ -260,6 +234,16 @@ export async function refineMovementContent(
 
     if (!adventure || adventure.user_id !== user.id) {
       return { success: false, error: 'Unauthorized' }
+    }
+
+    // Check expansion regeneration limit (20 max)
+    // Refinement counts toward expansion limit
+    const expansionRegensUsed = adventure.expansion_regenerations_used ?? 0
+    if (expansionRegensUsed >= REGENERATION_LIMITS.EXPANSION) {
+      return {
+        success: false,
+        error: REGENERATION_LIMIT_ERRORS.REFINEMENT,
+      }
     }
 
     // Find movement
@@ -297,27 +281,21 @@ export async function refineMovementContent(
       frame: adventure.frame,
     })
 
+    // Increment expansion regeneration counter after successful refinement
+    await supabase
+      .from('adventures')
+      .update({
+        expansion_regenerations_used: expansionRegensUsed + 1,
+      })
+      .eq('id', adventureId)
+
     return {
       success: true,
       content: refinement.refinedContent,
       changes: refinement.changes,
     }
   } catch (error) {
-    // Refund credit if refinement failed after consumption
-    if (userId) {
-      try {
-        await creditManager.refundCredit(userId, 'expansion', {
-          adventureId,
-          movementId,
-          refinementType: 'refine',
-          reason: 'Refinement failed',
-          error: error instanceof Error ? error.message : 'Unknown error',
-        })
-      } catch (refundError) {
-        console.error('Failed to refund credit:', refundError)
-      }
-    }
-
+    // No refund needed since refinement is free
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to refine content',
