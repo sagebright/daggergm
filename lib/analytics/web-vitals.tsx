@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+
 import { trackWebVital } from '@/lib/performance/performance-monitor'
 
 declare global {
@@ -15,10 +16,14 @@ declare global {
  */
 export function initWebVitals(): void {
   // Only run on client side
-  if (typeof window === 'undefined') return
+  if (typeof window === 'undefined') {
+    return
+  }
 
   // Only initialize if analytics is enabled
-  if (process.env.NEXT_PUBLIC_ENABLE_ANALYTICS !== 'true') return
+  if (process.env.NEXT_PUBLIC_ENABLE_ANALYTICS !== 'true') {
+    return
+  }
 
   // Dynamic import to avoid SSR issues
   import('web-vitals')
@@ -107,7 +112,7 @@ function trackCustomMetrics(): void {
 export function trackCustomEvent(
   name: string,
   duration: number,
-  metadata?: Record<string, unknown>,
+  _metadata?: Record<string, unknown>,
 ): void {
   const rating = duration < 100 ? 'good' : duration < 300 ? 'needs-improvement' : 'poor'
 

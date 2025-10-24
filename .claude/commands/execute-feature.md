@@ -11,18 +11,18 @@
 ### Pre-Flight Checks
 
 ```bash
-# 1. Docker Health (MANDATORY)
-docker-compose ps
-
-# 2. Git Status
+# 1. Git Status
 git status
 git branch --show-current
 
-# 3. Recent Commits Check
+# 2. Recent Commits Check
 git log --oneline -5
 
-# 4. Test Coverage Check
+# 3. Test Coverage Check
 npm run test:coverage
+
+# 4. Supabase Local Status
+npx supabase status
 
 # 5. Current Branch Verification
 git branch --show-current
@@ -160,8 +160,8 @@ npm test
 # 5. Check build size
 npm run build
 
-# 6. Verify in Docker
-docker-compose exec app npm test
+# 6. Run full test suite
+npm run test:coverage
 ```
 
 ### Validation
@@ -186,10 +186,7 @@ npm run lint:fix
 npm run typecheck
 npm test
 npm run test:coverage
-
-# Docker verification
-docker-compose exec app npm test
-docker-compose exec app npm run build
+npm run build
 ```
 
 ### Phase Handoff Template
@@ -217,27 +214,29 @@ Prerequisites for Next Phase:
 ### Migration Rollback
 
 ```bash
-# If migration fails
-docker-compose exec backend npm run migrate:rollback
+# If migration fails, use Supabase CLI
+npx supabase migration repair --status reverted [migration-version]
 # Fix issue, then reapply
+npx supabase db push
 ```
 
 ### Test Failures
 
 ```bash
 # Isolate failing test
-docker-compose exec [service] npm run test -- [specific-test]
-# Check test environment
-docker-compose exec [service] npm run test:debug
+npm run test -- [specific-test]
+# Check test environment with verbose output
+npm run test -- --verbose
 ```
 
-### Container Issues
+### Supabase Issues
 
 ```bash
-# Restart specific service
-docker-compose restart [service]
-# Full reset
-docker-compose down && docker-compose up -d
+# Restart local Supabase
+npx supabase stop
+npx supabase start
+# Check status
+npx supabase status
 ```
 
 ---
@@ -298,7 +297,7 @@ Phase 3: Refactor (REFACTOR) □
 1. Clear node_modules and reinstall
 2. Check for version conflicts
 3. Verify environment variables
-4. Check Docker resource limits
+4. Check Supabase local status
 ```
 
 ---
@@ -309,7 +308,7 @@ Before marking phase complete:
 
 ```
 □ All code written and tested
-□ Docker CI/CD verification passed
+□ All tests passing locally
 □ TodoWrite updated
 □ git status clean (or intentionally dirty)
 □ Ready for next phase or deployment

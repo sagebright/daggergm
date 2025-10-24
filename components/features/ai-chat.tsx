@@ -1,24 +1,26 @@
 'use client'
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Textarea } from '@/components/ui/textarea'
-import { Card } from '@/components/ui/card'
 import { Loader2, Sparkles, FileText, Swords, Users } from 'lucide-react'
-import { expandMovement, refineMovementContent } from '@/app/actions/movements'
+import { useState } from 'react'
 import { toast } from 'sonner'
-import { Movement } from './focus-mode'
+
+import { expandMovement, refineMovementContent } from '@/app/actions/movements'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { Textarea } from '@/components/ui/textarea'
+
+import type { Movement } from './focus-mode'
 
 interface AIChatProps {
   movement: Movement
   adventureId: string
-  onSuggestionApply: (suggestion: string) => void
+  onSuggestionApply: (_suggestion: string) => void
 }
 
 export function AIChat({ movement, adventureId, onSuggestionApply }: AIChatProps) {
   const [loading, setLoading] = useState(false)
   const [instruction, setInstruction] = useState('')
-  const [suggestions, setSuggestions] = useState<string[]>([])
+  const [_suggestions, setSuggestions] = useState<string[]>([])
 
   const handleExpand = async () => {
     setLoading(true)
@@ -157,11 +159,11 @@ export function AIChat({ movement, adventureId, onSuggestionApply }: AIChatProps
           </>
         )}
 
-        {suggestions.length > 0 && (
+        {_suggestions.length > 0 && (
           <div className="border-t pt-4">
             <h5 className="text-sm font-medium mb-2">Suggestions</h5>
             <div className="space-y-2">
-              {suggestions.map((suggestion, index) => (
+              {_suggestions.map((suggestion, index) => (
                 <Card key={index} className="p-3 text-sm">
                   {suggestion}
                 </Card>

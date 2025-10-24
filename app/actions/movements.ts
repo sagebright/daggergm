@@ -1,19 +1,21 @@
+/* eslint-disable max-lines */
 'use server'
 
-import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+
+import { analytics, ANALYTICS_EVENTS } from '@/lib/analytics/analytics'
+import { CreditManager } from '@/lib/credits/credit-manager'
+import { InsufficientCreditsError } from '@/lib/credits/errors'
 import { OpenAIProvider } from '@/lib/llm/openai-provider'
+import type { Movement } from '@/lib/llm/types'
+import { withRateLimit, getRateLimitContext } from '@/lib/rate-limiting/middleware'
+import { RateLimitError } from '@/lib/rate-limiting/rate-limiter'
+import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { movementUpdateSchema } from '@/lib/validation/movement'
 import {
   movementExpansionRequestSchema,
   movementRefinementRequestSchema,
 } from '@/lib/validation/schemas'
-import { withRateLimit, getRateLimitContext } from '@/lib/rate-limiting/middleware'
-import { RateLimitError } from '@/lib/rate-limiting/rate-limiter'
-import { CreditManager } from '@/lib/credits/credit-manager'
-import { InsufficientCreditsError } from '@/lib/credits/errors'
-import { analytics, ANALYTICS_EVENTS } from '@/lib/analytics/analytics'
-import type { Movement } from '@/lib/llm/types'
 import type { Json } from '@/types/database.generated'
 
 let llmProvider: OpenAIProvider | null = null
@@ -151,7 +153,9 @@ export async function expandMovement(adventureId: string, movementId: string) {
       })
       .eq('id', adventureId)
 
-    if (error) throw error
+    if (error) {
+      throw error
+    }
 
     revalidatePath(`/adventures/${adventureId}`)
 
@@ -408,7 +412,9 @@ export async function updateMovement(
 
     console.log(`Database update took ${Date.now() - updateStart}ms`)
 
-    if (error) throw error
+    if (error) {
+      throw error
+    }
 
     // Comment out revalidatePath to test if it's causing the delay
     // revalidatePath(`/adventures/${adventureId}`)

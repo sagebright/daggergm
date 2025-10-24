@@ -1,8 +1,12 @@
-import { OpenAI } from 'openai'
-import { createServerSupabaseClient } from '@/lib/supabase/server'
-import { performanceMonitor } from '@/lib/performance/performance-monitor'
 import crypto from 'crypto'
+
+import { OpenAI } from 'openai'
+
+import { performanceMonitor } from '@/lib/performance/performance-monitor'
+import { createServerSupabaseClient } from '@/lib/supabase/server'
 import type { Json } from '@/types/database.generated'
+
+import { FRAME_PROMPTS } from './prompts/frame-prompts'
 import type {
   LLMProvider,
   ScaffoldParams,
@@ -13,7 +17,6 @@ import type {
   RefinementResult,
   TemperatureStrategy,
 } from './types'
-import { FRAME_PROMPTS } from './prompts/frame-prompts'
 
 export class OpenAIProvider implements LLMProvider {
   private client: OpenAI | null = null
@@ -55,7 +58,9 @@ export class OpenAIProvider implements LLMProvider {
   private async _generateAdventureScaffold(params: ScaffoldParams): Promise<ScaffoldResult> {
     // Check cache first
     const cached = await this.checkCache(params)
-    if (cached) return cached as ScaffoldResult
+    if (cached) {
+      return cached as ScaffoldResult
+    }
 
     const systemPrompt = await this.loadFramePrompt(params.frame, 'scaffold')
 
@@ -92,7 +97,9 @@ export class OpenAIProvider implements LLMProvider {
   private async _expandMovement(params: ExpansionParams): Promise<MovementResult> {
     // Check cache first
     const cached = await this.checkCache(params)
-    if (cached) return cached as MovementResult
+    if (cached) {
+      return cached as MovementResult
+    }
 
     const temperature = this.getTemperatureForMovementType(params.movement.type)
     const systemPrompt = await this.loadFramePrompt(

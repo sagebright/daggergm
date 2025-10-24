@@ -1,0 +1,26 @@
+{
+  "mcpServers": {
+    "supabase": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["./node_modules/@supabase/mcp-server-supabase/dist/transports/stdio.js"],
+      "env": {
+        "SUPABASE_ACCESS_TOKEN": "sbp_ff9a76b54374a81a0d192e5f817b8c79627767d3"
+      }
+    },
+    "github": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_TOKEN": "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",
+        "GITHUB_OWNER": "sagebright",
+        "GITHUB_REPO": "daggergm"
+      }
+    },
+    "vercel": {
+      "type": "http",
+      "url": "https://mcp.vercel.com/"
+    }
+  }
+}

@@ -388,8 +388,8 @@ TRACK AND IMPROVE:
 
 - **Always** validate CLAUDE.md compliance
 - **Never** approve code with security vulnerabilities
-- **Always** require 99% test coverage for new code
-- **Never** skip Docker CI/CD validation for critical changes
+- **Always** require 99% test coverage for new code (90% for overall project)
+- **Never** skip CI/CD validation for critical changes
 - **Always** document breaking changes and migration plans
 
 ### Review Philosophy

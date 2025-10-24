@@ -1,14 +1,15 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { useCallback, useEffect, useState } from 'react'
+import { toast } from 'sonner'
+
+import { generateAdventure, type AdventureConfig } from '@/app/actions/adventures'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { generateAdventure, type AdventureConfig } from '@/app/actions/adventures'
-import { toast } from 'sonner'
+import { createClient } from '@/lib/supabase/client'
 
 // Adventure creation steps based on requirements
 const ADVENTURE_STEPS = [
@@ -50,21 +51,22 @@ export default function NewAdventurePage() {
   const [loading, setLoading] = useState(true)
   const [generating, setGenerating] = useState(false)
 
-  useEffect(() => {
-    console.log('NewAdventurePage mounted')
-    checkAuth()
-
-    return () => {
-      console.log('NewAdventurePage unmounted')
-    }
-  }, [])
-
-  async function checkAuth() {
+  const checkAuth = useCallback(async () => {
     const supabase = createClient()
     const { data } = await supabase.auth.getUser()
     setIsGuest(!data.user)
     setLoading(false)
-  }
+  }, [])
+
+  useEffect(() => {
+    console.log('NewAdventurePage mounted')
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void checkAuth()
+
+    return () => {
+      console.log('NewAdventurePage unmounted')
+    }
+  }, [checkAuth])
 
   const handleSelection = async (value: string) => {
     console.log('handleSelection called with:', value, 'at step:', currentStep)
@@ -181,7 +183,7 @@ export default function NewAdventurePage() {
     <div className="container max-w-2xl mx-auto py-8">
       <h1 className="text-3xl font-bold mb-2">Create Your Adventure</h1>
 
-      {isGuest && (
+      {isGuest ? (
         <Card className="mb-6">
           <CardContent className="pt-6 space-y-4">
             <p className="text-sm text-muted-foreground">
@@ -204,7 +206,7 @@ export default function NewAdventurePage() {
             </div>
           </CardContent>
         </Card>
-      )}
+      ) : null}
 
       <div className="mb-8">
         <p className="text-sm text-muted-foreground mb-2">
@@ -234,9 +236,9 @@ export default function NewAdventurePage() {
               >
                 <div>
                   <div className="font-semibold">{option.label}</div>
-                  {option.description && (
+                  {option.description ? (
                     <div className="text-sm text-muted-foreground mt-1">{option.description}</div>
-                  )}
+                  ) : null}
                 </div>
               </Button>
             ))}

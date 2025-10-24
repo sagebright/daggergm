@@ -63,6 +63,7 @@ export default [
 
       // TypeScript Best Practices
       '@typescript-eslint/no-explicit-any': 'error',
+      'no-unused-vars': 'off',  // Turn off base rule
       '@typescript-eslint/no-unused-vars': ['error', {
         argsIgnorePattern: '^_',
         varsIgnorePattern: '^_',

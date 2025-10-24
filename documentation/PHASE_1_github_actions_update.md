@@ -148,12 +148,20 @@ lint-and-typecheck:
 
     - name: Check Formatting
       run: npx prettier --check .
+
+    - name: Run Security Audit (user_id isolation)
+      run: ./scripts/security-audit.sh
+
+    - name: Validate File Sizes (300-line limit)
+      run: ./scripts/validate-file-size.sh
 ```
 
 **Why**:
 
 - Adds TypeScript strict mode check
 - Adds Prettier format check
+- **Adds security audit for user_id isolation (CRITICAL)**
+- **Adds file size validation for 300-line limit**
 - Fast feedback (5 min timeout)
 
 ---
@@ -687,6 +695,8 @@ After implementation, verify:
 - [ ] Build succeeds after tests pass
 - [ ] Deployment triggers only on main branch
 - [ ] Workflow completes in ~20 minutes (full suite)
+- [ ] **Security audit script runs and passes (user_id isolation)**
+- [ ] **File size validation script runs and passes (300-line limit)**
 
 ---
 

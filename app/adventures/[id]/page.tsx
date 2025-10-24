@@ -1,15 +1,16 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { getAdventure } from '@/app/actions/adventures'
+import { Download } from 'lucide-react'
 import { notFound } from 'next/navigation'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { useState, useEffect } from 'react'
+
+import { getAdventure } from '@/app/actions/adventures'
+import { ExportDialog } from '@/components/features/export-dialog'
 import { FocusMode } from '@/components/features/focus-mode'
 import type { Movement } from '@/components/features/focus-mode'
-import { ExportDialog } from '@/components/features/export-dialog'
-import { Download } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
 interface Adventure {
   id: string
@@ -53,7 +54,7 @@ export default function AdventureDetailPage({ params }: { params: Promise<{ id: 
       setLoading(false)
     }
 
-    loadAdventure()
+    void loadAdventure()
   }, [params])
 
   if (loading) {
@@ -67,7 +68,9 @@ export default function AdventureDetailPage({ params }: { params: Promise<{ id: 
   const handleMovementUpdate = async (movementId: string, updates: Partial<Movement>) => {
     // Update local state immediately for responsiveness
     setAdventure((prev) => {
-      if (!prev) return prev
+      if (!prev) {
+        return prev
+      }
       return {
         ...prev,
         movements: prev.movements?.map((m) =>
@@ -85,7 +88,7 @@ export default function AdventureDetailPage({ params }: { params: Promise<{ id: 
     const result = await updateMovement(
       adventure.id,
       movementId,
-      updates as Partial<import('@/lib/llm/types').Movement>,
+      updates as Partial<Movement>,
       guestToken || undefined,
     )
 
@@ -131,7 +134,7 @@ export default function AdventureDetailPage({ params }: { params: Promise<{ id: 
                     console.log('Mark as Ready button clicked!')
                     setIsUpdating(true)
                     // Use immediate async function
-                    ;(async () => {
+                    void (async () => {
                       try {
                         console.log('Starting updateAdventureState...')
                         const { updateAdventureState } = await import('@/app/actions/adventures')
@@ -178,9 +181,9 @@ export default function AdventureDetailPage({ params }: { params: Promise<{ id: 
           </div>
         </div>
 
-        {adventure.description && (
+        {adventure.description ? (
           <p className="text-lg text-muted-foreground">{adventure.description}</p>
-        )}
+        ) : null}
 
         <div className="flex gap-2 mt-4">
           <Badge variant="secondary">{adventure.frame}</Badge>
@@ -197,11 +200,11 @@ export default function AdventureDetailPage({ params }: { params: Promise<{ id: 
             </CardHeader>
             <CardContent>
               <p className="whitespace-pre-wrap">{movement.content || movement.description}</p>
-              {movement.estimatedTime && (
+              {movement.estimatedTime ? (
                 <p className="text-sm text-muted-foreground mt-2">
                   Estimated time: {movement.estimatedTime}
                 </p>
-              )}
+              ) : null}
             </CardContent>
           </Card>
         ))}

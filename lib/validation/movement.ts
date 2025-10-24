@@ -1,4 +1,5 @@
 import { z } from 'zod'
+
 import { MovementType } from '@/types/adventure'
 
 export const movementUpdateSchema = z.object({

@@ -1,9 +1,12 @@
-import { describe, it, expect, beforeEach, vi, MockedFunction } from 'vitest'
-import { consumeAdventureCredit } from './consume-credit'
-import { createMockSupabaseClient } from '@/test/mocks/supabase'
-import { CreditError, InsufficientCreditsError } from './errors'
 import type { SupabaseClient } from '@supabase/supabase-js'
+import type { MockedFunction } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
+
+import { createMockSupabaseClient } from '@/test/mocks/supabase'
 import type { Database } from '@/types/database.generated'
+
+import { consumeAdventureCredit } from './consume-credit'
+import { CreditError, InsufficientCreditsError } from './errors'
 
 describe('consumeAdventureCredit', () => {
   let mockSupabase: SupabaseClient<Database>

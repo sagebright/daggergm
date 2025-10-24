@@ -1,5 +1,6 @@
-import { createClient } from '@/lib/supabase/server'
 import type { SupabaseClient } from '@supabase/supabase-js'
+
+import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/types/database.generated'
 
 export const ANALYTICS_EVENTS = {
@@ -65,7 +66,9 @@ export class Analytics {
   }
 
   async track(event: string, data: EventData = {}): Promise<void> {
-    if (!this.isEnabled) return
+    if (!this.isEnabled) {
+      return
+    }
 
     const timestamp = new Date().toISOString()
 
@@ -73,14 +76,15 @@ export class Analytics {
     await this.storeEventInDatabase(event, data, timestamp)
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async identify(userId: string, properties?: UserProperties): Promise<void> {
+  async identify(_userId: string, _properties?: UserProperties): Promise<void> {
     // Server-side identify is a no-op for now
     // Client-side analytics will handle user identification
   }
 
   async trackPerformance(data: PerformanceData): Promise<void> {
-    if (!this.isEnabled) return
+    if (!this.isEnabled) {
+      return
+    }
 
     const timestamp = new Date().toISOString()
 

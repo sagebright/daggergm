@@ -1,0 +1,33 @@
+{
+  "mcpServers": {
+    "supabase": {
+      "command": "node",
+      "args": [
+        "${PROJECT_ROOT}/node_modules/@supabase/mcp-server-supabase/dist/transports/stdio.js"
+      ],
+      "env": {
+        "SUPABASE_ACCESS_TOKEN": "${SUPABASE_ACCESS_TOKEN}"
+      }
+    },
+    "github": {
+      "command": "npx",
+      "args": [
+        "@modelcontextprotocol/server-github"
+      ],
+      "env": {
+        "GITHUB_TOKEN": "${GH_MCP_PAT}",
+        "GITHUB_OWNER": "sagebright",
+        "GITHUB_REPO": "daggergm"
+      }
+    },
+    "vercel": {
+      "command": "npx",
+      "args": [
+        "vercel-mcp"
+      ],
+      "env": {
+        "VERCEL_API_TOKEN": "${VERCEL_TOKEN}"
+      }
+    }
+  }
+}

@@ -1,15 +1,16 @@
 'use client'
 
-import { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X } from 'lucide-react'
+import { useState, useCallback } from 'react'
+
+import { AIChat } from '@/components/features/ai-chat'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 // import { MarkdownEditor } from '@/components/features/markdown-editor' // TODO: Implement when ready
-import { AIChat } from '@/components/features/ai-chat'
+import { useDebounce } from '@/lib/hooks/use-debounce'
 import { useHotkeys } from '@/lib/hooks/use-hotkeys'
 import { cn } from '@/lib/utils'
-import { useDebounce } from '@/lib/hooks/use-debounce'
 
 export interface Movement {
   id: string
@@ -22,7 +23,7 @@ export interface Movement {
 interface FocusModeProps {
   movements: Movement[]
   adventureId: string
-  onUpdate: (movementId: string, updates: Partial<Movement>) => void
+  onUpdate: (_movementId: string, _updates: Partial<Movement>) => void
   onExit: () => void
 }
 
@@ -123,7 +124,7 @@ export function FocusMode({ movements, adventureId, onUpdate, onExit }: FocusMod
 
       {/* AI Assistant Panel */}
       <AnimatePresence>
-        {isPanelOpen && focusedId && focusedMovement && (
+        {isPanelOpen && focusedId && focusedMovement ? (
           <motion.div
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
@@ -142,7 +143,7 @@ export function FocusMode({ movements, adventureId, onUpdate, onExit }: FocusMod
               }}
             />
           </motion.div>
-        )}
+        ) : null}
       </AnimatePresence>
 
       {/* Exit Button */}

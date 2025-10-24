@@ -1,11 +1,13 @@
 'use client'
 
-import { useRef, useEffect, ChangeEvent, KeyboardEvent } from 'react'
+import type { ChangeEvent, KeyboardEvent } from 'react'
+import { useRef, useEffect } from 'react'
+
 import { cn } from '@/lib/utils'
 
 interface MarkdownEditorProps {
   value: string
-  onChange: (value: string) => void
+  onChange: (_value: string) => void
   placeholder?: string
   className?: string
   ariaLabel?: string
@@ -23,7 +25,9 @@ export function MarkdownEditor({
   // Auto-resize textarea
   useEffect(() => {
     const textarea = textareaRef.current
-    if (!textarea) return
+    if (!textarea) {
+      return
+    }
 
     textarea.style.height = 'auto'
     textarea.style.height = `${textarea.scrollHeight}px`
@@ -35,7 +39,9 @@ export function MarkdownEditor({
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     const textarea = textareaRef.current
-    if (!textarea) return
+    if (!textarea) {
+      return
+    }
 
     // Handle tab for indentation
     if (e.key === 'Tab') {

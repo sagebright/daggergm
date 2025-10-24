@@ -1,6 +1,7 @@
 'use client'
 
 import posthog from 'posthog-js'
+
 import { analytics } from './analytics'
 import type { EventData, UserProperties } from './analytics'
 
@@ -21,7 +22,9 @@ export class ClientAnalytics {
   }
 
   private initializePostHog(): void {
-    if (this.isInitialized || !this.shouldInitializePostHog()) return
+    if (this.isInitialized || !this.shouldInitializePostHog()) {
+      return
+    }
 
     posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
       api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
@@ -40,7 +43,9 @@ export class ClientAnalytics {
   }
 
   async track(event: string, data: EventData = {}): Promise<void> {
-    if (!this.isEnabled) return
+    if (!this.isEnabled) {
+      return
+    }
 
     // Initialize PostHog if not already done
     this.initializePostHog()
@@ -62,7 +67,9 @@ export class ClientAnalytics {
   }
 
   async identify(userId: string, properties: UserProperties = {}): Promise<void> {
-    if (!this.isEnabled) return
+    if (!this.isEnabled) {
+      return
+    }
 
     // Initialize PostHog if not already done
     this.initializePostHog()

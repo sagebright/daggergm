@@ -101,7 +101,7 @@ export interface TemperatureStrategy {
 }
 
 export interface LLMProvider {
-  generateAdventureScaffold(params: ScaffoldParams): Promise<ScaffoldResult>
-  expandMovement(params: ExpansionParams): Promise<MovementResult>
-  refineContent(params: RefinementParams): Promise<RefinementResult>
+  generateAdventureScaffold(_params: ScaffoldParams): Promise<ScaffoldResult>
+  expandMovement(_params: ExpansionParams): Promise<MovementResult>
+  refineContent(_params: RefinementParams): Promise<RefinementResult>
 }

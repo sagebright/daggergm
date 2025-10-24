@@ -6,7 +6,9 @@ export interface CSSVariableMap {
 
 // Extract CSS variables from computed styles
 export function getCSSVariables(): CSSVariableMap {
-  if (typeof window === 'undefined') return {}
+  if (typeof window === 'undefined') {
+    return {}
+  }
 
   const computedStyle = window.getComputedStyle(document.documentElement)
   const variables: CSSVariableMap = {}
@@ -41,7 +43,9 @@ export function getCSSVariables(): CSSVariableMap {
 
 // Apply CSS variables to document root
 export function applyCSSVariables(variables: CSSVariableMap): void {
-  if (typeof document === 'undefined') return
+  if (typeof document === 'undefined') {
+    return
+  }
 
   const root = document.documentElement
 
@@ -52,7 +56,9 @@ export function applyCSSVariables(variables: CSSVariableMap): void {
 
 // Initialize theme variables
 export function initializeTheme(): void {
-  if (typeof document === 'undefined') return
+  if (typeof document === 'undefined') {
+    return
+  }
 
   // This will be populated by globals.css
   // But we ensure the structure is ready for dynamic updates

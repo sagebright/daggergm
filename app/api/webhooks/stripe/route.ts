@@ -1,7 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
-import { CreditManager } from '@/lib/credits/credit-manager'
+
 import { analytics, ANALYTICS_EVENTS } from '@/lib/analytics/analytics'
+import { CreditManager } from '@/lib/credits/credit-manager'
 
 let stripe: Stripe | null = null
 

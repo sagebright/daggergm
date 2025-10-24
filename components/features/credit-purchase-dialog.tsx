@@ -1,7 +1,12 @@
 'use client'
 
-import { useState } from 'react'
 import { loadStripe } from '@stripe/stripe-js'
+import { CheckIcon } from 'lucide-react'
+import { useState } from 'react'
+
+import { purchaseCredits } from '@/app/actions/credits'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -10,10 +15,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { purchaseCredits } from '@/app/actions/credits'
-import { Badge } from '@/components/ui/badge'
-import { CheckIcon } from 'lucide-react'
 
 // Load Stripe (client-side)
 const stripePromise = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
@@ -134,21 +135,21 @@ export function CreditPurchaseDialog({ open, onSuccess, onCancel }: CreditPurcha
               onClick={() => setSelectedPackage(pkg)}
               onFocus={() => setSelectedPackage(pkg)}
             >
-              {pkg.isBestValue && (
+              {pkg.isBestValue ? (
                 <Badge className="absolute -top-3 right-4 bg-primary text-primary-foreground">
                   Best Value
                 </Badge>
-              )}
+              ) : null}
 
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
                   <h3 className="font-semibold">{pkg.name}</h3>
                   <p className="text-sm text-muted-foreground">{pkg.perCreditPrice}</p>
-                  {pkg.discount && (
+                  {pkg.discount ? (
                     <Badge variant="secondary" className="mt-1">
                       {pkg.discount}
                     </Badge>
-                  )}
+                  ) : null}
                 </div>
 
                 <div className="text-right">
@@ -161,9 +162,9 @@ export function CreditPurchaseDialog({ open, onSuccess, onCancel }: CreditPurcha
             </button>
           ))}
 
-          {error && (
+          {error ? (
             <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
-          )}
+          ) : null}
         </div>
 
         <DialogFooter>

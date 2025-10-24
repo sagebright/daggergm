@@ -13,8 +13,8 @@ export interface RateLimitResult {
 export class RateLimitError extends Error {
   constructor(
     message: string,
-    public resetTime: number,
-    public retryAfter: number,
+    public _resetTime: number,
+    public _retryAfter: number,
   ) {
     super(message)
     this.name = 'RateLimitError'

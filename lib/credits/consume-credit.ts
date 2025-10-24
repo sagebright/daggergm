@@ -1,7 +1,9 @@
-import { SupabaseClient } from '@supabase/supabase-js'
-import { Database } from '@/types/database.generated'
-import { CreditError, InsufficientCreditsError } from './errors'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { z } from 'zod'
+
+import type { Database } from '@/types/database.generated'
+
+import { CreditError, InsufficientCreditsError } from './errors'
 
 // UUID validation schema
 const uuidSchema = z.string().uuid()

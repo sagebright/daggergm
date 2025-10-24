@@ -4,7 +4,7 @@
 export class CreditError extends Error {
   constructor(
     message: string,
-    public readonly code?: string,
+    public readonly _code?: string,
   ) {
     super(message)
     this.name = 'CreditError'

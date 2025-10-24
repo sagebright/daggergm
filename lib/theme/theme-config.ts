@@ -88,7 +88,9 @@ export function getDaggerheartTheme() {
 function oklchToRgb(oklch: string): [number, number, number] {
   // Parse OKLCH values
   const match = oklch.match(/oklch\(([\d.]+)\s+([\d.]+)\s+([\d.]+)\)/)
-  if (!match) return [0, 0, 0]
+  if (!match) {
+    return [0, 0, 0]
+  }
 
   const [, l, c, h] = match.map(Number)
 

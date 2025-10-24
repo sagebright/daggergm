@@ -92,32 +92,25 @@ psql --version
 # Ubuntu: sudo apt-get install postgresql-14
 ```
 
-### 1.2 Start PostgreSQL Service
+### 1.2 Use Supabase Local Database
 
 ```bash
-# macOS with Homebrew
-brew services start postgresql@14
+# Start Supabase local development
+npx supabase start
 
-# Linux
-sudo service postgresql start
-
-# Docker (alternative)
-docker run -d \
-  --name daggergm-test-db \
-  -e POSTGRES_PASSWORD=test_password \
-  -e POSTGRES_DB=daggergm_test \
-  -p 5433:5432 \
-  postgres:14
+# This automatically creates a test database with:
+# - PostgreSQL on port 54322
+# - Supabase Studio on port 54323
+# - API on port 54321
 ```
 
-### 1.3 Create Test Database
+### 1.3 Verify Database Running
 
 ```bash
-# Direct PostgreSQL
-createdb daggergm_test
+# Check Supabase status
+npx supabase status
 
-# OR with Docker
-docker exec -it daggergm-test-db psql -U postgres -c "CREATE DATABASE daggergm_test;"
+# You should see all services running
 ```
 
 ### 1.4 Create .env.test.local
@@ -126,10 +119,10 @@ Create file with test database credentials:
 
 ```bash
 # .env.test.local
-DATABASE_URL=postgresql://postgres:test_password@localhost:5433/daggergm_test
-NEXT_PUBLIC_SUPABASE_URL=http://localhost:54321
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGc...test-key
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGc...test-service-key
+# Get these values from: npx supabase status
+NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
+NEXT_PUBLIC_SUPABASE_ANON_KEY=[from supabase status - anon key]
+SUPABASE_SERVICE_ROLE_KEY=[from supabase status - service_role key]
 OPENAI_API_KEY=sk-test-key-not-used-in-tests
 ```
 
@@ -142,18 +135,18 @@ echo ".env.test.local" >> .gitignore
 ### 1.5 Apply Schema to Test Database
 
 ```bash
-# Apply Supabase migrations to test database
-DATABASE_URL=postgresql://postgres:test_password@localhost:5433/daggergm_test \
-  npx supabase db push
+# Apply Supabase migrations to local database
+npx supabase db push
 ```
 
 ### 1.6 Validation
 
 ```bash
-# Verify database exists and is accessible
-psql -U postgres -h localhost -p 5433 -d daggergm_test -c "\dt"
+# Verify database is accessible and has schema
+npx supabase db diff
 
-# Should show message (empty initially, or tables if migrations exist)
+# View in Supabase Studio
+open http://127.0.0.1:54323
 ```
 
 **✅ Checkpoint**: Database created and accessible
@@ -454,8 +447,8 @@ test -f tests/README.md && echo "✅ Test README exists"
 ### 3.1 Run Complete Validation Suite
 
 ```bash
-# 1. Database accessible
-psql -U postgres -h localhost -p 5433 -d daggergm_test -c "SELECT version();"
+# 1. Supabase running
+npx supabase status
 
 # 2. Environment variables loaded
 test -f .env.test.local && echo "✅ Test env configured"
@@ -484,9 +477,8 @@ Present to user:
 🎉 Testing Infrastructure Setup Complete!
 
 ✅ Validation Results:
-- [ ] Local PostgreSQL database running on port 5433
-- [ ] Test database 'daggergm_test' created
-- [ ] Schema applied to test database
+- [ ] Supabase local running on port 54321/54322
+- [ ] Local database schema applied
 - [ ] .env.test.local configured
 - [ ] Vitest installed and configured
 - [ ] Test helpers created (testDatabase, testAuth, testAdventures)
@@ -509,13 +501,15 @@ Present to user:
 ### Database Connection Failed
 
 ```bash
-# Check PostgreSQL is running
-pg_isready -h localhost -p 5433
+# Check Supabase is running
+npx supabase status
 
 # If not running, start it:
-brew services start postgresql@14
-# OR
-docker start daggergm-test-db
+npx supabase start
+
+# If stuck, try resetting:
+npx supabase stop
+npx supabase start
 ```
 
 ### Vitest Import Errors
@@ -555,7 +549,7 @@ Successfully set up integration-first testing infrastructure for DaggerGM.
 
 ## Components Installed
 
-- PostgreSQL test database (port 5433)
+- Supabase local (ports 54321-54323)
 - Vitest test runner
 - MSW for API mocking
 - Test helper utilities

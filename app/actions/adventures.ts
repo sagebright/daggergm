@@ -1,15 +1,17 @@
 'use server'
 
-import { createServerSupabaseClient, createServiceRoleClient } from '@/lib/supabase/server'
+import crypto from 'crypto'
+
 import { revalidatePath } from 'next/cache'
+
+import { analytics, ANALYTICS_EVENTS } from '@/lib/analytics/analytics'
 import { CreditManager } from '@/lib/credits/credit-manager'
 import { InsufficientCreditsError } from '@/lib/credits/errors'
 import { getLLMProvider } from '@/lib/llm/provider'
-import { adventureConfigSchema } from '@/lib/validation/schemas'
 import { withRateLimit, getRateLimitContext } from '@/lib/rate-limiting/middleware'
 import { RateLimitError } from '@/lib/rate-limiting/rate-limiter'
-import { analytics, ANALYTICS_EVENTS } from '@/lib/analytics/analytics'
-import crypto from 'crypto'
+import { createServerSupabaseClient, createServiceRoleClient } from '@/lib/supabase/server'
+import { adventureConfigSchema } from '@/lib/validation/schemas'
 
 export interface AdventureConfig {
   length?: string
@@ -178,7 +180,9 @@ export async function generateAdventure(config: AdventureConfig) {
       .select()
       .single()
 
-    if (error) throw error
+    if (error) {
+      throw error
+    }
 
     console.log('Adventure saved to database:', adventure.id)
 
@@ -342,7 +346,9 @@ export async function updateAdventureState(
       })
       .eq('id', adventureId)
 
-    if (error) throw error
+    if (error) {
+      throw error
+    }
 
     revalidatePath(`/adventures/${adventureId}`)
 
