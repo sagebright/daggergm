@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+
 import { expandMovement, refineMovementContent, updateMovement } from '@/app/actions/movements'
-import { createServerSupabaseClient, createServiceRoleClient } from '@/lib/supabase/server'
-import { OpenAIProvider } from '@/lib/llm/openai-provider'
 import { CreditManager } from '@/lib/credits/credit-manager'
+import { OpenAIProvider } from '@/lib/llm/openai-provider'
+import { createServerSupabaseClient, createServiceRoleClient } from '@/lib/supabase/server'
 
 // Mock dependencies
 vi.mock('@/lib/supabase/server', () => ({
@@ -91,18 +92,19 @@ describe('Movement Server Actions', () => {
         data: { user: mockUser },
       })
 
+      // Mock adventure with regeneration tracking
+      const mockAdventureWithRegen = {
+        ...mockAdventure,
+        expansion_regenerations_used: 5,
+        scaffold_regenerations_used: 0,
+      }
+
       mockSupabaseClient.from.mockReturnValueOnce({
         select: vi.fn().mockReturnValue({
           eq: vi.fn().mockReturnValue({
-            single: vi.fn().mockResolvedValueOnce({ data: mockAdventure }),
+            single: vi.fn().mockResolvedValueOnce({ data: mockAdventureWithRegen }),
           }),
         }),
-      })
-
-      // Mock successful credit consumption
-      mockCreditManager.consumeCredit.mockResolvedValueOnce({
-        success: true,
-        remainingCredits: 4,
       })
 
       mockLLMProvider.expandMovement.mockResolvedValueOnce({
@@ -113,6 +115,14 @@ describe('Movement Server Actions', () => {
         gmNotes: 'Remember to describe the ancient carvings',
       })
 
+      // Mock update for movements
+      mockSupabaseClient.from.mockReturnValueOnce({
+        update: vi.fn().mockReturnValue({
+          eq: vi.fn().mockResolvedValueOnce({ data: null, error: null }),
+        }),
+      })
+
+      // Mock update for regeneration counter increment
       mockSupabaseClient.from.mockReturnValueOnce({
         update: vi.fn().mockReturnValue({
           eq: vi.fn().mockResolvedValueOnce({ data: null, error: null }),
@@ -227,6 +237,8 @@ describe('Movement Server Actions', () => {
             content: 'The path winds through trees.',
           },
         ],
+        expansion_regenerations_used: 10,
+        scaffold_regenerations_used: 0,
       }
 
       mockSupabaseClient.auth.getUser.mockResolvedValueOnce({
@@ -244,6 +256,13 @@ describe('Movement Server Actions', () => {
       mockLLMProvider.refineContent.mockResolvedValueOnce({
         refinedContent: 'The ancient path winds through towering oaks, their gnarled roots...',
         changes: ['Added sensory details', 'Enhanced atmosphere'],
+      })
+
+      // Mock update for regeneration counter increment
+      mockSupabaseClient.from.mockReturnValueOnce({
+        update: vi.fn().mockReturnValue({
+          eq: vi.fn().mockResolvedValueOnce({ data: null, error: null }),
+        }),
       })
 
       // Act
