@@ -74,6 +74,7 @@ export async function purchaseCredits(input: CreditPurchase) {
     return {
       success: true,
       sessionId: session.id,
+      url: session.url,
     }
   } catch (error) {
     console.error('Credit purchase error:', error)

@@ -1,9 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { ExportDialog } from '@/components/features/export-dialog'
-import { exportAdventure } from '@/app/actions/export'
 import { toast } from 'sonner'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+
+import { exportAdventure } from '@/app/actions/export'
+import { ExportDialog } from '@/components/features/export-dialog'
 
 vi.mock('@/app/actions/export', () => ({
   exportAdventure: vi.fn(),
@@ -111,8 +112,8 @@ describe('ExportDialog', () => {
 
     await user.click(screen.getByText('Markdown'))
 
-    // Should show loading state
-    expect(screen.getByText('Exporting...')).toBeInTheDocument()
+    // Should show loading state (wait for async state update)
+    expect(await screen.findByText('Exporting...')).toBeInTheDocument()
 
     // Buttons should be disabled
     expect(screen.getByText('PDF Document').closest('button')).toBeDisabled()

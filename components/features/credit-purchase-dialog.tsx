@@ -1,6 +1,5 @@
 'use client'
 
-import { loadStripe } from '@stripe/stripe-js'
 import { CheckIcon } from 'lucide-react'
 import { useState } from 'react'
 
@@ -15,11 +14,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-
-// Load Stripe (client-side)
-const stripePromise = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
-  ? loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
-  : null
 
 interface CreditPackage {
   id: 'credits_5' | 'credits_15' | 'credits_30'
@@ -87,22 +81,13 @@ export function CreditPurchaseDialog({ open, onSuccess, onCancel }: CreditPurcha
       }
 
       // Redirect to Stripe Checkout
-      if (!stripePromise) {
-        throw new Error('Stripe is not configured')
+      if (!result.url) {
+        throw new Error('Checkout URL not received')
       }
 
-      const stripe = await stripePromise
-      if (!stripe) {
-        throw new Error('Stripe failed to load')
-      }
-
-      const { error: stripeError } = await stripe.redirectToCheckout({
-        sessionId: result.sessionId!,
-      })
-
-      if (stripeError) {
-        throw stripeError
-      }
+      // In Stripe.js v8, redirectToCheckout was removed
+      // Use window.location to redirect to checkout URL
+      window.location.href = result.url
 
       // User will be redirected to Stripe - this line won't be reached
       onSuccess()
