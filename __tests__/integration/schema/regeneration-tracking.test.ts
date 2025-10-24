@@ -10,8 +10,9 @@ import type { Database } from '@/types/database.generated'
  * Prerequisites:
  * - NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set
  * - Migration 00006_add_regeneration_tracking.sql must be applied
+ * - Real database connection available (skipped in CI)
  */
-describe('Regeneration Tracking Schema', () => {
+describe.skipIf(process.env.CI === 'true')('Regeneration Tracking Schema', () => {
   let supabase: ReturnType<typeof createClient<Database>>
   let testUserId: string
   let createdAdventureIds: string[] = []
