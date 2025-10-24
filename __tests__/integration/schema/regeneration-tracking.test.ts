@@ -53,7 +53,8 @@ describe('Regeneration Tracking Schema', () => {
     const { data, error } = await supabase
       .from('adventures')
       .insert({
-        user_id: testUserId,
+        user_id: null, // Guest user
+        guest_email: testUserId,
         title: 'Test Adventure',
         frame: 'witherwild',
         focus: 'mystery',
@@ -80,7 +81,8 @@ describe('Regeneration Tracking Schema', () => {
     const { data, error } = await supabase
       .from('adventures')
       .insert({
-        user_id: testUserId,
+        user_id: null, // Guest user
+        guest_email: testUserId,
         title: 'Test Adventure 2',
         frame: 'witherwild',
         focus: 'mystery',
@@ -107,7 +109,8 @@ describe('Regeneration Tracking Schema', () => {
     const { data: adventure } = await supabase
       .from('adventures')
       .insert({
-        user_id: testUserId,
+        user_id: null, // Guest user
+        guest_email: testUserId,
         title: 'Test Adventure 3',
         frame: 'witherwild',
         focus: 'mystery',
@@ -134,7 +137,8 @@ describe('Regeneration Tracking Schema', () => {
     const { data: adventure } = await supabase
       .from('adventures')
       .insert({
-        user_id: testUserId,
+        user_id: null, // Guest user
+        guest_email: testUserId,
         title: 'Test Adventure 4',
         frame: 'witherwild',
         focus: 'mystery',
@@ -161,7 +165,8 @@ describe('Regeneration Tracking Schema', () => {
     const { data: adventure } = await supabase
       .from('adventures')
       .insert({
-        user_id: testUserId,
+        user_id: null, // Guest user
+        guest_email: testUserId,
         title: 'Test Adventure 5',
         frame: 'witherwild',
         focus: 'mystery',
@@ -199,7 +204,8 @@ describe('Regeneration Tracking Schema', () => {
     const { data: adventure } = await supabase
       .from('adventures')
       .insert({
-        user_id: testUserId,
+        user_id: null, // Guest user
+        guest_email: testUserId,
         title: 'Test Adventure 6',
         frame: 'witherwild',
         focus: 'mystery',
