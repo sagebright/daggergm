@@ -92,6 +92,31 @@ export interface RefinementResult {
   changes: string[]
 }
 
+export interface RegenerateMovementParams {
+  movement: Movement
+  adventure: {
+    frame: string
+    focus: string
+    partySize: number
+    partyLevel: number
+    difficulty: string
+    stakes: string
+  }
+  lockedMovements?: Array<{
+    id: string
+    title: string
+    type: string
+    description: string
+  }>
+}
+
+export interface MovementScaffoldResult {
+  title: string
+  description: string
+  type: 'combat' | 'exploration' | 'social' | 'puzzle'
+  estimatedTime: string
+}
+
 export interface TemperatureStrategy {
   scaffoldGeneration: number
   combatEncounters: number
@@ -104,4 +129,5 @@ export interface LLMProvider {
   generateAdventureScaffold(_params: ScaffoldParams): Promise<ScaffoldResult>
   expandMovement(_params: ExpansionParams): Promise<MovementResult>
   refineContent(_params: RefinementParams): Promise<RefinementResult>
+  regenerateMovement(_params: RegenerateMovementParams): Promise<MovementScaffoldResult>
 }

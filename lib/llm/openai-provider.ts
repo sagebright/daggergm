@@ -15,6 +15,8 @@ import type {
   MovementResult,
   RefinementParams,
   RefinementResult,
+  RegenerateMovementParams,
+  MovementScaffoldResult,
   TemperatureStrategy,
 } from './types'
 
@@ -169,6 +171,44 @@ export class OpenAIProvider implements LLMProvider {
     }
   }
 
+  async regenerateMovement(params: RegenerateMovementParams): Promise<MovementScaffoldResult> {
+    return performanceMonitor.trackOperation(
+      'movement_regeneration',
+      () => this._regenerateMovement(params),
+      {
+        frame: params.adventure.frame,
+        movementType: params.movement.type,
+        lockedCount: params.lockedMovements?.length || 0,
+      },
+    )
+  }
+
+  private async _regenerateMovement(
+    params: RegenerateMovementParams,
+  ): Promise<MovementScaffoldResult> {
+    const systemPrompt = await this.loadFramePrompt(params.adventure.frame, 'scaffold')
+    const locked = params.lockedMovements?.length
+      ? `\nLocked: ${params.lockedMovements.map((m) => `${m.title} (${m.type})`).join(', ')}`
+      : ''
+    const userPrompt = `Regenerate: ${params.movement.title} (${params.movement.type})
+Content: ${params.movement.content}
+Frame: ${params.adventure.frame}, Focus: ${params.adventure.focus}
+Party: ${params.adventure.partySize} lvl ${params.adventure.partyLevel}, ${params.adventure.difficulty}, ${params.adventure.stakes}${locked}
+NEW version: maintain type, fit locked, vary from original, appropriate difficulty.
+JSON: {"title":"","description":"","type":"combat|exploration|social|puzzle","estimatedTime":""}`
+
+    const completion = await this.getClient().chat.completions.create({
+      model: 'gpt-4-turbo-preview',
+      temperature: this.temperatures.scaffoldGeneration,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt },
+      ],
+      response_format: { type: 'json_object' },
+    })
+    return JSON.parse(completion.choices[0]!.message.content!) as MovementScaffoldResult
+  }
+
   private getTemperatureForMovementType(type: string): number {
     switch (type) {
       case 'combat':
@@ -186,15 +226,12 @@ export class OpenAIProvider implements LLMProvider {
   private async checkCache(params: unknown): Promise<unknown | null> {
     const promptHash = await this.hashPrompt(params)
     const supabase = await createServerSupabaseClient()
-
     const { data } = await supabase
       .from('llm_cache')
       .select('*')
       .eq('prompt_hash', promptHash)
       .single()
-
     if (data) {
-      // Update access timestamp and count
       await supabase
         .from('llm_cache')
         .update({
@@ -202,10 +239,8 @@ export class OpenAIProvider implements LLMProvider {
           access_count: (data.access_count || 0) + 1,
         })
         .eq('id', data.id)
-
       return JSON.parse(data.response as string)
     }
-
     return null
   }
 
@@ -216,15 +251,11 @@ export class OpenAIProvider implements LLMProvider {
   ): Promise<void> {
     const promptHash = await this.hashPrompt(params)
     const supabase = await createServerSupabaseClient()
-
     await supabase.from('llm_cache').insert({
       prompt_hash: promptHash,
       prompt_params: params as Json,
       response: JSON.stringify(response),
-      response_metadata: {
-        timestamp: new Date().toISOString(),
-        provider: 'openai',
-      } as Json,
+      response_metadata: { timestamp: new Date().toISOString(), provider: 'openai' } as Json,
       model: 'gpt-4-turbo-preview',
       temperature: this.temperatures.scaffoldGeneration,
       token_count: tokenCount || 0,
@@ -248,59 +279,27 @@ export class OpenAIProvider implements LLMProvider {
 
   private buildScaffoldPrompt(params: ScaffoldParams): string {
     const customFrame = params.customFrameDescription
-      ? `\n\nCustom Frame: ${params.customFrameDescription}`
+      ? `\nCustom Frame: ${params.customFrameDescription}`
       : ''
+    return `Create a Daggerheart adventure:
+Frame: ${params.frame}${customFrame}
+Focus: ${params.focus}
+Party: ${params.partySize} level ${params.partyLevel}
+Difficulty: ${params.difficulty}, Stakes: ${params.stakes}
 
-    return `Create a Daggerheart adventure with these parameters:
-- Frame: ${params.frame}${customFrame}
-- Focus: ${params.focus}
-- Party Size: ${params.partySize} characters
-- Party Level: ${params.partyLevel}
-- Difficulty: ${params.difficulty}
-- Stakes: ${params.stakes}
-
-Generate a complete adventure scaffold with:
-1. Compelling title
-2. Brief description (2-3 sentences)
-3. 3-5 movements that tell a complete story
-4. Estimated duration: 3-4 hours
-
-Return as JSON with structure: {
-  "title": "string",
-  "description": "string", 
-  "estimatedDuration": "string",
-  "movements": [{
-    "id": "string",
-    "title": "string",
-    "type": "combat|exploration|social|puzzle",
-    "description": "string",
-    "estimatedTime": "string",
-    "orderIndex": number
-  }]
-}`
+Generate: title, description, 3-5 movements, 3-4hr duration
+JSON: {"title":"","description":"","estimatedDuration":"","movements":[{"id":"","title":"","type":"combat|exploration|social|puzzle","description":"","estimatedTime":"","orderIndex":0}]}`
   }
 
   private buildExpansionPrompt(params: ExpansionParams): string {
-    return `Expand this movement for a Daggerheart adventure:
-
-Movement: ${params.movement.title} (${params.movement.type})
-Current content: ${params.movement.content}
-
-Adventure context:
-- Frame: ${params.adventure.frame}
-- Focus: ${params.adventure.focus}
-- Party: ${params.adventure.partySize} level ${params.adventure.partyLevel} characters
-
-${params.previousMovements ? `Previous movement: ${params.previousMovements[params.previousMovements.length - 1]?.title}` : ''}
-${params.nextMovements ? `Next movement: ${params.nextMovements[0]?.title}` : ''}
-
-Expand this movement with:
-1. Vivid descriptions and atmosphere
-2. Clear objectives and challenges
-3. Specific mechanics (DCs, enemies, etc.)
-4. GM notes and tips
-5. Smooth transitions
-
-Keep the expansion focused and actionable.`
+    const prev = params.previousMovements
+      ? `\nPrev: ${params.previousMovements[params.previousMovements.length - 1]?.title}`
+      : ''
+    const next = params.nextMovements ? `\nNext: ${params.nextMovements[0]?.title}` : ''
+    return `Expand: ${params.movement.title} (${params.movement.type})
+Content: ${params.movement.content}
+Frame: ${params.adventure.frame}, Focus: ${params.adventure.focus}
+Party: ${params.adventure.partySize} lvl ${params.adventure.partyLevel}${prev}${next}
+Include: vivid descriptions, objectives, mechanics, GM notes, transitions.`
   }
 }

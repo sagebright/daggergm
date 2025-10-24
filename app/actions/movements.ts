@@ -303,6 +303,174 @@ export async function refineMovementContent(
   }
 }
 
+export async function regenerateScaffoldMovement(adventureId: string, movementId: string) {
+  // Validate input parameters
+  const validationResult = movementExpansionRequestSchema.safeParse({
+    adventureId,
+    movementId,
+  })
+
+  if (!validationResult.success) {
+    return {
+      success: false,
+      error: validationResult.error.issues[0]?.message || 'Validation failed',
+    }
+  }
+
+  let userId: string | null = null
+
+  try {
+    const supabase = await createServerSupabaseClient()
+
+    // Get current user
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    if (!user) {
+      return { success: false, error: 'Unauthorized' }
+    }
+    userId = user.id
+
+    // Apply rate limiting
+    try {
+      const rateLimitContext = await getRateLimitContext(userId)
+      await withRateLimit('movement_regeneration', rateLimitContext, async () => {
+        // Rate limiting wrapper - the actual work will be done below
+      })
+    } catch (error) {
+      if (error instanceof RateLimitError) {
+        return {
+          success: false,
+          error: error.message,
+          retryAfter: error.retryAfter,
+        }
+      }
+      throw error
+    }
+
+    // Get adventure
+    const { data: adventure } = await supabase
+      .from('adventures')
+      .select('*')
+      .eq('id', adventureId)
+      .single()
+
+    if (!adventure) {
+      return { success: false, error: 'Adventure not found' }
+    }
+
+    // Check ownership
+    if (adventure.user_id !== user.id) {
+      return { success: false, error: 'Unauthorized' }
+    }
+
+    // Check scaffold regeneration limit (10 max)
+    const SCAFFOLD_LIMIT = REGENERATION_LIMITS.SCAFFOLD
+    const scaffoldRegensUsed = adventure.scaffold_regenerations_used ?? 0
+    if (scaffoldRegensUsed >= SCAFFOLD_LIMIT) {
+      return {
+        success: false,
+        error: REGENERATION_LIMIT_ERRORS.SCAFFOLD,
+      }
+    }
+
+    // Find the movement to regenerate
+    const movements = adventure.movements as Movement[] | null
+    const targetMovement = movements?.find((m) => m.id === movementId)
+    if (!targetMovement) {
+      return { success: false, error: 'Movement not found' }
+    }
+
+    // Get locked movements for context
+    const lockedMovements =
+      movements
+        ?.filter((m) => 'locked' in m && m.locked && m.id !== movementId)
+        .map((m) => ({
+          id: m.id,
+          title: m.title,
+          type: m.type,
+          description: ('description' in m ? (m.description as string) : '') || '',
+        })) || []
+
+    // Regenerate using LLM
+    const startTime = Date.now()
+    const config = adventure.config as {
+      party_size?: number
+      party_level?: number
+      difficulty?: string
+      stakes?: string
+    } | null
+
+    const llmProvider = getLLMProvider()
+    const regenerated = await llmProvider.regenerateMovement({
+      movement: targetMovement,
+      adventure: {
+        frame: adventure.frame,
+        focus: adventure.focus,
+        partySize: config?.party_size || 4,
+        partyLevel: config?.party_level || 2,
+        difficulty: config?.difficulty || 'standard',
+        stakes: config?.stakes || 'personal',
+      },
+      lockedMovements,
+    })
+    const duration = (Date.now() - startTime) / 1000
+
+    // Track regeneration event
+    await analytics.track(ANALYTICS_EVENTS.SCAFFOLD_MOVEMENT_REGENERATED, {
+      userId,
+      adventureId,
+      movementId,
+      movementType: targetMovement.type,
+      duration,
+      regenerationCount: scaffoldRegensUsed + 1,
+      lockedCount: lockedMovements.length,
+    })
+
+    // Update movement with regenerated content
+    const updatedMovements = movements?.map((m) =>
+      m.id === movementId
+        ? {
+            ...m,
+            title: regenerated.title,
+            description: regenerated.description,
+            type: regenerated.type,
+            estimatedTime: regenerated.estimatedTime,
+            // Preserve id and orderIndex
+          }
+        : m,
+    )
+
+    // Increment regeneration counter and save
+    const { error } = await supabase
+      .from('adventures')
+      .update({
+        movements: updatedMovements as unknown as Json[],
+        scaffold_regenerations_used: scaffoldRegensUsed + 1,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', adventureId)
+
+    if (error) {
+      throw error
+    }
+
+    revalidatePath(`/adventures/${adventureId}`)
+
+    return {
+      success: true,
+      movement: regenerated,
+      remainingRegenerations: SCAFFOLD_LIMIT - (scaffoldRegensUsed + 1),
+    }
+  } catch (error) {
+    console.error('Error regenerating movement:', error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to regenerate movement',
+    }
+  }
+}
+
 export async function updateMovement(
   adventureId: string,
   movementId: string,

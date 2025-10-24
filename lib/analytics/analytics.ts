@@ -6,6 +6,7 @@ import type { Database } from '@/types/database.generated'
 export const ANALYTICS_EVENTS = {
   ADVENTURE_STARTED: 'adventure_started',
   SCAFFOLD_GENERATED: 'scaffold_generated',
+  SCAFFOLD_MOVEMENT_REGENERATED: 'scaffold_movement_regenerated',
   MOVEMENT_EXPANDED: 'movement_expanded',
   AI_REFINEMENT_USED: 'ai_refinement_used',
   ADVENTURE_EXPORTED: 'adventure_exported',
