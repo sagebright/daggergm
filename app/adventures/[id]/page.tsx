@@ -88,7 +88,8 @@ export default function AdventureDetailPage({ params }: { params: Promise<{ id: 
     const result = await updateMovement(
       adventure.id,
       movementId,
-      updates as Partial<Movement>,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      updates as any,
       guestToken || undefined,
     )
 

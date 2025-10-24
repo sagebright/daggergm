@@ -55,7 +55,7 @@ export async function getRateLimitContext(userId?: string): Promise<RateLimitCon
   }
 
   return {
-    userId,
+    ...(userId && { userId }),
     isAuthenticated: !!userId,
     ipAddress,
   }

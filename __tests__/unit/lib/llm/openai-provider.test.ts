@@ -1,6 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { OpenAIProvider } from '@/lib/llm/openai-provider'
 import { OpenAI } from 'openai'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+
+import { OpenAIProvider } from '@/lib/llm/openai-provider'
 import type { ScaffoldParams, ExpansionParams, RefinementParams } from '@/lib/llm/types'
 
 // Mock OpenAI
@@ -263,10 +264,10 @@ describe('OpenAIProvider', () => {
       await provider.generateAdventureScaffold(params)
 
       // Check that system message includes Witherwild context
-      const call = vi.mocked(mockOpenAI.chat.completions.create).mock.calls[0][0]
-      expect(call.messages[0].content).toContain('Witherwild')
-      expect(call.messages[0].content).toContain('corruption')
-      expect(call.messages[0].content).toContain('Ancient corruption spreading')
+      const call = vi.mocked(mockOpenAI.chat.completions.create).mock.calls[0]![0]!
+      expect(call.messages![0]!.content).toContain('Witherwild')
+      expect(call.messages![0]!.content).toContain('corruption')
+      expect(call.messages![0]!.content).toContain('Ancient corruption spreading')
     })
 
     it('should handle custom frames appropriately', async () => {
@@ -303,9 +304,9 @@ describe('OpenAIProvider', () => {
 
       await provider.generateAdventureScaffold(params)
 
-      const call = vi.mocked(mockOpenAI.chat.completions.create).mock.calls[0][0]
-      expect(call.messages[1].content).toContain('floating islands')
-      expect(call.messages[0].content).not.toContain('Witherwild')
+      const call = vi.mocked(mockOpenAI.chat.completions.create).mock.calls[0]![0]!
+      expect(call.messages![1]!.content).toContain('floating islands')
+      expect(call.messages![0]!.content).not.toContain('Witherwild')
     })
   })
 

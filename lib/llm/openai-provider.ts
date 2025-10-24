@@ -74,7 +74,7 @@ export class OpenAIProvider implements LLMProvider {
       response_format: { type: 'json_object' },
     })
 
-    const result = JSON.parse(completion.choices[0].message.content!) as ScaffoldResult
+    const result = JSON.parse(completion.choices[0]!.message.content!) as ScaffoldResult
 
     // Cache the response
     await this.cacheResponse(params, result, completion.usage?.total_tokens)
@@ -116,7 +116,7 @@ export class OpenAIProvider implements LLMProvider {
       ],
     })
 
-    const content = completion.choices[0].message.content!
+    const content = completion.choices[0]!.message.content!
 
     // Parse structured response
     const result: MovementResult = {
@@ -164,7 +164,7 @@ export class OpenAIProvider implements LLMProvider {
     })
 
     return {
-      refinedContent: completion.choices[0].message.content!,
+      refinedContent: completion.choices[0]!.message.content!,
       changes: ['Applied refinement'], // Could parse actual changes
     }
   }

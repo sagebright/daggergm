@@ -1,6 +1,7 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+
 import { createServerSupabaseClient, createServiceRoleClient } from '@/lib/supabase/server'
 
 // Type for cookie config
@@ -92,7 +93,7 @@ describe('Supabase Server Utils', () => {
       await createServerSupabaseClient()
 
       // Get the cookies config that was passed to createServerClient
-      const cookiesConfig = mockCreateServerClient.mock.calls[0][2].cookies
+      const cookiesConfig = mockCreateServerClient.mock.calls[0]![2]!.cookies
 
       // Call getAll to test it
       const result = cookiesConfig.getAll()
@@ -108,7 +109,7 @@ describe('Supabase Server Utils', () => {
       await createServerSupabaseClient()
 
       // Get the cookies config that was passed to createServerClient
-      const cookiesConfig = mockCreateServerClient.mock.calls[0][2].cookies
+      const cookiesConfig = mockCreateServerClient.mock.calls[0]![2]!.cookies
 
       // Test setAll
       const cookiesToSet = [
@@ -134,7 +135,7 @@ describe('Supabase Server Utils', () => {
       await createServerSupabaseClient()
 
       // Get the cookies config that was passed to createServerClient
-      const cookiesConfig = mockCreateServerClient.mock.calls[0][2].cookies
+      const cookiesConfig = mockCreateServerClient.mock.calls[0]![2]!.cookies
 
       // Test that setAll doesn't throw even when cookieStore.set throws
       expect(cookiesConfig).toBeDefined()
@@ -177,7 +178,7 @@ describe('Supabase Server Utils', () => {
       await createServiceRoleClient()
 
       // Get the cookies config that was passed to createServerClient
-      const cookiesConfig = mockCreateServerClient.mock.calls[0][2].cookies
+      const cookiesConfig = mockCreateServerClient.mock.calls[0]![2]!.cookies
 
       // Test getAll returns empty array
       const result = cookiesConfig.getAll()
@@ -191,7 +192,7 @@ describe('Supabase Server Utils', () => {
       await createServiceRoleClient()
 
       // Get the cookies config that was passed to createServerClient
-      const cookiesConfig = mockCreateServerClient.mock.calls[0][2].cookies
+      const cookiesConfig = mockCreateServerClient.mock.calls[0]![2]!.cookies
 
       // Test setAll does nothing (no-op)
       expect(cookiesConfig).toBeDefined()

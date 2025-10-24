@@ -63,7 +63,7 @@ vi.mock('next/server', async (importOriginal) => {
   }
 
   return {
-    ...actual,
+    ...(actual as object),
     NextResponse: {
       next: vi.fn(() => createMockResponse()),
     },
@@ -154,7 +154,7 @@ describe('updateSession', () => {
     await updateSession(request)
 
     // Get the cookies config that was passed to createServerClient
-    const cookiesConfig = mockCreateServerClient.mock.calls[0][2].cookies
+    const cookiesConfig = mockCreateServerClient.mock.calls[0]![2]!.cookies
 
     // Test getAll
     const result = cookiesConfig.getAll()
@@ -170,7 +170,7 @@ describe('updateSession', () => {
     await updateSession(request)
 
     // Get the cookies config that was passed to createServerClient
-    const cookiesConfig = mockCreateServerClient.mock.calls[0][2].cookies
+    const cookiesConfig = mockCreateServerClient.mock.calls[0]![2]!.cookies
 
     // Test setAll
     const cookiesToSet = [

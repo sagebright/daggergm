@@ -1,5 +1,6 @@
-import { describe, it, expect } from 'vitest'
 import resolveConfig from 'tailwindcss/resolveConfig'
+import { describe, it, expect } from 'vitest'
+
 import tailwindConfig from '@/tailwind.config'
 
 describe('Tailwind Theme Configuration', () => {
@@ -91,16 +92,16 @@ describe('Tailwind Theme Configuration', () => {
   describe('OKLCH Color Support', () => {
     it('should use OKLCH color function format', () => {
       const primaryColor = (
-        fullConfig.theme.colors as unknown as Record<string, Record<string, string>>
-      ).primary.DEFAULT
+        fullConfig.theme!.colors as unknown as Record<string, Record<string, string>>
+      ).primary!.DEFAULT
       expect(primaryColor).toContain('oklch(')
       expect(primaryColor).toContain('var(')
     })
 
     it('should support alpha values in OKLCH colors', () => {
       const purpleColor = (
-        fullConfig.theme.colors as unknown as Record<string, Record<string, string>>
-      )['dagger-purple']['800']
+        fullConfig.theme!.colors as unknown as Record<string, Record<string, string>>
+      )['dagger-purple']!['800']
       expect(purpleColor).toContain('<alpha-value>')
     })
   })

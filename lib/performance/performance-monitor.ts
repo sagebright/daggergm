@@ -19,7 +19,7 @@ export class PerformanceMonitor {
     this.metrics.set(operationId, {
       operation,
       startTime: Date.now(),
-      metadata,
+      ...(metadata && { metadata }),
     })
   }
 
@@ -44,7 +44,9 @@ export class PerformanceMonitor {
     // Update metric
     metric.endTime = endTime
     metric.success = success
-    metric.error = error
+    if (error) {
+      metric.error = error
+    }
 
     // Combine metadata
     const finalMetadata = {
@@ -53,13 +55,17 @@ export class PerformanceMonitor {
     }
 
     // Track performance metric
-    await analytics.trackPerformance({
+    const perfData: Record<string, unknown> = {
       operation: metric.operation,
       duration,
       success,
-      error,
       ...finalMetadata,
-    })
+    }
+    if (error) {
+      perfData.error = error
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await analytics.trackPerformance(perfData as any)
 
     // Clean up
     this.metrics.delete(operationId)

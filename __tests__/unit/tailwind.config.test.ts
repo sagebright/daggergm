@@ -1,6 +1,7 @@
-import { describe, it, expect } from 'vitest'
-import tailwindConfig from '@/tailwind.config'
 import type { Config } from 'tailwindcss'
+import { describe, it, expect } from 'vitest'
+
+import tailwindConfig from '@/tailwind.config'
 
 describe('tailwind.config.ts', () => {
   it('should export a valid Tailwind config object', () => {
@@ -45,10 +46,10 @@ describe('tailwind.config.ts', () => {
         expect((colors as Record<string, Record<string, string>>)!['dagger-purple']).toHaveProperty(
           '800',
         )
-        expect((colors as Record<string, Record<string, string>>)!['dagger-purple']['900']).toBe(
+        expect((colors as Record<string, Record<string, string>>)!['dagger-purple']!['900']).toBe(
           'oklch(var(--dagger-purple-900) / <alpha-value>)',
         )
-        expect((colors as Record<string, Record<string, string>>)!['dagger-purple']['800']).toBe(
+        expect((colors as Record<string, Record<string, string>>)!['dagger-purple']!['800']).toBe(
           'oklch(var(--dagger-purple-800) / <alpha-value>)',
         )
       })
@@ -58,7 +59,7 @@ describe('tailwind.config.ts', () => {
         expect((colors as Record<string, Record<string, string>>)!['dagger-teal']).toHaveProperty(
           '400',
         )
-        expect((colors as Record<string, Record<string, string>>)!['dagger-teal']['400']).toBe(
+        expect((colors as Record<string, Record<string, string>>)!['dagger-teal']!['400']).toBe(
           'oklch(var(--dagger-teal-400) / <alpha-value>)',
         )
       })
@@ -68,7 +69,7 @@ describe('tailwind.config.ts', () => {
         expect((colors as Record<string, Record<string, string>>)!['dagger-gold']).toHaveProperty(
           '400',
         )
-        expect((colors as Record<string, Record<string, string>>)!['dagger-gold']['400']).toBe(
+        expect((colors as Record<string, Record<string, string>>)!['dagger-gold']!['400']).toBe(
           'oklch(var(--dagger-gold-400) / <alpha-value>)',
         )
       })
@@ -86,8 +87,8 @@ describe('tailwind.config.ts', () => {
         expect(colors!).toHaveProperty('primary')
         expect(colorsTyped!.primary).toHaveProperty('DEFAULT')
         expect(colorsTyped!.primary).toHaveProperty('foreground')
-        expect(colorsTyped!.primary.DEFAULT).toBe('oklch(var(--primary) / <alpha-value>)')
-        expect(colorsTyped!.primary.foreground).toBe(
+        expect(colorsTyped!.primary!.DEFAULT).toBe('oklch(var(--primary) / <alpha-value>)')
+        expect(colorsTyped!.primary!.foreground).toBe(
           'oklch(var(--primary-foreground) / <alpha-value>)',
         )
       })
@@ -153,7 +154,7 @@ describe('tailwind.config.ts', () => {
       })
 
       it('should include system-ui as primary font', () => {
-        expect((fontFamily as Record<string, string[]>)!.sans[0]).toBe('system-ui')
+        expect((fontFamily as Record<string, string[]>)!.sans![0]!).toBe('system-ui')
       })
 
       it('should include Apple system font', () => {
@@ -186,7 +187,7 @@ describe('tailwind.config.ts', () => {
 
       it('should fallback to generic sans-serif', () => {
         const fontFamilyTyped = fontFamily as Record<string, string[]>
-        expect(fontFamilyTyped!.sans[fontFamilyTyped!.sans.length - 1]).toBe('sans-serif')
+        expect(fontFamilyTyped!.sans![fontFamilyTyped!.sans!.length - 1]!).toBe('sans-serif')
       })
     })
 

@@ -104,8 +104,8 @@ export default function NewAdventurePage() {
       toast.info('Generating your adventure...', { duration: 2000 })
 
       const adventureConfig: AdventureConfig = {
-        length: config.length,
-        primary_motif: config.primary_motif,
+        length: config.length || '',
+        primary_motif: config.primary_motif || '',
         // Add defaults for missing fields
         frame: 'witherwild', // Default frame
         party_size: 4,
@@ -222,12 +222,12 @@ export default function NewAdventurePage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>{step.title}</CardTitle>
-          <CardDescription>{step.description}</CardDescription>
+          <CardTitle>{step!.title}</CardTitle>
+          <CardDescription>{step!.description}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {step.options.map((option) => (
+            {step!.options.map((option) => (
               <Button
                 key={option.value}
                 variant="outline"

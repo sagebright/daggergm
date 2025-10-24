@@ -126,7 +126,7 @@ describe('MarkdownExporter', () => {
 
     it('should escape special markdown characters in content', () => {
       const movementWithSpecialChars: Movement = {
-        ...mockMovements[0],
+        ...mockMovements[0]!,
         content: 'This has *asterisks* and _underscores_ and [brackets]',
       }
 
