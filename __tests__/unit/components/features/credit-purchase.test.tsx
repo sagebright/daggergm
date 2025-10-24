@@ -1,8 +1,9 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { CreditPurchaseDialog } from '@/components/features/credit-purchase-dialog'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+
 import { purchaseCredits } from '@/app/actions/credits'
+import { CreditPurchaseDialog } from '@/components/features/credit-purchase-dialog'
 
 // Mock actions
 vi.mock('@/app/actions/credits', () => ({
@@ -61,6 +62,11 @@ describe('CreditPurchaseDialog', () => {
 
     render(<CreditPurchaseDialog open={true} onSuccess={mockOnSuccess} onCancel={mockOnCancel} />)
 
+    // First select a package
+    const firstPackage = screen.getByTestId('credit-package-credits_5')
+    await user.click(firstPackage)
+
+    // Then click purchase button
     const purchaseButton = screen.getByRole('button', { name: 'Purchase 5 Credits' })
     await user.click(purchaseButton)
 

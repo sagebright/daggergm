@@ -1,12 +1,13 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import type { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime'
 import { useRouter } from 'next/navigation'
-import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime'
+import { toast } from 'sonner'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+
 import LoginPage from '@/app/auth/login/page'
 import { createClient } from '@/lib/supabase/client'
 import { createMockSupabaseClient } from '@/test/mocks/supabase'
-import { toast } from 'sonner'
 
 // Mock dependencies
 vi.mock('next/navigation', () => ({
@@ -75,7 +76,9 @@ describe('LoginPage', () => {
 
   describe('magic link authentication', () => {
     it('should send magic link on form submission', async () => {
-      ;(mockSupabaseClient.auth.signInWithOtp as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ error: null })
+      ;(mockSupabaseClient.auth.signInWithOtp as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        error: null,
+      })
 
       const user = userEvent.setup()
       render(<LoginPage />)
@@ -97,7 +100,9 @@ describe('LoginPage', () => {
     })
 
     it('should show loading state during submission', async () => {
-      ;(mockSupabaseClient.auth.signInWithOtp as ReturnType<typeof vi.fn>).mockImplementation(() => new Promise(() => {})) // Never resolves
+      ;(mockSupabaseClient.auth.signInWithOtp as ReturnType<typeof vi.fn>).mockImplementation(
+        () => new Promise(() => {}),
+      ) // Never resolves
 
       const user = userEvent.setup()
       render(<LoginPage />)
@@ -152,7 +157,9 @@ describe('LoginPage', () => {
     })
 
     it('should handle unexpected errors', async () => {
-      ;(mockSupabaseClient.auth.signInWithOtp as ReturnType<typeof vi.fn>).mockRejectedValueOnce(new Error('Network error'))
+      ;(mockSupabaseClient.auth.signInWithOtp as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
+        new Error('Network error'),
+      )
 
       const user = userEvent.setup()
       render(<LoginPage />)
@@ -201,7 +208,9 @@ describe('LoginPage', () => {
 
   describe('signup flow', () => {
     it('should trigger same login flow for signup button', async () => {
-      ;(mockSupabaseClient.auth.signInWithOtp as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ error: null })
+      ;(mockSupabaseClient.auth.signInWithOtp as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        error: null,
+      })
 
       const user = userEvent.setup()
       render(<LoginPage />)

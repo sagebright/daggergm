@@ -10,7 +10,7 @@ services:
         - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY:-}
     container_name: daggergm-app
     ports:
-      - "3002:3002"
+      - '3002:3002'
     environment:
       - NODE_ENV=development
     env_file:
@@ -23,7 +23,7 @@ services:
     networks:
       - daggergm-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3002/api/health"]
+      test: ['CMD', 'curl', '-f', 'http://localhost:3002/api/health']
       interval: 30s
       timeout: 10s
       retries: 3

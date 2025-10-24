@@ -1,6 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { GET } from '@/app/auth/callback/route'
 import { NextResponse } from 'next/server'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+
+import { GET } from '@/app/auth/callback/route'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { createMockSupabaseClient } from '@/test/mocks/supabase'
 
@@ -28,7 +29,9 @@ describe('Auth Callback Route', () => {
   describe('successful authentication', () => {
     it('should redirect to dashboard by default after successful auth', async () => {
       // Mock successful auth
-      ;(mockSupabaseClient.auth.exchangeCodeForSession as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      ;(
+        mockSupabaseClient.auth.exchangeCodeForSession as ReturnType<typeof vi.fn>
+      ).mockResolvedValueOnce({
         error: null,
         data: { session: {} },
       })
@@ -43,7 +46,9 @@ describe('Auth Callback Route', () => {
 
     it('should redirect to specified next path after successful auth', async () => {
       // Mock successful auth
-      ;(mockSupabaseClient.auth.exchangeCodeForSession as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      ;(
+        mockSupabaseClient.auth.exchangeCodeForSession as ReturnType<typeof vi.fn>
+      ).mockResolvedValueOnce({
         error: null,
         data: { session: {} },
       })
@@ -61,7 +66,9 @@ describe('Auth Callback Route', () => {
   describe('failed authentication', () => {
     it('should redirect to login with error when auth fails', async () => {
       // Mock failed auth
-      ;(mockSupabaseClient.auth.exchangeCodeForSession as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      ;(
+        mockSupabaseClient.auth.exchangeCodeForSession as ReturnType<typeof vi.fn>
+      ).mockResolvedValueOnce({
         error: { message: 'Invalid code' },
         data: null,
       })
