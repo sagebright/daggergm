@@ -93,3 +93,4 @@ export default defineConfig({
     },
   },
 })
+// CI trigger for 70% coverage threshold
