@@ -12,10 +12,10 @@ import { beforeAll, afterEach, afterAll, vi } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 
 // Load test environment variables
-if (!process.env.TEST_SUPABASE_URL) {
-  console.warn('⚠️  TEST_SUPABASE_URL not set, using local Supabase')
-  process.env.NEXT_PUBLIC_SUPABASE_URL = 'http://localhost:54321'
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test-anon-key'
+// Use the same Supabase instance for tests as the main app (single DB until launch)
+if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+  console.warn('⚠️  NEXT_PUBLIC_SUPABASE_URL not set, tests may fail')
+  console.warn('Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your environment')
 }
 
 // Mock Next.js modules
