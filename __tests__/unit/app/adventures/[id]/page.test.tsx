@@ -1,8 +1,9 @@
-import { describe, it, expect, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import AdventureDetailPage from '@/app/adventures/[id]/page'
+import { describe, it, expect, vi } from 'vitest'
+
 import { getAdventure } from '@/app/actions/adventures'
+import AdventureDetailPage from '@/app/adventures/[id]/page'
 
 vi.mock('@/app/actions/adventures', () => ({
   getAdventure: vi.fn(),
@@ -53,6 +54,8 @@ describe('AdventureDetailPage', () => {
     guest_email: null,
     guest_token: null,
     user_id: 'user-123',
+    scaffold_regenerations_used: 0,
+    expansion_regenerations_used: 0,
     movements: [
       {
         id: 'mov-1',
