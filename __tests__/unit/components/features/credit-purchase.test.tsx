@@ -55,7 +55,7 @@ describe('CreditPurchaseDialog', () => {
                 success: true,
                 sessionId: 'test-session',
               }),
-            100,
+            200, // Increased timeout to ensure loading state is visible
           ),
         ),
     )
@@ -70,8 +70,10 @@ describe('CreditPurchaseDialog', () => {
     const purchaseButton = screen.getByRole('button', { name: 'Purchase 5 Credits' })
     await user.click(purchaseButton)
 
-    // Should show loading state
-    expect(screen.getByText('Processing...')).toBeInTheDocument()
+    // Should show loading state - use waitFor to handle async state updates
+    await waitFor(() => {
+      expect(screen.getByText('Processing...')).toBeInTheDocument()
+    })
 
     await waitFor(() => {
       expect(purchaseCredits).toHaveBeenCalledWith({
