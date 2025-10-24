@@ -71,8 +71,9 @@ npm list [package]                  # Verify dependency tree
 git diff package.json package-lock.json  # See pending changes
 
 # For Supabase Operations:
-npx supabase status                 # Check Supabase connection
-npx supabase projects list          # List projects
+# Check credentials configured
+test -f .env.test.local && grep "NEXT_PUBLIC_SUPABASE_URL" .env.test.local || echo "⚠️  Missing .env.test.local"
+# Use Supabase MCP tools: list_projects, get_project
 ```
 
 ### Impact Assessment:
@@ -257,8 +258,8 @@ npm run test:coverage               # Coverage check (≥90%)
 npm run build                       # Verify build succeeds
 
 # For Supabase changes
-npx supabase status                 # Check connection
-npx supabase db diff                # Check schema changes
+# Use Supabase MCP tools: list_migrations, list_tables
+# Check credentials: test -f .env.test.local
 ```
 
 ### Rollback Triggers:

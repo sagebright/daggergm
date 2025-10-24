@@ -27,21 +27,21 @@ ANALYZE → PLAN → ✋ CHECKPOINT → EXECUTE → VALIDATE → ✋ CHECKPOINT 
 3. **Verify database access**: Supabase connection
 4. **Create backup strategy**: Supabase snapshots / Git-tracked migrations
 5. **Check current database state**:
-   - Schema version: `npx supabase db diff`
-   - Active connections: `npx supabase status`
-   - Table info: Supabase Studio (http://127.0.0.1:54323)
+   - Remote Supabase credentials: Check `.env.test.local` exists
+   - Schema version: Use Supabase MCP tools to list migrations
+   - Table info: Supabase Dashboard (https://supabase.com/dashboard)
 
 ### Safety Checklist:
 
 ```bash
-# Verify Supabase connection
-npx supabase status
+# Verify Supabase credentials configured
+test -f .env.test.local && grep "NEXT_PUBLIC_SUPABASE_URL" .env.test.local || echo "⚠️  Missing .env.test.local"
 
-# Check current schema
-npx supabase db diff
+# Check current schema (use MCP tools or Supabase Dashboard)
+# Use Supabase MCP: list_tables, list_migrations
 
-# View in Supabase Studio
-open http://127.0.0.1:54323
+# View in Supabase Dashboard
+# https://supabase.com/dashboard/project/[your-project-id]
 
 # List current migrations
 ls -la supabase/migrations/

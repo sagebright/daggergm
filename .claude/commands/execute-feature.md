@@ -314,8 +314,8 @@ Phase 3: Refactor (REFACTOR) □
 ```
 1. Clear node_modules and reinstall
 2. Check for version conflicts
-3. Verify environment variables
-4. Check Supabase local status
+3. Verify environment variables (.env.test.local)
+4. Test Supabase connection (npm test -- --run)
 ```
 
 ---

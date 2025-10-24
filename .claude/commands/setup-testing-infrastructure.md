@@ -92,37 +92,30 @@ psql --version
 # Ubuntu: sudo apt-get install postgresql-14
 ```
 
-### 1.2 Use Supabase Local Database
+### 1.2 Use Remote Supabase Database
+
+**Note**: We use a remote hosted Supabase instance for testing (JMK project), not local Docker.
+
+### 1.3 Verify Database Credentials
 
 ```bash
-# Start Supabase local development
-npx supabase start
+# Check if credentials file exists
+test -f .env.test.local && echo "✅ Credentials configured" || echo "⚠️  Missing .env.test.local"
 
-# This automatically creates a test database with:
-# - PostgreSQL on port 54322
-# - Supabase Studio on port 54323
-# - API on port 54321
+# Verify it has required values
+grep "NEXT_PUBLIC_SUPABASE_URL" .env.test.local
 ```
 
-### 1.3 Verify Database Running
+### 1.4 Create .env.test.local (if missing)
 
-```bash
-# Check Supabase status
-npx supabase status
-
-# You should see all services running
-```
-
-### 1.4 Create .env.test.local
-
-Create file with test database credentials:
+Create file with remote test database credentials:
 
 ```bash
 # .env.test.local
-# Get these values from: npx supabase status
-NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
-NEXT_PUBLIC_SUPABASE_ANON_KEY=[from supabase status - anon key]
-SUPABASE_SERVICE_ROLE_KEY=[from supabase status - service_role key]
+# Get these values from project maintainer or Supabase Dashboard
+NEXT_PUBLIC_SUPABASE_URL=https://[your-project].supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=[from Supabase Dashboard]
+SUPABASE_SERVICE_ROLE_KEY=[from Supabase Dashboard]
 OPENAI_API_KEY=sk-test-key-not-used-in-tests
 ```
 
@@ -132,24 +125,25 @@ OPENAI_API_KEY=sk-test-key-not-used-in-tests
 echo ".env.test.local" >> .gitignore
 ```
 
-### 1.5 Apply Schema to Test Database
+### 1.5 Verify Schema Applied
+
+The remote Supabase database should already have the schema applied. Verify using MCP tools:
 
 ```bash
-# Apply Supabase migrations to local database
-npx supabase db push
+# Use Supabase MCP tools to verify:
+# - list_tables
+# - list_migrations
+# Or check Supabase Dashboard
 ```
 
 ### 1.6 Validation
 
 ```bash
-# Verify database is accessible and has schema
-npx supabase db diff
-
-# View in Supabase Studio
-open http://127.0.0.1:54323
+# Verify credentials work by running a simple test
+npm test -- --run
 ```
 
-**✅ Checkpoint**: Database created and accessible
+**✅ Checkpoint**: Database accessible with valid credentials
 
 ---
 
@@ -447,8 +441,8 @@ test -f tests/README.md && echo "✅ Test README exists"
 ### 3.1 Run Complete Validation Suite
 
 ```bash
-# 1. Supabase running
-npx supabase status
+# 1. Supabase credentials configured
+test -f .env.test.local && grep "NEXT_PUBLIC_SUPABASE_URL" .env.test.local && echo "✅ Credentials configured"
 
 # 2. Environment variables loaded
 test -f .env.test.local && echo "✅ Test env configured"
@@ -477,8 +471,8 @@ Present to user:
 🎉 Testing Infrastructure Setup Complete!
 
 ✅ Validation Results:
-- [ ] Supabase local running on port 54321/54322
-- [ ] Local database schema applied
+- [ ] Remote Supabase credentials configured
+- [ ] Database schema verified (use MCP tools or Dashboard)
 - [ ] .env.test.local configured
 - [ ] Vitest installed and configured
 - [ ] Test helpers created (testDatabase, testAuth, testAdventures)
@@ -501,15 +495,14 @@ Present to user:
 ### Database Connection Failed
 
 ```bash
-# Check Supabase is running
-npx supabase status
+# Check credentials are configured
+test -f .env.test.local && cat .env.test.local
 
-# If not running, start it:
-npx supabase start
+# Verify credentials are correct by checking Supabase Dashboard:
+# https://supabase.com/dashboard/project/[your-project-id]/settings/api
 
-# If stuck, try resetting:
-npx supabase stop
-npx supabase start
+# Test connection with simple query
+npm test -- --run
 ```
 
 ### Vitest Import Errors
@@ -549,7 +542,7 @@ Successfully set up integration-first testing infrastructure for DaggerGM.
 
 ## Components Installed
 
-- Supabase local (ports 54321-54323)
+- Remote Supabase connection configured
 - Vitest test runner
 - MSW for API mocking
 - Test helper utilities
