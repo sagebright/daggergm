@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+
 import { purchaseCredits, getUserCredits } from '@/app/actions/credits'
-import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { stripe } from '@/lib/stripe/server'
+import { createServerSupabaseClient } from '@/lib/supabase/server'
 import type { CreditPurchase } from '@/lib/validation/schemas'
 
 // Mock dependencies
@@ -68,6 +69,7 @@ describe('credits actions', () => {
       expect(result).toEqual({
         success: true,
         sessionId: 'session-123',
+        url: 'https://checkout.stripe.com/session-123',
       })
 
       expect(stripe.checkout.sessions.create).toHaveBeenCalledWith({
@@ -119,6 +121,7 @@ describe('credits actions', () => {
       expect(result).toEqual({
         success: true,
         sessionId: 'session-456',
+        url: 'https://checkout.stripe.com/session-456',
       })
 
       expect(stripe.checkout.sessions.create).toHaveBeenCalledWith(
@@ -166,6 +169,7 @@ describe('credits actions', () => {
       expect(result).toEqual({
         success: true,
         sessionId: 'session-789',
+        url: 'https://checkout.stripe.com/session-789',
       })
 
       expect(stripe.checkout.sessions.create).toHaveBeenCalledWith(
