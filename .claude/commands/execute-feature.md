@@ -15,7 +15,12 @@
 git status
 git branch --show-current
 
-# 2. Recent Commits Check
+# 2. Create Feature Branch (REQUIRED)
+# Extract feature name from FEATURE document filename
+# Example: FEATURE_free_expansion_with_limits.md -> feature/free-expansion-with-limits
+git checkout -b feature/[feature-name]
+
+# 3. Recent Commits Check
 git log --oneline -5
 
 # 3. Test Coverage Check (Baseline)
