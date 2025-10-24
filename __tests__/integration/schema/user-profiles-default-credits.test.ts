@@ -11,8 +11,9 @@ import type { Database } from '@/types/database.generated'
  * 2. Existing users' credit balances are unchanged
  * 3. Credits can still be explicitly set during profile creation
  *
- * @requires Real Supabase connection (uses NEXT_PUBLIC_SUPABASE_URL)
+ * @requires Real Supabase connection (uses remote JMK project)
  * @coverage Integration test for database schema default values
+ * @note GitHub secrets updated to point to production Supabase project
  */
 
 describe('User Profiles - Default Credits', () => {
