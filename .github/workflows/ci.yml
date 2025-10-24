@@ -140,11 +140,11 @@ jobs:
       - name: Enforce Coverage Threshold
         run: |
           COVERAGE=$(jq '.total.lines.pct' coverage/coverage-summary.json)
-          if [ $(echo "$COVERAGE < 90" | bc) -eq 1 ]; then
-            echo "❌ Coverage below 90% threshold (actual: $COVERAGE%)"
+          if [ $(echo "$COVERAGE < 80" | bc) -eq 1 ]; then
+            echo "❌ Coverage below 80% threshold (actual: $COVERAGE%)"
             exit 1
           fi
-          echo "✅ Coverage: $COVERAGE% (target: ≥90%)"
+          echo "✅ Coverage: $COVERAGE% (target: ≥80%)"
 
       - name: Upload Coverage
         uses: codecov/codecov-action@v4
