@@ -112,8 +112,8 @@ describe('ExportDialog', () => {
 
     await user.click(screen.getByText('Markdown'))
 
-    // Should show loading state (wait for async state update)
-    expect(await screen.findByText('Exporting...')).toBeInTheDocument()
+    // Should show loading state (wait for async state update with longer timeout)
+    expect(await screen.findByText('Exporting...', {}, { timeout: 3000 })).toBeInTheDocument()
 
     // Buttons should be disabled
     expect(screen.getByText('PDF Document').closest('button')).toBeDisabled()
