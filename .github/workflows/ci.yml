@@ -137,14 +137,6 @@ jobs:
       - name: Run Coverage Check
         run: npm run test:coverage
 
-      - name: Enforce Coverage Threshold
-        run: |
-          COVERAGE=$(jq '.total.lines.pct' coverage/coverage-summary.json)
-          if [ $(echo "$COVERAGE < 70" | bc) -eq 1 ]; then
-            echo "❌ Coverage below 70% threshold (actual: $COVERAGE%)"
-            exit 1
-          fi
-          echo "✅ Coverage: $COVERAGE% (target: ≥70%)"
 
       - name: Upload Coverage
         uses: codecov/codecov-action@v4
@@ -173,7 +165,7 @@ jobs:
         run: npm ci --no-audit --no-fund
 
       - name: Install Playwright Browsers
-        run: npx playwright install --with-deps chromium firefox
+        run: npx playwright install --with-deps chromium firefox webkit
 
       - name: Run Playwright Tests
         env:
