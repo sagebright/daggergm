@@ -1,8 +1,10 @@
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 
+import { Button } from '@/components/ui/button'
+import { createServerSupabaseClient } from '@/lib/supabase/server'
+
+// Trigger CI/CD test run - 2025-10-24
 export default async function Home() {
   const supabase = await createServerSupabaseClient()
   const {
