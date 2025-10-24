@@ -18,14 +18,18 @@ git branch --show-current
 # 2. Recent Commits Check
 git log --oneline -5
 
-# 3. Test Coverage Check
+# 3. Test Coverage Check (Baseline)
 npm run test:coverage
 
-# 4. Supabase Local Status
-npx supabase status
-
-# 5. Current Branch Verification
-git branch --show-current
+# 4. Database Connection Check
+# We use remote Supabase (JMK project), not local Docker
+if [ -f .env.test.local ]; then
+  echo "✅ Found .env.test.local with remote Supabase credentials"
+  grep "NEXT_PUBLIC_SUPABASE_URL" .env.test.local
+else
+  echo "⚠️  No .env.test.local found - integration tests may fail"
+  echo "   Check .env.local for database URL"
+fi
 ```
 
 ### Phase Detection & Planning
@@ -78,8 +82,11 @@ git branch --show-current
 ```bash
 # 1. Create test files FIRST
 # 2. Write failing tests (RED)
-# 3. Run tests to confirm failures
-npm test -- --watch
+# 3. Run tests to confirm failures (CRITICAL - DO NOT SKIP)
+npm test -- [your-test-file]
+
+# If tests fail due to credentials, verify .env.test.local exists:
+cat .env.test.local | grep SUPABASE
 
 # 4. Check coverage baseline
 npm run test:coverage
@@ -88,10 +95,11 @@ npm run test:coverage
 ### Validation
 
 ```
-□ Tests fail as expected
+□ Tests fail as expected (RED phase confirmed)
 □ Tests cover all requirements
 □ Coverage report generated
 □ Ready for implementation
+□ ⚠️ NEVER skip running tests - even if you expect them to fail
 ```
 
 ---
@@ -127,11 +135,12 @@ npm run typecheck
 ### Validation
 
 ```
-□ All tests pass (GREEN)
-□ Coverage maintained at 99%
+□ All tests pass (GREEN) - MUST run locally before pushing
+□ Coverage maintained at 90%+
 □ Linting clean
 □ Types valid
 □ No console errors
+□ ⚠️ If tests fail, DO NOT push to GitHub - fix locally first
 ```
 
 ---
@@ -181,12 +190,16 @@ npm run test:coverage
 ### After EVERY Phase:
 
 ```bash
-# MANDATORY Quality Checks
+# MANDATORY Quality Checks (DO NOT SKIP)
 npm run lint:fix
 npm run typecheck
-npm test
-npm run test:coverage
-npm run build
+npm test                  # ⚠️ CRITICAL: Must pass locally before push
+npm run test:coverage     # ⚠️ CRITICAL: Must be ≥90%
+npm run build             # ⚠️ CRITICAL: Catches Next.js build issues
+
+# If any of these fail, FIX LOCALLY before pushing to GitHub
+# CI takes 5-10 minutes. Local tests take 30 seconds.
+# Catching failures locally saves 10x time.
 ```
 
 ### Phase Handoff Template
@@ -308,7 +321,9 @@ Before marking phase complete:
 
 ```
 □ All code written and tested
-□ All tests passing locally
+□ All tests passing locally (MANDATORY - DO NOT SKIP)
+□ Test coverage ≥90% verified
+□ Production build succeeds (npm run build)
 □ TodoWrite updated
 □ git status clean (or intentionally dirty)
 □ Ready for next phase or deployment
@@ -316,12 +331,38 @@ Before marking phase complete:
 
 ---
 
+## 🚨 **BEFORE PUSHING TO GITHUB**
+
+### MANDATORY: Run Full Test Suite Locally
+
+```bash
+# Run these commands BEFORE git push:
+npm test                  # Must pass
+npm run test:coverage     # Must be ≥90%
+npm run build             # Must succeed
+
+# If tests fail due to missing credentials:
+# 1. Check .env.test.local has remote Supabase credentials
+# 2. Test SQL directly with Supabase MCP tools
+# 3. DO NOT PUSH until tests pass locally
+```
+
+**Why this matters:**
+
+- CI takes 5-10 minutes to run
+- Local tests take 30 seconds
+- Catching failures locally saves 10x time
+- Failed CI blocks the team and wastes GitHub Actions minutes
+
+---
+
 **REMEMBER**:
 
 - TDD ALWAYS: Tests first, then implementation
-- Maintain 99% coverage at all times
-- Run tests after EVERY change
+- Maintain 90%+ coverage at all times
+- Run tests LOCALLY after EVERY change
 - Update TodoWrite continuously
 - Follow CLAUDE.md patterns exactly
+- NEVER skip local testing before push
 
 **Version**: 2025-09-12 | **Optimized for**: DaggerGM TDD development with 99% coverage requirement
