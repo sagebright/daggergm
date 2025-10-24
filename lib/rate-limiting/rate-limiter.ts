@@ -142,6 +142,10 @@ export const RATE_LIMITS = {
     authenticated: { maxRequests: 50, windowMs: 60 * 60 * 1000 }, // 50 per hour
     guest: { maxRequests: 5, windowMs: 24 * 60 * 60 * 1000 }, // 5 per day
   },
+  movement_regeneration: {
+    authenticated: { maxRequests: 30, windowMs: 60 * 60 * 1000 }, // 30 per hour
+    guest: { maxRequests: 5, windowMs: 24 * 60 * 60 * 1000 }, // 5 per day
+  },
   content_refinement: {
     authenticated: { maxRequests: 100, windowMs: 60 * 60 * 1000 }, // 100 per hour
     guest: { maxRequests: 10, windowMs: 24 * 60 * 60 * 1000 }, // 10 per day

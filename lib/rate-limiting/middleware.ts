@@ -12,7 +12,12 @@ export interface RateLimitContext {
  * Rate limiting middleware for server actions
  */
 export async function withRateLimit<R>(
-  operation: 'adventure_generation' | 'movement_expansion' | 'content_refinement' | 'export',
+  operation:
+    | 'adventure_generation'
+    | 'movement_expansion'
+    | 'movement_regeneration'
+    | 'content_refinement'
+    | 'export',
   context: RateLimitContext,
   fn: () => Promise<R>,
 ): Promise<R> {
