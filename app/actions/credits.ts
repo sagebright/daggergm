@@ -62,7 +62,7 @@ export async function purchaseCredits(input: CreditPurchase) {
       mode: 'payment',
       success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard?canceled=true`,
-      customer_email: user.email,
+      ...(user.email && { customer_email: user.email }),
       client_reference_id: user.id,
       metadata: {
         userId: user.id,

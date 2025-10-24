@@ -74,7 +74,7 @@ export default defineConfig({
     reporters: ['verbose'],
 
     // Watch Mode
-    watchExclude: ['**/node_modules/**', '**/.next/**', '**/coverage/**'],
+    // watchExclude: ['**/node_modules/**', '**/.next/**', '**/coverage/**'],
   },
 
   // Path Resolution (match tsconfig.json)

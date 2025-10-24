@@ -27,7 +27,7 @@ export class ClientAnalytics {
     }
 
     posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
-      api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
+      api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || undefined,
       loaded: (posthog) => {
         if (process.env.NODE_ENV === 'development') {
           posthog.debug()

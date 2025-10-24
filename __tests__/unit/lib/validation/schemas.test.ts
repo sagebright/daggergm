@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest'
+
 import {
   adventureConfigSchema,
   creditPurchaseSchema,
@@ -66,10 +67,10 @@ describe('Validation Schemas', () => {
       const result = adventureConfigSchema.safeParse(minimalConfig)
       expect(result.success).toBe(true)
       if (result.success) {
-        expect(result.data.party_size).toBe(4)
-        expect(result.data.party_level).toBe(1)
-        expect(result.data.difficulty).toBe('standard')
-        expect(result.data.stakes).toBe('personal')
+        expect(result.data!.party_size).toBe(4)
+        expect(result.data!.party_level).toBe(1)
+        expect(result.data!.difficulty).toBe('standard')
+        expect(result.data!.stakes).toBe('personal')
       }
     })
 
@@ -83,7 +84,7 @@ describe('Validation Schemas', () => {
       const result = adventureConfigSchema.safeParse(configWithEmail)
       expect(result.success).toBe(true)
       if (result.success) {
-        expect(result.data.guestEmail).toBe('test@example.com')
+        expect(result.data!.guestEmail).toBe('test@example.com')
       }
     })
   })
@@ -146,8 +147,8 @@ describe('Validation Schemas', () => {
       const result = movementUpdateSchema.safeParse(partialUpdate)
       expect(result.success).toBe(true)
       if (result.success) {
-        expect(result.data.content).toBe('Just updating the content')
-        expect(result.data.title).toBeUndefined()
+        expect(result.data!.content).toBe('Just updating the content')
+        expect(result.data!.title).toBeUndefined()
       }
     })
 

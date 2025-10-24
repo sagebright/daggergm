@@ -44,7 +44,7 @@ export async function generateAdventure(config: AdventureConfig) {
   if (!validationResult.success) {
     return {
       success: false,
-      error: validationResult.error.issues[0].message,
+      error: validationResult.error.issues[0]?.message || 'Validation failed',
     }
   }
 
@@ -108,7 +108,7 @@ export async function generateAdventure(config: AdventureConfig) {
     // Track adventure start event
     if (userId || isGuest) {
       await analytics.track(ANALYTICS_EVENTS.ADVENTURE_STARTED, {
-        userId: userId ?? undefined,
+        userId: userId || 'guest',
         sessionId: crypto.randomUUID(), // Generate session ID for tracking
         frame: validatedConfig.frame || 'witherwild',
         partySize: validatedConfig.party_size,
@@ -135,7 +135,7 @@ export async function generateAdventure(config: AdventureConfig) {
     // Track scaffold generation completion
     if (userId || isGuest) {
       await analytics.track(ANALYTICS_EVENTS.SCAFFOLD_GENERATED, {
-        userId: userId ?? undefined,
+        userId: userId || 'guest',
         adventureId,
         duration,
         frame: validatedConfig.frame || 'witherwild',

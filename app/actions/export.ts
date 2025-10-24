@@ -32,7 +32,7 @@ export async function exportAdventure(
     if (!validationResult.success) {
       return {
         success: false,
-        error: validationResult.error.issues[0].message,
+        error: validationResult.error.issues[0]?.message || 'Validation failed',
       }
     }
 

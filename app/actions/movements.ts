@@ -37,7 +37,7 @@ export async function expandMovement(adventureId: string, movementId: string) {
   if (!validationResult.success) {
     return {
       success: false,
-      error: validationResult.error.issues[0].message,
+      error: validationResult.error.issues[0]?.message || 'Validation failed',
     }
   }
   const creditManager = new CreditManager()
@@ -202,7 +202,7 @@ export async function refineMovementContent(
   if (!validationResult.success) {
     return {
       success: false,
-      error: validationResult.error.issues[0].message,
+      error: validationResult.error.issues[0]?.message || 'Validation failed',
     }
   }
   const creditManager = new CreditManager()

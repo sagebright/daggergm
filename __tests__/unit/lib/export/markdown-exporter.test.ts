@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest'
+
 import { MarkdownExporter } from '@/lib/export/markdown-exporter'
 import type { Adventure, Movement } from '@/types/adventure'
 
@@ -35,7 +36,7 @@ describe('MarkdownExporter', () => {
     {
       id: 'mov-1',
       title: 'The Abandoned Entrance',
-      type: 'exploration',
+      type: 'exploration' as const,
       content: '## Description\n\nThe mine entrance yawns before you...',
       estimatedTime: '30 minutes',
       isLocked: false,
@@ -47,7 +48,7 @@ describe('MarkdownExporter', () => {
     {
       id: 'mov-2',
       title: 'Cave-in!',
-      type: 'social',
+      type: 'social' as const,
       content: '## Challenge\n\nThe ceiling begins to crumble...',
       estimatedTime: '45 minutes',
       isLocked: false,

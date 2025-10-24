@@ -97,14 +97,14 @@ function oklchToRgb(oklch: string): [number, number, number] {
   // Simplified OKLCH to RGB conversion
   // Note: This is a simplified version for testing
   // Production would use a proper color library
-  const L = l
-  const a = c * Math.cos((h * Math.PI) / 180)
-  const b = c * Math.sin((h * Math.PI) / 180)
+  const L = l!
+  const a = c! * Math.cos((h! * Math.PI) / 180)
+  const b = c! * Math.sin((h! * Math.PI) / 180)
 
   // OKLab to linear RGB
-  const l_ = L + 0.3963377774 * a + 0.2158037573 * b
-  const m_ = L - 0.1055613458 * a - 0.0638541728 * b
-  const s_ = L - 0.0894841775 * a - 1.291485548 * b
+  const l_ = L! + 0.3963377774 * a + 0.2158037573 * b
+  const m_ = L! - 0.1055613458 * a - 0.0638541728 * b
+  const s_ = L! - 0.0894841775 * a - 1.291485548 * b
 
   const l3 = l_ * l_ * l_
   const m3 = m_ * m_ * m_
@@ -128,7 +128,7 @@ function getLuminance(r: number, g: number, b: number): number {
     c = c / 255
     return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)
   })
-  return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs
+  return 0.2126 * rs! + 0.7152 * gs! + 0.0722 * bs!
 }
 
 // Validate WCAG color contrast

@@ -1,6 +1,8 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
+import type { NextRequest } from 'next/server'
+import { NextResponse } from 'next/server'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+
 import { updateSession } from '@/lib/supabase/middleware'
 
 // Mock environment variables
@@ -24,7 +26,7 @@ vi.mock('@supabase/ssr', () => ({
 }))
 
 vi.mock('next/server', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('next/server')>()
+  const actual = await importOriginal()
 
   // Create a more complete NextResponse mock
   const createMockResponse = () => {
@@ -125,7 +127,7 @@ describe('updateSession', () => {
     const response = await updateSession(request)
 
     expect(response).toBeDefined()
-    expect(response.cookies.set).toBeDefined()
+    expect(response.cookies!.set).toBeDefined()
   })
 
   it('should pass request headers to NextResponse', async () => {
@@ -191,10 +193,10 @@ describe('updateSession', () => {
       vi.mocked(NextResponse.next).mock.results.length - 1
     ]?.value
     if (response && 'cookies' in response) {
-      expect(response.cookies.set).toHaveBeenCalledWith('session', 'new-session', {
+      expect(response.cookies!.set).toHaveBeenCalledWith('session', 'new-session', {
         path: '/',
       })
-      expect(response.cookies.set).toHaveBeenCalledWith('refresh', 'new-refresh', {
+      expect(response.cookies!.set).toHaveBeenCalledWith('refresh', 'new-refresh', {
         path: '/',
       })
     }
@@ -212,7 +214,7 @@ describe('updateSession', () => {
 
     expect(mockSupabaseClient.auth.getUser).toHaveBeenCalled()
     expect(response).toBeDefined()
-    expect(response.cookies.set).toBeDefined()
+    expect(response.cookies!.set).toBeDefined()
   })
 
   it('should handle authentication errors', async () => {
@@ -226,6 +228,6 @@ describe('updateSession', () => {
 
     expect(mockSupabaseClient.auth.getUser).toHaveBeenCalled()
     expect(response).toBeDefined()
-    expect(response.cookies.set).toBeDefined()
+    expect(response.cookies!.set).toBeDefined()
   })
 })

@@ -59,7 +59,7 @@ export function validateServerEnv() {
     return serverEnvSchema.parse(process.env)
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const missingVars = error.errors.map((e) => `${e.path.join('.')}: ${e.message}`)
+      const missingVars = error.issues.map((e: any) => `${e.path.join('.')}: ${e.message}`)
       throw new Error(
         `❌ Invalid server environment variables:\n${missingVars.join('\n')}\n\n` +
           'Check your .env.local file and ensure all required variables are set.',
@@ -82,7 +82,7 @@ export function validateClientEnv() {
     })
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const missingVars = error.errors.map((e) => `${e.path.join('.')}: ${e.message}`)
+      const missingVars = error.issues.map((e: any) => `${e.path.join('.')}: ${e.message}`)
       throw new Error(`❌ Invalid client environment variables:\n${missingVars.join('\n')}`)
     }
     throw error
@@ -101,7 +101,7 @@ export function validateEnv() {
     return envSchema.parse(process.env)
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const missingVars = error.errors.map((e) => `${e.path.join('.')}: ${e.message}`)
+      const missingVars = error.issues.map((e: any) => `${e.path.join('.')}: ${e.message}`)
       throw new Error(
         `❌ Invalid environment variables:\n${missingVars.join('\n')}\n\n` +
           'Check your .env.local file and ensure all required variables are set.',

@@ -70,7 +70,7 @@ export default function NewAdventurePage() {
 
   const handleSelection = async (value: string) => {
     console.log('handleSelection called with:', value, 'at step:', currentStep)
-    const newSelections = { ...selections, [ADVENTURE_STEPS[currentStep].id]: value }
+    const newSelections = { ...selections, [ADVENTURE_STEPS[currentStep]!.id]: value }
     console.log('New selections:', newSelections)
     setSelections(newSelections)
 

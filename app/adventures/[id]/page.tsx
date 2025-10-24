@@ -73,7 +73,7 @@ export default function AdventureDetailPage({ params }: { params: Promise<{ id: 
       }
       return {
         ...prev,
-        movements: prev.movements?.map((m) =>
+        movements: (prev.movements || []).map((m) =>
           (m.id || String(prev.movements?.indexOf(m))) === movementId ? { ...m, ...updates } : m,
         ),
       }
