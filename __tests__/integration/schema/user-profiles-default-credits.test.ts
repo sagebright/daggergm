@@ -14,6 +14,7 @@ import type { Database } from '@/types/database.generated'
  * @requires Real Supabase connection (uses remote JMK project)
  * @coverage Integration test for database schema default values
  * @note GitHub secrets updated to point to production Supabase project
+ * @note CI workflow updated to pass env vars to coverage step
  */
 
 describe('User Profiles - Default Credits', () => {
