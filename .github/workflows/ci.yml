@@ -115,6 +115,20 @@ jobs:
 
       - name: Run Coverage Check
         run: npm run test:coverage
+        env:
+          # Supabase Test Environment (same as test run above)
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+          # OpenAI (mocked via MSW)
+          OPENAI_API_KEY: sk-test-mock-key
+
+          # Test flags
+          NODE_ENV: test
+          INTEGRATION_TESTS: true
+          USE_REAL_SUPABASE: true
+          IS_TEST_DATABASE: true
 
       - name: Upload Coverage
         uses: codecov/codecov-action@v4
