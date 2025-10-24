@@ -110,10 +110,17 @@ describe('ExportDialog', () => {
 
     render(<ExportDialog open={true} adventureId={mockAdventureId} onClose={mockOnClose} />)
 
-    await user.click(screen.getByText('Markdown'))
+    // Click and wait for loading state to appear
+    const markdownButton = screen.getByText('Markdown')
+    await user.click(markdownButton)
 
-    // Should show loading state (wait for async state update)
-    expect(await screen.findByText('Exporting...')).toBeInTheDocument()
+    // Use waitFor to check for loading state
+    await waitFor(
+      () => {
+        expect(screen.getByText('Exporting...')).toBeInTheDocument()
+      },
+      { timeout: 3000 },
+    )
 
     // Buttons should be disabled
     expect(screen.getByText('PDF Document').closest('button')).toBeDisabled()
