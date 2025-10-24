@@ -54,6 +54,7 @@ describe('CreditPurchaseDialog', () => {
               resolve({
                 success: true,
                 sessionId: 'test-session',
+                url: 'https://checkout.stripe.com/test',
               }),
             200, // Increased timeout to ensure loading state is visible
           ),
@@ -128,6 +129,7 @@ describe('CreditPurchaseDialog', () => {
     vi.mocked(purchaseCredits).mockResolvedValueOnce({
       success: true,
       sessionId: 'test-session-123',
+      url: 'https://checkout.stripe.com/test',
     })
 
     render(<CreditPurchaseDialog open={true} onSuccess={mockOnSuccess} onCancel={mockOnCancel} />)
