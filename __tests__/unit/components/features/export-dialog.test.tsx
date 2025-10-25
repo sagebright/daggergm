@@ -98,9 +98,9 @@ describe('ExportDialog', () => {
   it('should show loading state during export', async () => {
     const user = userEvent.setup()
 
-    // Mock a slow export
+    // Mock a slow export (longer delay to ensure we can test loading state)
     vi.mocked(exportAdventure).mockImplementation(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 100))
+      await new Promise((resolve) => setTimeout(resolve, 500))
       return {
         success: true,
         data: new Blob(['content']),
@@ -114,17 +114,21 @@ describe('ExportDialog', () => {
     const markdownButton = screen.getByText('Markdown')
     await user.click(markdownButton)
 
-    // Use waitFor to check for loading state
+    // Wait for loading state and check disabled state in the same waitFor
     await waitFor(
       () => {
+        // First verify loading text is present
         expect(screen.getByText('Exporting...')).toBeInTheDocument()
-      },
-      { timeout: 3000 },
-    )
 
-    // Buttons should be disabled
-    expect(screen.getByText('PDF Document').closest('button')).toBeDisabled()
-    expect(screen.getByText('Roll20').closest('button')).toBeDisabled()
+        // Then immediately check that OTHER buttons are disabled
+        const pdfButton = screen.getByText('PDF Document').closest('button')
+        const roll20Button = screen.getByText('Roll20').closest('button')
+
+        expect(pdfButton).toBeDisabled()
+        expect(roll20Button).toBeDisabled()
+      },
+      { timeout: 1000 },
+    )
 
     // Wait for export to complete
     await waitFor(() => {
