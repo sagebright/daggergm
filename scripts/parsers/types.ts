@@ -42,3 +42,33 @@ export interface Armor {
   searchable_text: string
   source_book: string
 }
+
+// Phase 2 types
+
+export interface Ability {
+  name: string
+  ability_type: 'Foundation' | 'Specialization' | 'Pinnacle'
+  parent_class?: string
+  parent_subclass?: string
+  domain?: string
+  description: string
+  level_requirement?: number
+  searchable_text: string
+  source_book: string
+}
+
+export interface Item {
+  name: string
+  description: string
+  item_type: string
+  searchable_text: string
+  source_book: string
+}
+
+export interface Consumable {
+  name: string
+  description: string
+  uses: number
+  searchable_text: string
+  source_book: string
+}
