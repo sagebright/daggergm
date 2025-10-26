@@ -21,8 +21,8 @@ describe('Daggerheart Content - Phase 1 (Weapons, Classes, Armor)', () => {
         .from('daggerheart_weapons')
         .select('*', { count: 'exact', head: true })
 
-      // We have 139 weapons successfully parsed/seeded
-      expect(count).toBeGreaterThanOrEqual(130)
+      // We have 192 weapons successfully parsed/seeded (all source files)
+      expect(count).toBeGreaterThanOrEqual(190)
     })
 
     it('should parse Advanced Battleaxe correctly', async () => {
@@ -84,7 +84,7 @@ describe('Daggerheart Content - Phase 1 (Weapons, Classes, Armor)', () => {
   describe('Phase 1 Totals', () => {
     it('should have ~241 total entries from Phase 1', async () => {
       const tables = [
-        'daggerheart_weapons', // ~139
+        'daggerheart_weapons', // ~192
         'daggerheart_classes', // ~9
         'daggerheart_armor', // ~34
       ]
@@ -96,8 +96,8 @@ describe('Daggerheart Content - Phase 1 (Weapons, Classes, Armor)', () => {
         totalCount += count || 0
       }
 
-      // Total: 139 + 9 + 34 = 182
-      expect(totalCount).toBeGreaterThanOrEqual(170)
+      // Total: 192 + 9 + 34 = 235
+      expect(totalCount).toBeGreaterThanOrEqual(230)
     })
   })
 })

@@ -22,8 +22,8 @@ export function parseArmor(markdown: string, filename: string): Armor {
   const featureLine = lines.find((l) => l.includes('Feature:'))
   const feature = featureLine?.split(':')[1]?.trim() || null
 
-  // Line 5: *Tier 1*
-  const tierLine = lines.find((l) => l.match(/\*Tier\s+\d+\*/))
+  // Line 5: *Armor - Tier 1*
+  const tierLine = lines.find((l) => l.match(/\*Armor\s+-\s+Tier\s+\d+\*/))
   const tier = parseInt(tierLine?.match(/Tier\s+(\d+)/)?.[1] || '1', 10)
 
   const searchable_text = `${name} ${base_thresholds} ${feature || ''}`.trim()
