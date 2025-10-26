@@ -143,11 +143,7 @@ export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
             }
           ).memory
           if (memory) {
-            console.log('Memory usage:', {
-              used: Math.round(memory.usedJSHeapSize / 1024 / 1024) + 'MB',
-              total: Math.round(memory.totalJSHeapSize / 1024 / 1024) + 'MB',
-              limit: Math.round(memory.jsHeapSizeLimit / 1024 / 1024) + 'MB',
-            })
+            // Memory usage tracking disabled
           }
         }
       }, 30000) // Every 30 seconds

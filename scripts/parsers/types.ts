@@ -72,3 +72,71 @@ export interface Consumable {
   searchable_text: string
   source_book: string
 }
+
+// Phase 3 types
+
+export interface AncestryFeature {
+  name: string
+  desc: string
+}
+
+export interface Ancestry {
+  name: string
+  description: string
+  features: AncestryFeature[]
+  source_book: string
+}
+
+export interface SubclassFeature {
+  name: string
+  desc: string
+}
+
+export interface Subclass {
+  name: string
+  parent_class: string
+  description: string
+  features: SubclassFeature[]
+  source_book: string
+}
+
+export interface EnvironmentFeature {
+  name: string
+  type: 'Passive' | 'Action' | 'GM Prompt'
+  desc: string
+}
+
+export interface Environment {
+  name: string
+  tier: number
+  type: string
+  description: string
+  impulses?: string[]
+  difficulty?: number
+  potential_adversaries?: string[]
+  features: EnvironmentFeature[]
+  searchable_text: string
+  source_book: string
+}
+
+export interface Domain {
+  name: string
+  description: string
+  source_book: string
+}
+
+export interface Community {
+  name: string
+  description: string
+  community_moves?: string[]
+  source_book: string
+}
+
+export interface Frame {
+  name: string
+  description: string
+  themes?: string[]
+  typical_adversaries?: string[]
+  lore?: string
+  source_book: string
+}

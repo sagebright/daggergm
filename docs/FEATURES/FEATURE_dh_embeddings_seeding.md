@@ -1,10 +1,172 @@
 # Feature: Daggerheart Content - Phase 4 (Embeddings & Final Integration)
 
-**Status**: Not Started
+**Status**: Ready to Start
 **Priority**: 🔴 Critical
 **Phase**: 1 - Content Foundation
 **Estimated Time**: 2-3 hours
-**Dependencies**: [FEATURE_dh_parsers_phase1.md](FEATURE_dh_parsers_phase1.md), [FEATURE_dh_parsers_phase2.md](FEATURE_dh_parsers_phase2.md), [FEATURE_dh_parsers_phase3.md](FEATURE_dh_parsers_phase3.md) (all parsers complete)
+**Dependencies**: [FEATURE_dh_parsers_phase1.md](FEATURE_dh_parsers_phase1.md) ✅, [FEATURE_dh_parsers_phase2.md](FEATURE_dh_parsers_phase2.md) ✅, [FEATURE_dh_parsers_phase3.md](FEATURE_dh_parsers_phase3.md) ✅ (all parsers complete)
+
+---
+
+## Phase 2 & 3 Learnings Applied
+
+**Key learnings from Phase 2 & 3 implementations**:
+
+### 1. Data Quality Standards
+
+Phase 2 achieved **100% accuracy (309/309 entries)**:
+
+- 189/189 abilities ✅
+- 60/60 items ✅
+- 60/60 consumables ✅
+
+**Quality bar for embeddings**: Zero tolerance for inaccurate data. Generate embeddings only after validation confirms 100% accuracy.
+
+### 2. Systematic Validation Before Embedding Generation
+
+**4-step methodology** (must complete BEFORE generating embeddings):
+
+1. **Hallucination check**: Verify ALL DB records exist in source files
+2. **Content type check**: Verify ALL records are in correct table
+3. **Sample accuracy**: Randomly verify 10% for data field accuracy
+4. **Report updates**: Document and fix any corrections
+
+**Rationale**: Embeddings are expensive (~$0.10 for 771 entries). Generate only once, after data is perfect.
+
+### 3. Apostrophe Normalization
+
+**Challenge**: Source filenames vs markdown headers vs database entries
+
+- Filenames: `A Soldiers Bond.md` (no apostrophes)
+- Headers: `# A SOLDIER'S BOND` (curly apostrophes ')
+- Database: Stored as extracted from headers
+
+**Impact on embeddings**: No impact - embeddings use `searchable_text` or `description` fields, not filenames
+
+### 4. searchable_text Field Strategy
+
+**Phase 2 pattern**: Include ALL relevant text for semantic search
+
+```typescript
+// For items
+const searchable_text = `${name} ${description}`.trim()
+
+// For abilities
+const searchable_text = `${name} ${description}`.trim()
+
+// For environments (Phase 3)
+const featuresText = features.map((f) => `${f.name} ${f.desc}`).join(' ')
+const searchable_text = `${name} ${description} ${impulses?.join(' ') || ''} ${featuresText}`.trim()
+```
+
+**Why comprehensive text matters**: Enables semantic queries like "underground insect creature" → finds "Acid Burrower"
+
+### 5. Insert vs Upsert for Re-runs
+
+**Learned from Phase 2**: Tables without unique constraints require special handling
+
+**Embedding generation strategy**:
+
+- Check for existing embeddings: `.is('embedding', null)`
+- Only generate for rows missing embeddings
+- Use `.update()` to set embedding (safer than upsert for tables without constraints)
+- Makes re-runs safe and idempotent
+
+### 6. Error Tracking in Long-Running Scripts
+
+**Pattern from Phase 2**:
+
+```typescript
+let count = 0
+let errorCount = 0
+
+for (const row of rows) {
+  try {
+    // Generate embedding
+    count++
+  } catch (err) {
+    errorCount++
+    console.error(`\n  ❌ Failed for ${row.name}:`, err)
+  }
+}
+
+console.log(`\n  ✅ Generated ${count} embeddings`)
+if (errorCount > 0) {
+  console.log(`  ⚠️  ${errorCount} errors encountered`)
+}
+```
+
+This pattern is CRITICAL for embedding generation where individual failures shouldn't block entire process.
+
+### 7. Cost Management
+
+**Phase 1 data volume**: ~377 entries (weapons, classes, armor, adversaries)
+**Phase 2 data volume**: 309 entries (abilities, items, consumables)
+**Phase 3 actual volume**: 74 entries (18 ancestries, 18 subclasses, 19 environments, 9 domains, 9 communities, 1 frame)
+**Total for embeddings**: ~760 entries
+
+**Cost calculation** (text-embedding-3-small):
+
+- Average text length: ~300 tokens
+- 760 entries × 300 tokens = 228,000 tokens
+- Cost: $0.00002 per 1K tokens = **~$0.0046** (under 1 cent!)
+- Phase 2 estimate was conservative at $0.10
+
+**Takeaway**: Embedding cost is negligible. Focus on data quality, not cost optimization.
+
+### 8. Phase 3 Learnings: Database Constraints
+
+**Challenge**: Database tier constraint blocked Tier 4 environments
+
+- Schema had: `CHECK (tier BETWEEN 1 AND 3)`
+- Actual data: 4 environments at Tier 4
+
+**Solution**: Updated constraint via SQL:
+
+```sql
+ALTER TABLE daggerheart_environments
+DROP CONSTRAINT daggerheart_environments_tier_check;
+
+ALTER TABLE daggerheart_environments
+ADD CONSTRAINT daggerheart_environments_tier_check CHECK (tier BETWEEN 1 AND 4);
+```
+
+**Impact on embeddings**: No impact - but validates importance of testing seeding with actual data before generating embeddings.
+
+### 9. Phase 3 Learnings: Subclass Parent Class Inference
+
+**Challenge**: Markdown files don't explicitly declare parent classes
+
+- Subclass files only have name + description
+- No structured field for parent class
+
+**Solution**: Create comprehensive mapping in parser:
+
+```typescript
+function inferParentClass(subclassName: string): string {
+  const mappings: Record<string, string> = {
+    TROUBADOUR: 'Bard',
+    WORDSMITH: 'Bard',
+    'WARDEN OF RENEWAL': 'Druid',
+    // ... all 18 subclasses mapped
+  }
+  return mappings[subclassName.toUpperCase()] || 'Unknown'
+}
+```
+
+**Result**: Perfect distribution - 18 subclasses across 9 classes (exactly 2 per class)
+
+**Impact on embeddings**: Ensures subclass embeddings can be filtered by parent class for class-specific queries.
+
+### 10. Phase 3 Learnings: Simpler Content Types
+
+**Observation**: Not all content types need complex parsing
+
+- **Domains**: Just name + description
+- **Communities**: Name + description + optional community_moves
+- **Frames**: Only 1 entry (The Witherwild)
+
+**Takeaway**: Parser complexity should match content structure. Simple parsers are faster to implement and test.
 
 ---
 
@@ -29,7 +191,7 @@ This phase brings together all previous work and makes the content database prod
 - [ ] Unified seeding script (`npm run seed:daggerheart`) works end-to-end
 - [ ] All 27 integration tests pass (from original test file)
 - [ ] TypeScript types regenerated and committed
-- [ ] ~771 total entries verified across all 13 tables
+- [ ] ~760 total entries verified across all 13 tables (377 Phase 1 + 309 Phase 2 + 74 Phase 3)
 - [ ] Package.json scripts added for seeding & embeddings
 - [ ] Documentation updated with completion status
 - [ ] No TypeScript errors, linting passes, coverage ≥90%
@@ -45,8 +207,9 @@ This phase brings together all previous work and makes the content database prod
 Vector embeddings enable semantic search (e.g., "underground insect creature" → finds "Acid Burrower").
 
 ```typescript
+/* eslint-disable no-console */
 import { OpenAI } from 'openai'
-import { createClient } from '@supabase/supabase-js'
+import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! })
 
@@ -81,10 +244,10 @@ async function generateEmbeddings() {
   console.log('Total cost estimate: ~$0.10 for 771 entries')
 }
 
-async function generateForTable(supabase: any, tableName: string) {
+async function generateForTable(supabase: SupabaseClient, tableName: string) {
   console.log(`📊 Generating embeddings for ${tableName}...`)
 
-  // Get all rows that don't have embeddings yet
+  // Phase 2 learning: Only process rows without embeddings (idempotent)
   const { data: rows } = await supabase
     .from(tableName)
     .select('id, name, searchable_text, description')
@@ -98,6 +261,7 @@ async function generateForTable(supabase: any, tableName: string) {
   console.log(`  Found ${rows.length} rows without embeddings`)
 
   let count = 0
+  let errorCount = 0 // Phase 2 learning: Track errors
   const batchSize = 100 // Process in batches to avoid rate limits
 
   for (let i = 0; i < rows.length; i += batchSize) {
@@ -105,7 +269,7 @@ async function generateForTable(supabase: any, tableName: string) {
 
     for (const row of batch) {
       try {
-        // Use searchable_text if available, otherwise fallback to name + description
+        // Phase 2 learning: Use searchable_text (includes ALL relevant content)
         const textToEmbed = row.searchable_text || `${row.name} ${row.description || ''}`
 
         const response = await openai.embeddings.create({
@@ -115,6 +279,7 @@ async function generateForTable(supabase: any, tableName: string) {
 
         const embedding = response.data[0].embedding
 
+        // Phase 2 learning: Use update() not upsert() for tables without unique constraints
         await supabase.from(tableName).update({ embedding }).eq('id', row.id)
 
         count++
@@ -123,12 +288,18 @@ async function generateForTable(supabase: any, tableName: string) {
         // Small delay to avoid rate limits
         await new Promise((resolve) => setTimeout(resolve, 50))
       } catch (err) {
+        errorCount++ // Phase 2 learning: Count errors
         console.error(`\n  ❌ Failed for ${row.name}:`, err)
       }
     }
   }
 
-  console.log(`\n  ✅ Generated ${count} embeddings for ${tableName}\n`)
+  console.log(`\n  ✅ Generated ${count} embeddings for ${tableName}`)
+  if (errorCount > 0) {
+    console.log(`  ⚠️  ${errorCount} errors encountered\n`)
+  } else {
+    console.log('')
+  }
 }
 
 // ES module main check
@@ -154,6 +325,7 @@ export { generateEmbeddings }
 Runs all phases in sequence.
 
 ```typescript
+/* eslint-disable no-console */
 import { seedAdversaries } from './seed-adversaries-mvp'
 import { seedPhase1 } from './seeders/phase1'
 import { seedPhase2 } from './seeders/phase2'
@@ -411,7 +583,7 @@ Total entries: ~771 across 13 tables
 npm run embeddings:generate
 ```
 
-**Cost estimate**: ~$0.10 for 771 entries using text-embedding-3-small
+**Cost estimate**: ~$0.005 for 771 entries using text-embedding-3-small (Phase 2 learning: Cost is negligible)
 
 ### Step 6: Regenerate Types (5 min)
 
@@ -428,6 +600,13 @@ npm test -- __tests__/integration/daggerheart-content.test.ts
 ```
 
 **Expected**: All 27 tests pass ✅
+
+**Phase 2 learning**: If tests fail, use systematic validation:
+
+1. Check for hallucinations (DB records not in source)
+2. Check for misclassifications (records in wrong table)
+3. Sample 10% for data accuracy
+4. Fix issues BEFORE regenerating embeddings
 
 ### Step 8: Final Validation (20 min)
 
@@ -449,20 +628,20 @@ npm run build             # Should succeed
 - [ ] Embeddings generated for all searchable content
 - [ ] TypeScript types regenerated
 - [ ] All 27 integration tests pass
-- [ ] Database totals verified:
-  - [ ] ~130 adversaries
-  - [ ] ~194 weapons
-  - [ ] ~191 abilities
-  - [ ] ~62 items
-  - [ ] ~62 consumables
-  - [ ] ~36 armor
-  - [ ] ~20 ancestries
-  - [ ] ~20 subclasses
-  - [ ] ~20 environments
-  - [ ] ~11 classes
-  - [ ] ~11 domains
-  - [ ] ~11 communities
-  - [ ] ~3 frames
+- [ ] Database totals verified (Phase 1 learning: allow 5-10% variance):
+  - [ ] ~130 adversaries (≥120)
+  - [ ] ~194 weapons (≥185)
+  - [ ] ~191 abilities (≥180)
+  - [ ] ~62 items (≥58)
+  - [ ] ~62 consumables (≥58)
+  - [ ] ~36 armor (≥32)
+  - [ ] ~20 ancestries (≥18)
+  - [ ] ~20 subclasses (≥18)
+  - [ ] ~20 environments (≥18)
+  - [ ] ~11 classes (≥9)
+  - [ ] ~11 domains (≥9)
+  - [ ] ~11 communities (≥9)
+  - [ ] ~3 frames (≥3)
 - [ ] Linting passes
 - [ ] TypeScript compiles
 - [ ] Coverage ≥90%
@@ -534,8 +713,20 @@ Document how to use semantic search in generation pipeline (future work).
 **Solution**:
 
 - Increase delay between requests (line with `setTimeout`)
-- Reduce batch size
-- Use exponential backoff retry logic
+- Reduce batch size from 100 to 50 or 25
+- Use exponential backoff retry logic:
+  ```typescript
+  const maxRetries = 3
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const response = await openai.embeddings.create(...)
+      break // Success
+    } catch (err) {
+      if (attempt === maxRetries - 1) throw err
+      await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, attempt)))
+    }
+  }
+  ```
 
 ### Seeding Takes Too Long
 
@@ -546,17 +737,97 @@ Document how to use semantic search in generation pipeline (future work).
 - Run phases in parallel (if no dependencies)
 - Use batch inserts instead of individual upserts
 - Increase database connection pool size
+- **Phase 1 timing**: Full seed took ~2-3 minutes for 235 entries
 
 ### Tests Fail After Seeding
 
 **Issue**: Integration tests fail unexpectedly
 
+**Phase 2 Learning**: Use systematic 4-step validation process
+
 **Solution**:
+
+1. **Hallucination check**: Create verification script to compare DB to source files
+   ```bash
+   npx tsx scripts/verify-[content-type].ts
+   ```
+2. **Content type check**: Create content validation script
+   ```bash
+   npx tsx scripts/verify-[content-type]-content.ts
+   ```
+3. **Sample accuracy**: Create sample verification script (10% random sample)
+   ```bash
+   npx tsx scripts/sample-verify-[content-type].ts
+   ```
+4. **Fix data issues**: Re-run seeding after fixing parser bugs
+5. **Only then**: Generate embeddings (expensive, do once)
 
 - Check database counts manually
 - Verify embeddings column is populated
 - Re-run seed scripts (idempotent - safe to re-run)
-- Check for parser bugs with specific failing entries
+- **Phase 1 learning**: Check test expectations allow 5-10% variance
+- **Phase 2 learning**: 100% accuracy is achievable - don't settle for less
+
+### Tier Constraint Blocking Seeds
+
+**Issue**: Some entries fail to seed silently
+
+**Phase 1 Example**: 53 Tier 4 weapons blocked by `CHECK (tier BETWEEN 1 AND 3)`
+
+**Solution**:
+
+```sql
+-- Check ALL tier constraints:
+SELECT
+  conrelid::regclass AS table_name,
+  conname AS constraint_name,
+  pg_get_constraintdef(oid) AS definition
+FROM pg_constraint
+WHERE conname LIKE '%tier%';
+
+-- Update any that are "BETWEEN 1 AND 3":
+ALTER TABLE table_name DROP CONSTRAINT constraint_name;
+ALTER TABLE table_name ADD CONSTRAINT constraint_name CHECK (tier BETWEEN 1 AND 4);
+```
+
+### Environment Variables Not Loading
+
+**Issue**: Scripts fail with auth errors or wrong database
+
+**Phase 1 Learning**: dotenv load order matters
+
+**Solution**:
+
+```bash
+# Verify correct environment:
+echo $NEXT_PUBLIC_SUPABASE_URL
+echo $SUPABASE_SERVICE_ROLE_KEY
+echo $OPENAI_API_KEY
+
+# For tests, check __tests__/setup.ts:
+config({ path: '.env.test.local', override: true })
+
+# For scripts, add to top of file:
+import { config } from 'dotenv'
+config({ path: '.env.local' })
+```
+
+### Migration Drift
+
+**Issue**: Cannot apply migrations due to remote/local mismatch
+
+**Solution**:
+
+```bash
+# Option 1: Use Supabase MCP tool (preferred)
+# In Claude Code: Call mcp__supabase__apply_migration
+
+# Option 2: Pull remote migrations
+npx supabase db pull
+
+# Option 3: Reset local (DESTRUCTIVE - loses local changes)
+npx supabase db reset
+```
 
 ---
 
@@ -566,6 +837,7 @@ Document how to use semantic search in generation pipeline (future work).
 - **Phase 1**: [FEATURE_dh_parsers_phase1.md](FEATURE_dh_parsers_phase1.md)
 - **Phase 2**: [FEATURE_dh_parsers_phase2.md](FEATURE_dh_parsers_phase2.md)
 - **Phase 3**: [FEATURE_dh_parsers_phase3.md](FEATURE_dh_parsers_phase3.md)
+- **Phase 1 Learnings**: Applied throughout (SupabaseClient types, error logging, tier constraints, flexible test expectations)
 - **OpenAI Embeddings**: https://platform.openai.com/docs/guides/embeddings
 - **pgvector**: https://github.com/pgvector/pgvector
 
@@ -573,4 +845,8 @@ Document how to use semantic search in generation pipeline (future work).
 
 **Created**: 2025-10-26
 **Last Updated**: 2025-10-26
-**Final Phase**: This completes the Daggerheart Content Database feature 🎉
+**Revision History**:
+
+- 2025-10-26 - Applied Phase 1 learnings (type safety, eslint-disable, tier constraints, comprehensive troubleshooting)
+- 2025-10-26 - Applied Phase 2 learnings (100% accuracy standard, systematic validation, apostrophe handling, cost analysis, error tracking)
+  **Final Phase**: This completes the Daggerheart Content Database feature 🎉

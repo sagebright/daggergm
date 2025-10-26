@@ -477,13 +477,7 @@ export async function updateMovement(
   updates: Partial<Movement>,
   guestToken?: string,
 ) {
-  const startTime = Date.now()
-  console.log('updateMovement called:', {
-    adventureId,
-    movementId,
-    hasUpdates: !!updates,
-    hasGuestToken: !!guestToken,
-  })
+  // Update movement called
 
   try {
     // Validate updates
@@ -545,8 +539,7 @@ export async function updateMovement(
     const { createServiceRoleClient } = await import('@/lib/supabase/server')
     const serviceClient = await createServiceRoleClient()
 
-    console.log('Starting database update...')
-    const updateStart = Date.now()
+    // Starting database update
 
     const { error } = await serviceClient
       .from('adventures')
@@ -556,7 +549,7 @@ export async function updateMovement(
       })
       .eq('id', adventureId)
 
-    console.log(`Database update took ${Date.now() - updateStart}ms`)
+    // Database update completed
 
     if (error) {
       throw error
@@ -564,7 +557,7 @@ export async function updateMovement(
 
     // Comment out revalidatePath to test if it's causing the delay
     // revalidatePath(`/adventures/${adventureId}`)
-    console.log(`Total updateMovement took ${Date.now() - startTime}ms`)
+    // Update movement completed
 
     return { success: true }
   } catch (error) {

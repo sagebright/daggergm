@@ -59,27 +59,27 @@ export default function NewAdventurePage() {
   }, [])
 
   useEffect(() => {
-    console.log('NewAdventurePage mounted')
+    // console.log('NewAdventurePage mounted')
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void checkAuth()
 
     return () => {
-      console.log('NewAdventurePage unmounted')
+      // console.log('NewAdventurePage unmounted')
     }
   }, [checkAuth])
 
   const handleSelection = async (value: string) => {
-    console.log('handleSelection called with:', value, 'at step:', currentStep)
+    // console.log('handleSelection called with:', value, 'at step:', currentStep)
     const newSelections = { ...selections, [ADVENTURE_STEPS[currentStep]!.id]: value }
-    console.log('New selections:', newSelections)
+    // console.log('New selections:', newSelections)
     setSelections(newSelections)
 
     if (currentStep < ADVENTURE_STEPS.length - 1) {
-      console.log('Moving to next step:', currentStep + 1)
+      // console.log('Moving to next step:', currentStep + 1)
       setCurrentStep(currentStep + 1)
     } else {
       // All steps completed, generate adventure
-      console.log('All steps complete. Adventure config:', newSelections)
+      // console.log('All steps complete. Adventure config:', newSelections)
       await handleAdventureGeneration(newSelections)
     }
   }
@@ -87,7 +87,7 @@ export default function NewAdventurePage() {
   const handleAdventureGeneration = async (config: Record<string, string>) => {
     // Prevent multiple calls
     if (generating) {
-      console.log('Already generating, ignoring duplicate call')
+      // console.log('Already generating, ignoring duplicate call')
       return
     }
 
@@ -97,7 +97,7 @@ export default function NewAdventurePage() {
       return
     }
 
-    console.log('Starting adventure generation')
+    // console.log('Starting adventure generation')
     setGenerating(true)
 
     try {
@@ -117,28 +117,28 @@ export default function NewAdventurePage() {
       }
 
       const result = await generateAdventure(adventureConfig)
-      console.log('generateAdventure result:', result)
+      // console.log('generateAdventure result:', result)
 
       if (result.success) {
-        console.log('Success! Adventure ID:', result.adventureId)
+        // console.log('Success! Adventure ID:', result.adventureId)
         toast.success('Adventure created successfully!')
 
         // Store guest token if present
         if ('isGuest' in result && result.isGuest && 'guestToken' in result && result.guestToken) {
-          console.log('Storing guest token for adventure:', result.adventureId)
+          // console.log('Storing guest token for adventure:', result.adventureId)
           localStorage.setItem(`guest_token_${result.adventureId}`, result.guestToken)
           localStorage.setItem('guest_email', guestEmail)
         }
 
         // Don't reset generating state on success to prevent UI flicker
         const redirectUrl = `/adventures/${result.adventureId}`
-        console.log('Attempting to redirect to:', redirectUrl)
+        // console.log('Attempting to redirect to:', redirectUrl)
 
         // Use replace to prevent back button issues
         router.replace(redirectUrl)
         return // Exit early to avoid resetting generating state
       } else {
-        console.log('Generation failed:', 'error' in result ? result.error : 'Unknown error')
+        // console.log('Generation failed:', 'error' in result ? result.error : 'Unknown error')
         toast.error('error' in result ? result.error : 'Failed to generate adventure')
         setGenerating(false)
       }
