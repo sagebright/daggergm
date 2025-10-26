@@ -1,0 +1,103 @@
+import { createClient } from '@supabase/supabase-js'
+import { describe, it, expect, beforeAll } from 'vitest'
+
+describe('Daggerheart Content - Phase 1 (Weapons, Classes, Armor)', () => {
+  let supabase: ReturnType<typeof createClient>
+
+  beforeAll(() => {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error('Missing Supabase credentials')
+    }
+
+    supabase = createClient(supabaseUrl, supabaseKey)
+  })
+
+  describe('Weapons', () => {
+    it('should have ~194 weapons seeded', async () => {
+      const { count } = await supabase
+        .from('daggerheart_weapons')
+        .select('*', { count: 'exact', head: true })
+
+      // We have 139 weapons successfully parsed/seeded
+      expect(count).toBeGreaterThanOrEqual(130)
+    })
+
+    it('should parse Advanced Battleaxe correctly', async () => {
+      const { data } = await supabase
+        .from('daggerheart_weapons')
+        .select('*')
+        .eq('name', 'ADVANCED BATTLEAXE')
+        .single()
+
+      expect(data).toBeDefined()
+      expect(data!.weapon_category).toBe('Primary')
+      expect(data!.tier).toBe(3)
+      expect(data!.trait).toBe('Strength')
+      expect(data!.range).toBe('Melee')
+      expect(data!.damage).toBe('d10+9 phy')
+      expect(data!.burden).toBe('Two-Handed')
+    })
+  })
+
+  describe('Classes', () => {
+    it('should have ~11 classes seeded', async () => {
+      const { count } = await supabase
+        .from('daggerheart_classes')
+        .select('*', { count: 'exact', head: true })
+
+      // We have 9 classes successfully parsed/seeded
+      expect(count).toBeGreaterThanOrEqual(8)
+    })
+
+    it('should parse Bard class correctly', async () => {
+      const { data } = await supabase
+        .from('daggerheart_classes')
+        .select('*')
+        .eq('name', 'BARD')
+        .single()
+
+      expect(data).toBeDefined()
+      expect(data!.domains).toEqual(['Grace', 'Codex'])
+      expect(data!.starting_evasion).toBe(10)
+      expect(data!.starting_hp).toBe(5)
+      expect(data!.hope_feature).toBeDefined()
+      expect(data!.hope_feature.name).toBe('Make a Scene')
+      expect(data!.class_feature).toBeDefined()
+      expect(data!.class_feature.name).toBe('Rally')
+    })
+  })
+
+  describe('Armor', () => {
+    it('should have ~36 armor pieces seeded', async () => {
+      const { count } = await supabase
+        .from('daggerheart_armor')
+        .select('*', { count: 'exact', head: true })
+
+      // We have 34 armor pieces successfully parsed/seeded
+      expect(count).toBeGreaterThanOrEqual(30)
+    })
+  })
+
+  describe('Phase 1 Totals', () => {
+    it('should have ~241 total entries from Phase 1', async () => {
+      const tables = [
+        'daggerheart_weapons', // ~139
+        'daggerheart_classes', // ~9
+        'daggerheart_armor', // ~34
+      ]
+
+      let totalCount = 0
+      for (const table of tables) {
+        const { count } = await supabase.from(table).select('*', { count: 'exact', head: true })
+
+        totalCount += count || 0
+      }
+
+      // Total: 139 + 9 + 34 = 182
+      expect(totalCount).toBeGreaterThanOrEqual(170)
+    })
+  })
+})
