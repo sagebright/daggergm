@@ -91,7 +91,6 @@ export async function generateAdventure(config: AdventureConfig) {
 
     // Generate a temporary adventure ID for credit metadata
     adventureId = crypto.randomUUID()
-    console.log('Generated adventure ID:', adventureId)
 
     // Only consume credit for authenticated users
     if (userId && !isGuest) {
@@ -184,12 +183,12 @@ export async function generateAdventure(config: AdventureConfig) {
       throw error
     }
 
-    console.log('Adventure saved to database:', adventure.id)
+    // Adventure saved to database
 
     revalidatePath('/dashboard')
     // For guest users, return the guest token along with the adventure ID
     if (isGuest && adventure.guest_token) {
-      console.log('Returning guest adventure with token')
+      // Returning guest adventure with token
       return {
         success: true,
         adventureId: adventure.id,
@@ -198,10 +197,8 @@ export async function generateAdventure(config: AdventureConfig) {
       }
     }
 
-    console.log('Returning authenticated adventure')
-    const response = { success: true, adventureId: adventure.id }
-    console.log('Final response:', response)
-    return response
+    // Returning authenticated adventure
+    return { success: true, adventureId: adventure.id }
   } catch (error) {
     console.error('Error in generateAdventure:', error)
     // Refund credit if generation failed after consumption (only for authenticated users)
@@ -293,11 +290,7 @@ export async function updateAdventureState(
   newState: 'draft' | 'ready' | 'archived',
   guestToken?: string,
 ) {
-  console.log('updateAdventureState called:', {
-    adventureId,
-    newState,
-    hasGuestToken: !!guestToken,
-  })
+  // Update adventure state
 
   try {
     const supabase = await createServerSupabaseClient()

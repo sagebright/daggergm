@@ -10,8 +10,13 @@ WARN_LINES=250
 FAIL=0
 WARNINGS=0
 
-# Check all TypeScript/TSX files in src
+# Check all TypeScript/TSX files in src (excluding auto-generated)
 for file in $(find src -name "*.ts" -o -name "*.tsx" 2>/dev/null); do
+  # Skip auto-generated type files
+  if [[ "$file" == *"/types/supabase.ts" ]] || [[ "$file" == *"database.generated.ts" ]]; then
+    continue
+  fi
+
   lines=$(wc -l < "$file" | tr -d ' ')
 
   if [ "$lines" -gt $MAX_LINES ]; then

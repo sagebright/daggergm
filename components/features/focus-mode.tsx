@@ -89,7 +89,7 @@ export function FocusMode({ movements, adventureId, onUpdate, onExit }: FocusMod
                 focusedId === movement.id && 'ring-2 ring-primary',
               )}
               onClick={() => {
-                console.log('Movement clicked:', movement.id, 'Current focused:', focusedId)
+                // console.log('Movement clicked:', movement.id, 'Current focused:', focusedId)
                 setFocusedId(focusedId === movement.id ? null : movement.id)
               }}
             >

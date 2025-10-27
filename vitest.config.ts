@@ -28,6 +28,7 @@ export default defineConfig({
         '**/dist/**',
         '*.config.{ts,mjs,js}',
         '**/middleware.ts',
+        '**/scripts/**', // Build/seed scripts (verified by integration tests)
       ],
 
       // 🎯 DaggerGM Coverage Thresholds

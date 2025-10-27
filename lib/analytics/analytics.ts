@@ -151,15 +151,15 @@ export class Analytics {
   }
 
   private async storeEventInDatabase(
-    eventName: string,
-    data: EventData,
-    timestamp: string,
+    _eventName: string,
+    _data: EventData,
+    _timestamp: string,
   ): Promise<void> {
     try {
       // TODO: Implement analytics_events table in database
       // For now, just log to console in development
       if (process.env.NODE_ENV === 'development') {
-        console.log('[Analytics Event]', eventName, { data, timestamp })
+        // console.log('[Analytics Event]', eventName, { data, timestamp })
       }
       // const supabase = await this.getSupabase()
       // const { error } = await supabase.from('analytics_events').insert({
@@ -211,14 +211,14 @@ export class Analytics {
   }
 
   private async storePerformanceInDatabase(
-    data: PerformanceData,
-    timestamp: string,
+    _data: PerformanceData,
+    _timestamp: string,
   ): Promise<void> {
     try {
       // TODO: Implement performance_metrics table in database
       // For now, just log to console in development
       if (process.env.NODE_ENV === 'development') {
-        console.log('[Performance Metric]', { data, timestamp })
+        // console.log('[Performance Metric]', { data, timestamp })
       }
       // const supabase = await this.getSupabase()
       // const { error } = await supabase.from('performance_metrics').insert({

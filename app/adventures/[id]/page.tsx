@@ -49,7 +49,7 @@ export default function AdventureDetailPage({ params }: { params: Promise<{ id: 
         notFound()
       }
 
-      console.log('Adventure loaded:', data)
+      // Adventure loaded
       setAdventure(data as unknown as Adventure)
       setLoading(false)
     }
@@ -100,7 +100,7 @@ export default function AdventureDetailPage({ params }: { params: Promise<{ id: 
   }
 
   if (focusMode && adventure.movements) {
-    console.log('Entering focus mode with movements:', adventure.movements)
+    // Entering focus mode with movements
     const formattedMovements = adventure.movements.map((m, index) => ({
       id: m.id || String(index),
       title: m.title,
@@ -108,7 +108,7 @@ export default function AdventureDetailPage({ params }: { params: Promise<{ id: 
       content: m.content || m.description || '', // Use description if content is missing
       estimatedTime: m.estimatedTime || '30 minutes',
     }))
-    console.log('Formatted movements:', formattedMovements)
+    // Formatted movements
 
     return (
       <FocusMode
@@ -132,22 +132,18 @@ export default function AdventureDetailPage({ params }: { params: Promise<{ id: 
                   variant="default"
                   disabled={isUpdating}
                   onClick={() => {
-                    console.log('Mark as Ready button clicked!')
                     setIsUpdating(true)
                     // Use immediate async function
                     void (async () => {
                       try {
-                        console.log('Starting updateAdventureState...')
                         const { updateAdventureState } = await import('@/app/actions/adventures')
                         const guestToken = localStorage.getItem(`guest_token_${adventure.id}`)
-                        console.log('Got guestToken:', !!guestToken)
 
                         const result = await updateAdventureState(
                           adventure.id,
                           'ready',
                           guestToken || undefined,
                         )
-                        console.log('updateAdventureState result:', result)
 
                         if (result.success) {
                           setAdventure((prev) => (prev ? { ...prev, state: 'ready' } : prev))
