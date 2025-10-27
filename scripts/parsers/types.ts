@@ -1,5 +1,35 @@
 // Type definitions for Daggerheart content parsers
 
+// Phase 0 types (Adversaries)
+
+export interface AdversaryFeature {
+  name: string
+  type: 'Passive' | 'Action' | 'Reaction'
+  desc: string
+}
+
+export interface Adversary {
+  name: string
+  tier: number
+  type: string
+  description: string
+  motives_tactics: string[]
+  difficulty: number
+  thresholds: string
+  hp: number
+  stress: number
+  atk: string
+  weapon: string
+  range: string
+  dmg: string
+  experiences?: Record<string, number>
+  features: AdversaryFeature[]
+  searchable_text: string
+  source_book: string
+}
+
+// Phase 1 types
+
 export interface Weapon {
   name: string
   weapon_category: 'Primary' | 'Secondary'

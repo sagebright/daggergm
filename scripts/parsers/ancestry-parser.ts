@@ -23,11 +23,16 @@ export function parseAncestry(markdown: string, filename: string): Ancestry {
 function parseAncestryDescription(lines: string[]): string {
   const descLines: string[] = []
   for (let i = 1; i < lines.length; i++) {
-    if (lines[i].match(/^##\s*ANCESTRY\s+FEATURES/i)) {
+    const line = lines[i]
+    if (!line) {
+      continue
+    }
+
+    if (line.match(/^##\s*ANCESTRY\s+FEATURES/i)) {
       break
     }
-    if (!lines[i].startsWith('#')) {
-      descLines.push(lines[i])
+    if (!line.startsWith('#')) {
+      descLines.push(line)
     }
   }
   return descLines.join(' ').trim()
@@ -41,8 +46,17 @@ function parseAncestryFeatures(lines: string[]): AncestryFeature[] {
   }
 
   for (let i = featuresIndex + 1; i < lines.length; i++) {
-    if (lines[i].startsWith('***') && lines[i].includes(':***')) {
-      const [namePart, ...descParts] = lines[i].split(':***')
+    const line = lines[i]
+    if (!line) {
+      continue
+    }
+
+    if (line.startsWith('***') && line.includes(':***')) {
+      const [namePart, ...descParts] = line.split(':***')
+      if (!namePart) {
+        continue
+      }
+
       const name = namePart.replace(/^\*+/, '').replace(/\*+$/, '').trim()
       const desc = descParts.join(':').trim()
       features.push({ name, desc })

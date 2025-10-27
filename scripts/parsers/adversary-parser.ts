@@ -20,7 +20,11 @@ export function parseAdversary(markdown: string, filename: string): Adversary {
     .filter(Boolean)
 
   // Line 1: # ACID BURROWER
-  const name = parseName(lines[0], filename)
+  const firstLine = lines[0]
+  if (!firstLine) {
+    throw new Error(`Cannot parse adversary: empty file ${filename}`)
+  }
+  const name = parseName(firstLine, filename)
 
   // Line 2: ***Tier 1 Solo***
   const { tier, type } = parseTierAndType(lines[1] || '')
@@ -65,8 +69,9 @@ function parseName(firstLine: string, filename: string): string {
 function parseTierAndType(line: string): { tier: number; type: string } {
   // Format: ***Tier 1 Solo***
   const match = line.match(/\*+Tier\s+(\d+)\s+(.+?)\*+/)
-  const tier = match ? parseInt(match[1], 10) : 1
-  const type = match ? match[2].trim() : 'Standard'
+  const tierStr = match?.[1]
+  const tier = tierStr ? parseInt(tierStr, 10) : 1
+  const type = match?.[2]?.trim() || 'Standard'
   return { tier, type }
 }
 
@@ -89,6 +94,7 @@ function parseMotivesTactics(line: string): string[] {
   return content
     .split(',')
     .map((s) => s.trim())
+    .map((s) => s.replace(/^\*+/, '').replace(/\*+$/, '').trim()) // Strip markdown bold syntax
     .filter(Boolean)
 }
 
@@ -135,7 +141,7 @@ function parseStats(statsLines: string[]): AdversaryStats {
   const expMatch = statsText.match(/Experience:\*\*\s*(.+?)(|$)/)?.[1]?.trim()
   const experiences = expMatch ? parseExperiences(expMatch) : undefined
 
-  return {
+  const stats: AdversaryStats = {
     difficulty,
     thresholds,
     hp,
@@ -144,8 +150,13 @@ function parseStats(statsLines: string[]): AdversaryStats {
     weapon,
     range,
     dmg,
-    experiences,
   }
+
+  if (experiences) {
+    stats.experiences = experiences
+  }
+
+  return stats
 }
 
 function parseExperiences(expString: string): Record<string, number> {
@@ -155,8 +166,10 @@ function parseExperiences(expString: string): Record<string, number> {
   const parts = expString.split(',')
   for (const part of parts) {
     const match = part.trim().match(/^(.+?)\s+\+(\d+)$/)
-    if (match) {
-      experiences[match[1].trim()] = parseInt(match[2], 10)
+    const nameCapture = match?.[1]
+    const bonusCapture = match?.[2]
+    if (nameCapture && bonusCapture) {
+      experiences[nameCapture.trim()] = parseInt(bonusCapture, 10)
     }
   }
 
@@ -175,6 +188,10 @@ function parseFeatures(lines: string[]): AdversaryFeature[] {
   let i = featureStartIndex + 1
   while (i < lines.length) {
     const line = lines[i]
+    if (!line) {
+      i++
+      continue
+    }
 
     // Stop at next major section (###, ##)
     if (line.match(/^##/)) {
@@ -203,6 +220,9 @@ function parseFeature(
   startIndex: number,
 ): (AdversaryFeature & { _lineCount?: number }) | null {
   const line = lines[startIndex]
+  if (!line) {
+    return null
+  }
 
   // Format: ***Relentless (3) - Passive:*** description
   const [namePart, ...descParts] = line.split(':***')
@@ -214,7 +234,8 @@ function parseFeature(
 
   // Extract type: "Relentless (3) - Passive" -> type = "Passive"
   const typeMatch = nameTypeCleaned.match(/\s-\s(Passive|Action|Reaction)/)
-  const type = (typeMatch?.[1] || 'Passive') as 'Passive' | 'Action' | 'Reaction'
+  const typeCapture = typeMatch?.[1]
+  const type = (typeCapture || 'Passive') as 'Passive' | 'Action' | 'Reaction'
 
   const name = nameTypeCleaned.replace(/\s-\s(Passive|Action|Reaction)/, '').trim()
 
@@ -224,13 +245,12 @@ function parseFeature(
   let j = startIndex + 1
 
   // Continue reading until we hit another feature or section
-  while (
-    j < lines.length &&
-    lines[j] &&
-    !lines[j].startsWith('***') &&
-    !lines[j].startsWith('##')
-  ) {
-    desc += ' ' + lines[j]
+  while (j < lines.length) {
+    const nextLine = lines[j]
+    if (!nextLine || nextLine.startsWith('***') || nextLine.startsWith('##')) {
+      break
+    }
+    desc += ' ' + nextLine
     lineCount++
     j++
   }

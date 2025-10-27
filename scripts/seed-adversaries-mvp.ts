@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /**
  * MVP Seeding Script: Adversaries Only
  * Seeds ~130 adversaries from SRD to prove parsing and seeding approach works
@@ -8,9 +9,14 @@ import { readFile } from 'fs/promises'
 import path from 'path'
 
 import { createClient } from '@supabase/supabase-js'
+import { config } from 'dotenv'
 import { glob } from 'glob'
 
 import { parseAdversary } from './parsers/adversary-parser'
+
+// Load environment variables
+config({ path: '.env.test.local' })
+config({ path: '.env.local', override: false })
 
 const SRD_PATH = '/Users/jmfk/Repos/daggergm_backup/daggerheart-srd'
 
@@ -24,6 +30,8 @@ async function seedAdversaries() {
   if (!supabaseUrl || !supabaseKey) {
     throw new Error('Missing Supabase credentials in environment')
   }
+
+  console.log(`🔗 Connecting to: ${supabaseUrl}\n`)
 
   const supabase = createClient(supabaseUrl, supabaseKey)
 

@@ -15,7 +15,10 @@
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
     "db:types": "supabase gen types typescript --project-id ogvbbfzfljglfanceest > types/database.generated.ts",
-    "db:setup": "node scripts/test-connection.js"
+    "db:setup": "node scripts/test-connection.js",
+    "seed:daggerheart": "tsx scripts/seed-daggerheart-content.ts",
+    "embeddings:generate": "tsx scripts/generate-embeddings.ts",
+    "seed:full": "npm run seed:daggerheart && npm run embeddings:generate && npm run db:types"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

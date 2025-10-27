@@ -1,8 +1,10 @@
 import { createClient } from '@supabase/supabase-js'
 import { describe, it, expect, beforeAll } from 'vitest'
 
+import type { Database } from '@/types/database.generated'
+
 describe('Daggerheart Content - Phase 2 (Abilities, Items, Consumables)', () => {
-  let supabase: ReturnType<typeof createClient>
+  let supabase: ReturnType<typeof createClient<Database>>
 
   beforeAll(() => {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -12,7 +14,7 @@ describe('Daggerheart Content - Phase 2 (Abilities, Items, Consumables)', () => 
       throw new Error('Missing Supabase credentials')
     }
 
-    supabase = createClient(supabaseUrl, supabaseKey)
+    supabase = createClient<Database>(supabaseUrl, supabaseKey)
   })
 
   describe('Abilities', () => {
@@ -30,7 +32,11 @@ describe('Daggerheart Content - Phase 2 (Abilities, Items, Consumables)', () => 
       const { data } = await supabase.from('daggerheart_abilities').select('ability_type')
 
       expect(data).toBeDefined()
-      const types = data!.map((row) => row.ability_type)
+      if (!data) {
+        return
+      }
+
+      const types = data.map((row) => row.ability_type)
       expect(types.every((t) => validTypes.includes(t))).toBe(true)
     })
 
@@ -42,8 +48,12 @@ describe('Daggerheart Content - Phase 2 (Abilities, Items, Consumables)', () => 
         .single()
 
       expect(data).toBeDefined()
-      expect(data!.domain).toBe('Bone')
-      expect(data!.level_requirement).toBe(8)
+      if (!data) {
+        return
+      }
+
+      expect(data.domain).toBe('Bone')
+      expect(data.level_requirement).toBe(8)
     })
   })
 
@@ -65,16 +75,24 @@ describe('Daggerheart Content - Phase 2 (Abilities, Items, Consumables)', () => 
         .single()
 
       expect(data).toBeDefined()
-      expect(data!.item_type).toBe('Item')
-      expect(data!.description).toContain('charm to a weapon')
+      if (!data) {
+        return
+      }
+
+      expect(data.item_type).toBe('Item')
+      expect(data.description).toContain('charm to a weapon')
     })
 
     it('should have searchable_text populated', async () => {
       const { data } = await supabase.from('daggerheart_items').select('searchable_text').limit(10)
 
       expect(data).toBeDefined()
-      expect(data!.length).toBeGreaterThan(0)
-      expect(data!.every((row) => row.searchable_text && row.searchable_text.length > 0)).toBe(true)
+      if (!data) {
+        return
+      }
+
+      expect(data.length).toBeGreaterThan(0)
+      expect(data.every((row) => row.searchable_text && row.searchable_text.length > 0)).toBe(true)
     })
   })
 
@@ -96,15 +114,23 @@ describe('Daggerheart Content - Phase 2 (Abilities, Items, Consumables)', () => 
         .single()
 
       expect(data).toBeDefined()
-      expect(data!.uses).toBe(1)
-      expect(data!.description).toContain('paste eats away')
+      if (!data) {
+        return
+      }
+
+      expect(data.uses).toBe(1)
+      expect(data.description).toContain('paste eats away')
     })
 
     it('should default uses to 1 when not specified', async () => {
       const { data } = await supabase.from('daggerheart_consumables').select('uses')
 
       expect(data).toBeDefined()
-      expect(data!.every((row) => row.uses >= 1)).toBe(true)
+      if (!data) {
+        return
+      }
+
+      expect(data.every((row) => row.uses >= 1)).toBe(true)
     })
   })
 

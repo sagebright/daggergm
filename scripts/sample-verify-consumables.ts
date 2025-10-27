@@ -53,7 +53,7 @@ async function sampleVerify() {
         // Convert to title case for filename
         const words = name.split(' ')
         const titleCase = words
-          .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+          .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
           .join(' ')
         const filename = `${titleCase}.md`
         const filePath = path.join(SRD_PATH, 'consumables', filename)

@@ -1,8 +1,10 @@
 import { createClient } from '@supabase/supabase-js'
 import { describe, it, expect, beforeAll } from 'vitest'
 
+import type { Database } from '@/types/database.generated'
+
 describe('Daggerheart Content - Phase 1 (Weapons, Classes, Armor)', () => {
-  let supabase: ReturnType<typeof createClient>
+  let supabase: ReturnType<typeof createClient<Database>>
 
   beforeAll(() => {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -12,7 +14,7 @@ describe('Daggerheart Content - Phase 1 (Weapons, Classes, Armor)', () => {
       throw new Error('Missing Supabase credentials')
     }
 
-    supabase = createClient(supabaseUrl, supabaseKey)
+    supabase = createClient<Database>(supabaseUrl, supabaseKey)
   })
 
   describe('Weapons', () => {
@@ -33,12 +35,16 @@ describe('Daggerheart Content - Phase 1 (Weapons, Classes, Armor)', () => {
         .single()
 
       expect(data).toBeDefined()
-      expect(data!.weapon_category).toBe('Primary')
-      expect(data!.tier).toBe(3)
-      expect(data!.trait).toBe('Strength')
-      expect(data!.range).toBe('Melee')
-      expect(data!.damage).toBe('d10+9 phy')
-      expect(data!.burden).toBe('Two-Handed')
+      if (!data) {
+        return
+      }
+
+      expect(data.weapon_category).toBe('Primary')
+      expect(data.tier).toBe(3)
+      expect(data.trait).toBe('Strength')
+      expect(data.range).toBe('Melee')
+      expect(data.damage).toBe('d10+9 phy')
+      expect(data.burden).toBe('Two-Handed')
     })
   })
 
@@ -60,13 +66,17 @@ describe('Daggerheart Content - Phase 1 (Weapons, Classes, Armor)', () => {
         .single()
 
       expect(data).toBeDefined()
-      expect(data!.domains).toEqual(['Grace', 'Codex'])
-      expect(data!.starting_evasion).toBe(10)
-      expect(data!.starting_hp).toBe(5)
-      expect(data!.hope_feature).toBeDefined()
-      expect(data!.hope_feature.name).toBe('Make a Scene')
-      expect(data!.class_feature).toBeDefined()
-      expect(data!.class_feature.name).toBe('Rally')
+      if (!data) {
+        return
+      }
+
+      expect(data.domains).toEqual(['Grace', 'Codex'])
+      expect(data.starting_evasion).toBe(10)
+      expect(data.starting_hp).toBe(5)
+      expect(data.hope_feature).toBeDefined()
+      expect(data.hope_feature.name).toBe('Make a Scene')
+      expect(data.class_feature).toBeDefined()
+      expect(data.class_feature.name).toBe('Rally')
     })
   })
 

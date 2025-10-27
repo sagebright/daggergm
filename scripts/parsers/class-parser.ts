@@ -29,16 +29,32 @@ export function parseClass(markdown: string, filename: string): Class {
   // Connection questions
   const connection_questions = parseQuestions(lines, 'CONNECTIONS')
 
-  return {
+  const classObj: Class = {
     name,
     description,
-    ...stats,
-    hope_feature,
-    class_feature,
-    background_questions,
-    connection_questions,
+    domains: stats.domains,
+    starting_evasion: stats.starting_evasion,
+    starting_hp: stats.starting_hp,
     source_book: 'Core Rules',
   }
+
+  if (stats.class_items) {
+    classObj.class_items = stats.class_items
+  }
+  if (hope_feature) {
+    classObj.hope_feature = hope_feature
+  }
+  if (class_feature) {
+    classObj.class_feature = class_feature
+  }
+  if (background_questions) {
+    classObj.background_questions = background_questions
+  }
+  if (connection_questions) {
+    classObj.connection_questions = connection_questions
+  }
+
+  return classObj
 }
 
 function parseClassStats(statsLines: string[]) {
@@ -46,7 +62,7 @@ function parseClassStats(statsLines: string[]) {
 
   // Extract domains: [Grace](link) & [Codex](link)
   const domainMatches = Array.from(statsText.matchAll(/\[([^\]]+)\]/g))
-  const domains = domainMatches.map((m) => m[1])
+  const domains = domainMatches.map((m) => m[1]).filter((d): d is string => d !== undefined)
 
   const starting_evasion = parseInt(
     statsText.match(/STARTING EVASION:\*\*\s*(\d+)/)?.[1] || '10',
@@ -57,8 +73,9 @@ function parseClassStats(statsLines: string[]) {
 
   // Class items: comma-separated list after "CLASS ITEMS:**"
   const itemsMatch = statsText.match(/CLASS ITEMS:\*\*\s*(.+?)(\||$)/)
-  const class_items = itemsMatch
-    ? itemsMatch[1]
+  const itemsText = itemsMatch?.[1]
+  const class_items = itemsText
+    ? itemsText
         .split(/,|or/)
         .map((s) => s.trim())
         .filter(Boolean)
@@ -75,7 +92,11 @@ function parseHopeFeature(lines: string[]): ClassFeature | undefined {
 
   // Next line should have feature format: ***Make a Scene:*** description
   let i = hopeIndex + 1
-  while (i < lines.length && !lines[i].startsWith('***')) {
+  while (i < lines.length) {
+    const line = lines[i]
+    if (line && line.startsWith('***')) {
+      break
+    }
     i++
   }
 
@@ -84,15 +105,29 @@ function parseHopeFeature(lines: string[]): ClassFeature | undefined {
   }
 
   const featureLine = lines[i]
+  if (!featureLine) {
+    return undefined
+  }
+
   const [namePart, ...descParts] = featureLine.split(':***')
+  if (!namePart) {
+    return undefined
+  }
+
   const name = namePart.replace(/^\*+/, '').replace(/\*+$/, '').trim()
 
   // Check if there's a cost: "Spend 3 Hope"
   const descText = descParts.join(':').trim()
   const costMatch = descText.match(/Spend\s+(\d+)\s+Hope/i)
-  const cost = costMatch ? parseInt(costMatch[1], 10) : undefined
+  const costStr = costMatch?.[1]
+  const cost = costStr ? parseInt(costStr, 10) : undefined
 
-  return { name, desc: descText, cost }
+  const feature: ClassFeature = { name, desc: descText }
+  if (cost !== undefined) {
+    feature.cost = cost
+  }
+
+  return feature
 }
 
 function parseClassFeature(lines: string[]): ClassFeature | undefined {
@@ -102,7 +137,11 @@ function parseClassFeature(lines: string[]): ClassFeature | undefined {
   }
 
   let i = featureIndex + 1
-  while (i < lines.length && !lines[i].startsWith('***')) {
+  while (i < lines.length) {
+    const line = lines[i]
+    if (line && line.startsWith('***')) {
+      break
+    }
     i++
   }
 
@@ -111,7 +150,15 @@ function parseClassFeature(lines: string[]): ClassFeature | undefined {
   }
 
   const featureLine = lines[i]
+  if (!featureLine) {
+    return undefined
+  }
+
   const [namePart, ...descParts] = featureLine.split(':***')
+  if (!namePart) {
+    return undefined
+  }
+
   const name = namePart.replace(/^\*+/, '').replace(/\*+$/, '').trim()
   const desc = descParts.join(':').trim()
 
@@ -127,8 +174,15 @@ function parseQuestions(lines: string[], sectionName: string): string[] | undefi
   const questions: string[] = []
   let i = sectionIndex + 1
 
-  while (i < lines.length && !lines[i].startsWith('##')) {
+  while (i < lines.length) {
     const line = lines[i]
+    if (!line) {
+      i++
+      continue
+    }
+    if (line.startsWith('##')) {
+      break
+    }
     if (line.startsWith('-')) {
       questions.push(line.replace(/^-\s*/, '').trim())
     }
@@ -143,9 +197,17 @@ function parseDescription(lines: string[]): string {
   let desc = ''
   let i = 1 // Skip name line
 
-  while (i < lines.length && !lines[i].startsWith('>')) {
-    if (!lines[i].startsWith('#')) {
-      desc += lines[i] + ' '
+  while (i < lines.length) {
+    const line = lines[i]
+    if (!line) {
+      i++
+      continue
+    }
+    if (line.startsWith('>')) {
+      break
+    }
+    if (!line.startsWith('#')) {
+      desc += line + ' '
     }
     i++
   }

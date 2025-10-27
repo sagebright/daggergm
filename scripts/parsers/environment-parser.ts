@@ -25,23 +25,33 @@ export function parseEnvironment(markdown: string, filename: string): Environmen
   const searchable_text =
     `${name} ${description} ${impulses?.join(' ') || ''} ${featuresText}`.trim()
 
-  return {
+  const environment: Environment = {
     name,
     tier,
     type,
     description,
-    impulses,
-    difficulty,
-    potential_adversaries,
     features,
     searchable_text,
     source_book: 'Core Rules',
   }
+
+  if (impulses) {
+    environment.impulses = impulses
+  }
+  if (difficulty !== undefined) {
+    environment.difficulty = difficulty
+  }
+  if (potential_adversaries) {
+    environment.potential_adversaries = potential_adversaries
+  }
+
+  return environment
 }
 
 function parseTierType(line: string) {
   const tierMatch = line.match(/Tier\s+(\d+)/)
-  const tier = tierMatch ? parseInt(tierMatch[1], 10) : 1
+  const tierStr = tierMatch?.[1]
+  const tier = tierStr ? parseInt(tierStr, 10) : 1
 
   const typeMatch = line.match(/Tier\s+\d+\s+(.+?)\*/)
   const type = typeMatch?.[1]?.trim() || 'Event'
@@ -66,13 +76,16 @@ function parseEnvironmentStats(statsLines: string[]) {
   const statsText = statsLines.join(' ')
 
   const difficultyMatch = statsText.match(/Difficulty:\*\*\s*(\d+)/)
-  const difficulty = difficultyMatch ? parseInt(difficultyMatch[1], 10) : undefined
+  const difficulty = difficultyMatch?.[1] ? parseInt(difficultyMatch[1], 10) : undefined
 
   const adversariesMatch = statsText.match(/Potential Adversaries:\*\*\s*(.+?)(\||$)/)
-  const potential_adversaries = adversariesMatch?.[1]
-    ?.split(',')
-    .map((s) => s.trim())
-    .filter(Boolean)
+  const adversariesText = adversariesMatch?.[1]
+  const potential_adversaries = adversariesText
+    ? adversariesText
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean)
+    : undefined
 
   return { difficulty, potential_adversaries }
 }
@@ -80,6 +93,9 @@ function parseEnvironmentStats(statsLines: string[]) {
 function parseEnvironmentDescription(lines: string[]): string {
   for (let i = 1; i < lines.length; i++) {
     const line = lines[i]
+    if (!line) {
+      continue
+    }
     if (line.startsWith('*') && !line.startsWith('**') && !line.startsWith('***')) {
       return line.replace(/^\*/, '').replace(/\*$/, '').trim()
     }
@@ -95,18 +111,39 @@ function parseEnvironmentFeatures(lines: string[]): EnvironmentFeature[] {
   }
 
   for (let i = featuresIndex + 1; i < lines.length; i++) {
-    if (lines[i].startsWith('***') && lines[i].includes(' - ') && lines[i].includes(':***')) {
-      const [namePart, ...descParts] = lines[i].split(':***')
-      const [nameRaw, typeRaw] = namePart.split(' - ')
+    const line = lines[i]
+    if (!line) {
+      continue
+    }
 
+    if (line.startsWith('***') && line.includes(' - ') && line.includes(':***')) {
+      const parts = line.split(':***')
+      const namePart = parts[0]
+      if (!namePart) {
+        continue
+      }
+
+      const nameTypeParts = namePart.split(' - ')
+      const nameRaw = nameTypeParts[0]
+      if (!nameRaw) {
+        continue
+      }
+
+      const typeRaw = nameTypeParts[1]
       const name = nameRaw.replace(/^\*+/, '').replace(/\*+$/, '').trim()
       const type = (typeRaw?.trim() || 'Passive') as 'Passive' | 'Action' | 'GM Prompt'
+
+      const descParts = parts.slice(1)
       let desc = descParts.join(':').trim()
 
       // Collect multi-line descriptions
       let j = i + 1
-      while (j < lines.length && !lines[j].startsWith('***') && !lines[j].startsWith('##')) {
-        desc += ' ' + lines[j]
+      while (j < lines.length) {
+        const nextLine = lines[j]
+        if (!nextLine || nextLine.startsWith('***') || nextLine.startsWith('##')) {
+          break
+        }
+        desc += ' ' + nextLine
         j++
       }
 

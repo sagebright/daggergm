@@ -77,11 +77,15 @@ function inferParentClass(subclassName: string): string {
 function parseSubclassDescription(lines: string[]): string {
   const descLines: string[] = []
   for (let i = 1; i < lines.length; i++) {
-    if (lines[i].startsWith('##')) {
+    const line = lines[i]
+    if (!line) {
+      continue
+    }
+    if (line.startsWith('##')) {
       break
     }
-    if (!lines[i].startsWith('#')) {
-      descLines.push(lines[i])
+    if (!line.startsWith('#')) {
+      descLines.push(line)
     }
   }
   return descLines.join(' ').trim()
@@ -91,15 +95,30 @@ function parseSubclassFeatures(lines: string[]): SubclassFeature[] {
   const features: SubclassFeature[] = []
 
   for (let i = 0; i < lines.length; i++) {
-    if (lines[i].startsWith('***') && lines[i].includes(':***')) {
-      const [namePart, ...descParts] = lines[i].split(':***')
+    const line = lines[i]
+    if (!line) {
+      continue
+    }
+
+    if (line.startsWith('***') && line.includes(':***')) {
+      const parts = line.split(':***')
+      const namePart = parts[0]
+      if (!namePart) {
+        continue
+      }
+
       const name = namePart.replace(/^\*+/, '').replace(/\*+$/, '').trim()
+      const descParts = parts.slice(1)
       let desc = descParts.join(':').trim()
 
       // Collect multi-line descriptions
       let j = i + 1
-      while (j < lines.length && !lines[j].startsWith('***') && !lines[j].startsWith('##')) {
-        desc += ' ' + lines[j]
+      while (j < lines.length) {
+        const nextLine = lines[j]
+        if (!nextLine || nextLine.startsWith('***') || nextLine.startsWith('##')) {
+          break
+        }
+        desc += ' ' + nextLine
         j++
       }
 

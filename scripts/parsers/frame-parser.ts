@@ -14,67 +14,86 @@ export function parseFrame(markdown: string, filename: string): Frame {
   const typical_adversaries = parseTypicalAdversaries(lines)
   const lore = parseFrameLore(lines)
 
-  return {
+  const frame: Frame = {
     name,
     description,
-    themes,
-    typical_adversaries,
-    lore,
     source_book: 'Core Rules',
   }
+
+  if (themes) {
+    frame.themes = themes
+  }
+  if (typical_adversaries) {
+    frame.typical_adversaries = typical_adversaries
+  }
+  if (lore) {
+    frame.lore = lore
+  }
+
+  return frame
 }
 
 function parseFrameDescription(lines: string[]): string {
   // Second line usually has the description in italics
   for (let i = 1; i < lines.length; i++) {
-    if (lines[i].startsWith('***') && lines[i].endsWith('***')) {
-      return lines[i].replace(/^\*+/, '').replace(/\*+$/, '').trim()
+    const line = lines[i]
+    if (line && line.startsWith('***') && line.endsWith('***')) {
+      return line.replace(/^\*+/, '').replace(/\*+$/, '').trim()
     }
   }
   return ''
 }
 
-function parseFrameThemes(lines: string[]): string[] | undefined {
+function parseFrameThemes(lines: string[]): string[] | null {
   const themeLine = lines.find((l) => l.includes('THEMES'))
   if (!themeLine) {
-    return undefined
+    return null
   }
 
   // Find the line after "## THEMES"
   const themeIndex = lines.findIndex((l) => l.includes('THEMES'))
   if (themeIndex === -1 || themeIndex + 1 >= lines.length) {
-    return undefined
+    return null
   }
 
   const themeText = lines[themeIndex + 1]
+  if (!themeText) {
+    return null
+  }
+
   return themeText
-    ?.split(',')
+    .split(',')
     .map((s) => s.trim())
     .filter(Boolean)
 }
 
-function parseTypicalAdversaries(_lines: string[]): string[] | undefined {
+function parseTypicalAdversaries(_lines: string[]): string[] | null {
   // In frames, adversaries might be mentioned in various places
   // This is a placeholder for now
-  return undefined
+  return null
 }
 
-function parseFrameLore(lines: string[]): string | undefined {
+function parseFrameLore(lines: string[]): string | null {
   // The OVERVIEW section contains lore
   const overviewIndex = lines.findIndex((l) => l.match(/^##\s*OVERVIEW/i))
   if (overviewIndex === -1) {
-    return undefined
+    return null
   }
 
   const loreLines: string[] = []
   for (let i = overviewIndex + 1; i < lines.length; i++) {
-    if (lines[i].startsWith('##')) {
+    const line = lines[i]
+    if (!line) {
+      continue
+    }
+    if (line.startsWith('##')) {
       break
     }
-    if (!lines[i].startsWith('#')) {
-      loreLines.push(lines[i])
+    if (!line.startsWith('#')) {
+      loreLines.push(line)
     }
   }
 
-  return loreLines.join(' ').trim() || undefined
+  const result = loreLines.join(' ').trim()
+  return result || null
 }

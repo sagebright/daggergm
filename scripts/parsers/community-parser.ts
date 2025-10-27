@@ -12,22 +12,32 @@ export function parseCommunity(markdown: string, filename: string): Community {
   const description = parseDescription(lines)
   const community_moves = parseCommunityMoves(lines)
 
-  return {
+  const community: Community = {
     name,
     description,
-    community_moves,
     source_book: 'Core Rules',
   }
+
+  if (community_moves) {
+    community.community_moves = community_moves
+  }
+
+  return community
 }
 
 function parseDescription(lines: string[]): string {
   const descLines: string[] = []
   for (let i = 1; i < lines.length; i++) {
-    if (lines[i].match(/^##\s*COMMUNITY\s+FEATURE/i)) {
+    const line = lines[i]
+    if (!line) {
+      continue
+    }
+
+    if (line.match(/^##\s*COMMUNITY\s+FEATURE/i)) {
       break
     }
-    if (!lines[i].startsWith('#')) {
-      descLines.push(lines[i])
+    if (!line.startsWith('#')) {
+      descLines.push(line)
     }
   }
   return descLines.join(' ').trim()
@@ -42,8 +52,13 @@ function parseCommunityMoves(lines: string[]): string[] | undefined {
   // In the Highborne example, the feature is a single paragraph starting with ***
   // Look for the feature description after the COMMUNITY FEATURE heading
   for (let i = movesIndex + 1; i < lines.length; i++) {
-    if (lines[i].startsWith('***') && lines[i].includes(':***')) {
-      const [, ...descParts] = lines[i].split(':***')
+    const line = lines[i]
+    if (!line) {
+      continue
+    }
+
+    if (line.startsWith('***') && line.includes(':***')) {
+      const [, ...descParts] = line.split(':***')
       const desc = descParts.join(':').trim()
       return [desc]
     }

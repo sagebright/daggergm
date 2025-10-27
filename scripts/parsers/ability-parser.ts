@@ -20,17 +20,28 @@ export function parseAbility(markdown: string, filename: string): Ability {
 
   const searchable_text = `${name} ${description}`.trim()
 
-  return {
+  const ability: Ability = {
     name,
     ability_type,
-    parent_class,
-    parent_subclass,
-    domain,
     description,
-    level_requirement,
     searchable_text,
     source_book: 'Core Rules',
   }
+
+  if (parent_class) {
+    ability.parent_class = parent_class
+  }
+  if (parent_subclass) {
+    ability.parent_subclass = parent_subclass
+  }
+  if (domain) {
+    ability.domain = domain
+  }
+  if (level_requirement !== undefined) {
+    ability.level_requirement = level_requirement
+  }
+
+  return ability
 }
 
 interface AbilityInfo {
@@ -58,8 +69,9 @@ function parseAbilityInfo(infoLines: string[]): AbilityInfo {
 
   // Extract level: "Level 2"
   const levelMatch = infoText.match(/Level\s+(\d+)/)
-  if (levelMatch) {
-    level_requirement = parseInt(levelMatch[1], 10)
+  const levelStr = levelMatch?.[1]
+  if (levelStr) {
+    level_requirement = parseInt(levelStr, 10)
   }
 
   // Main classes list
@@ -118,16 +130,29 @@ function parseAbilityInfo(infoLines: string[]): AbilityInfo {
     const domainMatch = infoText.match(
       /\b(Grace|Codex|Valor|Sage|Blade|Bone|Arcana|Splendor|Midnight|Tide|Instinct)\b/,
     )
-    domain = domainMatch?.[1] || undefined
+    if (domainMatch?.[1]) {
+      domain = domainMatch[1]
+    }
   }
 
-  return {
+  const info: AbilityInfo = {
     ability_type,
-    level_requirement,
-    parent_class,
-    parent_subclass,
-    domain,
   }
+
+  if (level_requirement !== undefined) {
+    info.level_requirement = level_requirement
+  }
+  if (parent_class) {
+    info.parent_class = parent_class
+  }
+  if (parent_subclass) {
+    info.parent_subclass = parent_subclass
+  }
+  if (domain) {
+    info.domain = domain
+  }
+
+  return info
 }
 
 function parseDescription(lines: string[]): string {

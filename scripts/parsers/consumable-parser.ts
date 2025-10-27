@@ -15,7 +15,8 @@ export function parseConsumable(markdown: string, filename: string): Consumable 
 
   // Uses: Default to 1 (single use), unless specified otherwise in description
   const usesMatch = description.match(/(\d+)\s+uses?/i)
-  const uses = usesMatch ? parseInt(usesMatch[1], 10) : 1
+  const usesStr = usesMatch?.[1]
+  const uses = usesStr ? parseInt(usesStr, 10) : 1
 
   const searchable_text = `${name} ${description}`.trim()
 
@@ -33,6 +34,10 @@ function parseConsumableDescription(lines: string[]): string {
 
   for (let i = 1; i < lines.length; i++) {
     const line = lines[i]
+    if (!line) {
+      continue
+    }
+
     // Skip the type line (last line with *Consumable*)
     if (line.match(/^\*Consumable\*$/)) {
       break
