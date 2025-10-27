@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
 
         // Only process paid sessions
         if (session.payment_status !== 'paid') {
-          // console.log('Skipping unpaid session:', session.id)
+          console.log('Skipping unpaid session:', session.id)
           return NextResponse.json({ received: true })
         }
 
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
           sessionId: session.id,
         })
 
-        // console.log(`Added ${creditAmount} credits to user ${userId}`)
+        console.log(`Added ${creditAmount} credits to user ${userId}`)
         break
       }
 
@@ -95,12 +95,12 @@ export async function POST(request: NextRequest) {
           amount_paid: paymentIntent.amount / 100,
         })
 
-        // console.log(`Added ${creditAmount} credits to user ${userId}`)
+        console.log(`Added ${creditAmount} credits to user ${userId}`)
         break
       }
 
       default:
-      // console.log('Unhandled Stripe event type:', event.type)
+        console.log('Unhandled Stripe event type:', event.type)
     }
 
     return NextResponse.json({ received: true })
