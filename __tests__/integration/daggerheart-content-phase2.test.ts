@@ -130,13 +130,13 @@ describe('Daggerheart Content - Phase 2 (Abilities, Items, Consumables)', () => 
         return
       }
 
-      expect(data.every((row) => row.uses >= 1)).toBe(true)
+      expect(data.every((row) => row.uses !== null && row.uses >= 1)).toBe(true)
     })
   })
 
   describe('Phase 2 Totals', () => {
     it('should have ~315 total entries from Phase 2', async () => {
-      const tables = [
+      const tables: (keyof Database['public']['Tables'])[] = [
         'daggerheart_abilities', // ~191
         'daggerheart_items', // ~62
         'daggerheart_consumables', // ~62

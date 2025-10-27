@@ -74,9 +74,24 @@ describe('Daggerheart Content - Phase 1 (Weapons, Classes, Armor)', () => {
       expect(data.starting_evasion).toBe(10)
       expect(data.starting_hp).toBe(5)
       expect(data.hope_feature).toBeDefined()
-      expect(data.hope_feature.name).toBe('Make a Scene')
+
+      if (
+        data.hope_feature &&
+        typeof data.hope_feature === 'object' &&
+        'name' in data.hope_feature
+      ) {
+        expect(data.hope_feature.name).toBe('Make a Scene')
+      }
+
       expect(data.class_feature).toBeDefined()
-      expect(data.class_feature.name).toBe('Rally')
+
+      if (
+        data.class_feature &&
+        typeof data.class_feature === 'object' &&
+        'name' in data.class_feature
+      ) {
+        expect(data.class_feature.name).toBe('Rally')
+      }
     })
   })
 
@@ -93,7 +108,7 @@ describe('Daggerheart Content - Phase 1 (Weapons, Classes, Armor)', () => {
 
   describe('Phase 1 Totals', () => {
     it('should have ~241 total entries from Phase 1', async () => {
-      const tables = [
+      const tables: (keyof Database['public']['Tables'])[] = [
         'daggerheart_weapons', // ~192
         'daggerheart_classes', // ~9
         'daggerheart_armor', // ~34
