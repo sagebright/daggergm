@@ -18,10 +18,10 @@ This directory contains feature specifications for DaggerGM development.
 
 ### Phase 2: Business Model & Structure
 
-| Feature                                | Priority    | Status         | Doc                                                      |
-| -------------------------------------- | ----------- | -------------- | -------------------------------------------------------- |
-| **Remove Guest Free Adventures**       | 🔴 Critical | ⏳ Not Started | [FEATURE](FEATURE_remove_guest_free_adventures.md)       |
-| **Expansion Four-Component Structure** | 🔴 Critical | ⏳ Not Started | [FEATURE](FEATURE_expansion_four_component_structure.md) |
+| Feature                               | Priority    | Status      | Doc                                                     |
+| ------------------------------------- | ----------- | ----------- | ------------------------------------------------------- |
+| **Remove Guest Free Adventures**      | 🔴 Critical | ✅ Complete | [FEATURE](FEATURE_remove_guest_free_adventures.md)      |
+| **Expansion Six-Component Structure** | 🔴 Critical | ✅ Complete | [FEATURE](FEATURE_expansion_six_component_structure.md) |
 
 ### Phase 3: UI/UX Enhancement
 
@@ -32,7 +32,16 @@ This directory contains feature specifications for DaggerGM development.
 
 ---
 
-## ✅ Completed Features (Archived)
+## ✅ Completed Features
+
+### Recent (In docs/FEATURES)
+
+| Feature                               | Completed  | PR  | Doc                                                     |
+| ------------------------------------- | ---------- | --- | ------------------------------------------------------- |
+| **Remove Guest Free Adventures**      | 2025-10-28 | #68 | [FEATURE](FEATURE_remove_guest_free_adventures.md)      |
+| **Expansion Six-Component Structure** | 2025-10-27 | #64 | [FEATURE](FEATURE_expansion_six_component_structure.md) |
+
+### Archived (In docs/archive)
 
 | Feature                               | Completed  | Doc                                                                |
 | ------------------------------------- | ---------- | ------------------------------------------------------------------ |
@@ -111,4 +120,4 @@ When creating new FEATURE docs, use this structure:
 
 ---
 
-**Last Updated**: 2025-10-26
+**Last Updated**: 2025-10-28

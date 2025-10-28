@@ -1,9 +1,10 @@
 # Feature: Remove Guest Free Adventures
 
-**Status**: Not Started
+**Status**: ✅ Complete (Merged to main)
 **Priority**: 🔴 Critical
 **Phase**: 1 - Fix Business Model
-**Estimated Time**: 45 minutes
+**Completed**: 2025-10-28
+**PR**: #68
 **Dependencies**: None
 
 ---

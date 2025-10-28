@@ -1,8 +1,9 @@
 # DaggerGM System Overview
 
-**Version**: 2.0 (Current Implementation)
-**Date**: 2025-10-24
+**Version**: 2.1 (Current Implementation)
+**Date**: 2025-10-28
 **Status**: Active Development
+**Last Major Change**: Removed guest free adventures (PR #68)
 
 ---
 
@@ -15,7 +16,8 @@
 - **For**: Game Masters preparing one-shot Daggerheart adventures
 - **Problem**: Adventure prep is time-consuming (typically 2-4 hours) and creatively draining
 - **Solution**: AI-guided generation with limited refinement cycles (10 at Scaffold, 20 at Expansion) and Frame-aware context
-- **Business Model**: Credit-based purchases (NOT subscriptions) - 1 credit = 1 adventure generation (no free generations in MVP)
+- **Business Model**: Credit-based purchases (NOT subscriptions) - 1 credit = 1 adventure generation
+- **Access Model**: Authentication required for all adventure generation (no guest access)
 
 ---
 
@@ -127,17 +129,14 @@ Export (Markdown)
 - Uses semantic search to inject relevant context into prompts
 - Ensures generated adventures match frame tone/themes
 
-### 3. Guest System
+### 3. Authentication System
 
-**MVP Guest Access:**
+**Authentication Requirements:**
 
-- Guests can create free account (no payment required)
-- Must have credits to generate adventures (no free adventure in MVP)
-- Guest capabilities in MVP:
-  - View main landing page (most functionality grayed out)
-  - Download sample adventure
-  - Purchase credits via Stripe
-  - After purchase, can generate adventures like registered users
+- All users must create an account to generate adventures (Supabase Auth)
+- No guest access for adventure generation (removed in v1.1)
+- Free account creation (email/password via Supabase)
+- Must purchase credits before generating first adventure
 
 ### 4. Credit System
 

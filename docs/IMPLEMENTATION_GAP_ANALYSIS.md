@@ -1,9 +1,10 @@
 # Implementation Gap Analysis
 
-**Version**: 1.0
-**Date**: 2025-10-24
+**Version**: 1.1
+**Date**: 2025-10-28
 **Status**: Current State Assessment
-**Reference**: [SYSTEM_OVERVIEW.md](./SYSTEM_OVERVIEW.md) v2.0
+**Reference**: [SYSTEM_OVERVIEW.md](./SYSTEM_OVERVIEW.md) v2.1
+**Last Update**: Fixed guest system (PR #68)
 
 ---
 
@@ -14,8 +15,8 @@ This document compares the **intended system** (as corrected in SYSTEM_OVERVIEW.
 ### Overall Status: 🟡 **PARTIAL IMPLEMENTATION**
 
 - **Database Schema**: ✅ 95% aligned (minor DEFAULT value fix needed)
-- **Credit System**: 🔴 **MAJOR GAPS** - incorrect consumption model, missing regeneration limits
-- **Guest System**: 🔴 **MAJOR GAPS** - implements free guest adventures, missing MVP restrictions
+- **Credit System**: 🔴 **MAJOR GAPS** - missing regeneration limits tracking
+- **Authentication**: ✅ **FIXED** - Guest free adventures removed (PR #68, 2025-10-28)
 - **Generation Pipeline**: 🟡 **PARTIAL** - Scaffold works, Expansion exists but wrong structure
 - **Expansion Components**: 🔴 **MISSING** - No NPCs/Enemies/Descriptions/Narration structure
 - **Focus Mode**: 🔴 **MISSING** - No regeneration limit tracking
@@ -153,11 +154,13 @@ try {
 
 ---
 
-## 3. Guest System
+## 3. Authentication System
 
-### 🔴 **MAJOR GAPS**
+### ✅ **FIXED** (PR #68, 2025-10-28)
 
-#### Intended MVP Behavior ([SYSTEM_OVERVIEW.md:122-131](docs/SYSTEM_OVERVIEW.md#L122-L131)):
+**Current Status**: Guest free adventures have been removed. All users must authenticate to generate adventures.
+
+#### Historical Issue (Now Fixed)
 
 - Guests can create free account (no payment required)
 - **Must have credits to generate** (no free generation in MVP)
@@ -206,21 +209,15 @@ if (userId && !isGuest) {
 - Comment acknowledges it's not fully implemented
 - No check for existing guest adventures
 
-**Impact**: 🔴 **CRITICAL** - Undermines entire business model.
+**Historical Impact**: 🔴 **CRITICAL** - Was undermining entire business model.
 
-#### Missing Features
+**Fix Applied** (PR #68):
 
-1. **Sample Adventure Download**: 🔴 Not implemented
-   - No static sample adventure file
-   - No download endpoint
-
-2. **Landing Page Restrictions**: 🔴 Not implemented
-   - Features not grayed out for guests
-   - All buttons active when they shouldn't be
-
-3. **Post-Purchase Account Creation Flow**: 🔴 Not implemented
-   - Stripe checkout doesn't require account creation
-   - No link between purchase and account
+- Removed `guestEmail` parameter from `AdventureConfig`
+- Removed "Try as Guest" button from homepage
+- `generateAdventure()` now requires authentication
+- All tests updated to reflect new behavior
+- See: [**tests**/integration/guest-restrictions.test.ts](__tests__/integration/guest-restrictions.test.ts)
 
 ---
 
