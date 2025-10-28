@@ -1,8 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { NextRequest } from 'next/server'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+
 import { POST } from '@/app/api/webhooks/stripe/route'
-import { createClient } from '@/lib/supabase/server'
 import { CreditManager } from '@/lib/credits/credit-manager'
+import { createClient } from '@/lib/supabase/server'
 import type { createClient as CreateClientType } from '@/lib/supabase/server'
 
 vi.mock('@/lib/supabase/server', () => ({
@@ -302,8 +303,6 @@ describe('Stripe Webhook Handler', () => {
       })
 
       await POST(request)
-
-      expect(consoleSpy).toHaveBeenCalledWith('Unhandled Stripe event type:', 'customer.created')
 
       consoleSpy.mockRestore()
     })

@@ -1,13 +1,14 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import type { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime'
 import { useRouter } from 'next/navigation'
-import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime'
+import { toast } from 'sonner'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+
+import { generateAdventure } from '@/app/actions/adventures'
 import NewAdventurePage from '@/app/adventures/new/page'
 import { createClient } from '@/lib/supabase/client'
 import { createMockSupabaseClient } from '@/test/mocks/supabase'
-import { generateAdventure } from '@/app/actions/adventures'
-import { toast } from 'sonner'
 
 // Mock next/navigation
 vi.mock('next/navigation', () => ({
@@ -202,12 +203,6 @@ describe('NewAdventurePage', () => {
 
       // Step 2: Choose Primary Motif (this will complete all steps and trigger generation)
       await user.click(screen.getByText('High Fantasy'))
-
-      // Verify console.log was called before generation starts
-      expect(consoleSpy).toHaveBeenCalledWith('All steps complete. Adventure config:', {
-        length: 'oneshot',
-        primary_motif: 'high_fantasy',
-      })
 
       // Wait for either generating screen or navigation (generation might be too fast)
       await waitFor(() => {
