@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+
 import { generateAdventure } from '@/app/actions/adventures'
-import { createServerSupabaseClient, createServiceRoleClient } from '@/lib/supabase/server'
 import { CreditManager } from '@/lib/credits/credit-manager'
 import { getLLMProvider } from '@/lib/llm/provider'
+import { createServerSupabaseClient, createServiceRoleClient } from '@/lib/supabase/server'
 
 // Mock dependencies
 vi.mock('@/lib/supabase/server', () => ({
@@ -168,15 +169,15 @@ describe('Adventure Actions - Validation', () => {
       expect(mockCreditManager.consumeCredit).not.toHaveBeenCalled()
     })
 
-    it('should reject invalid guest email format', async () => {
+    it('should block unauthenticated users (guest email no longer supported)', async () => {
       mockSupabaseClient.auth.getUser.mockResolvedValue({
-        data: { user: null }, // Guest user
+        data: { user: null }, // No authenticated user
       })
 
       const config = {
         length: 'oneshot',
         primary_motif: 'high_fantasy',
-        guestEmail: 'not-an-email',
+        guestEmail: 'valid@email.com', // Guest email ignored
       }
 
       const result = await generateAdventure(config)
@@ -184,7 +185,7 @@ describe('Adventure Actions - Validation', () => {
       expect(result.success).toBe(false)
       if (!result.success) {
         expect((result as { success: false; error: string }).error).toContain(
-          'Invalid email address',
+          'Authentication required',
         )
       }
       expect(mockCreditManager.consumeCredit).not.toHaveBeenCalled()

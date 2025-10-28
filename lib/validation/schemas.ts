@@ -19,7 +19,6 @@ export const adventureConfigSchema = z.object({
   party_level: z.number().int().min(1).max(20).default(1),
   difficulty: z.enum(['easier', 'standard', 'harder']).default('standard'),
   stakes: z.enum(['low', 'personal', 'high', 'world']).default('personal'),
-  guestEmail: emailSchema.optional(),
 })
 
 // Credit package IDs

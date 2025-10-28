@@ -110,12 +110,6 @@ export default function NewAdventurePage() {
       if (result.success) {
         toast.success('Adventure created successfully!')
 
-        // Store guest token if present
-        if ('isGuest' in result && result.isGuest && 'guestToken' in result && result.guestToken) {
-          localStorage.setItem(`guest_token_${result.adventureId}`, result.guestToken)
-          localStorage.setItem('guest_email', guestEmail)
-        }
-
         // Don't reset generating state on success to prevent UI flicker
         const redirectUrl = `/adventures/${result.adventureId}`
 

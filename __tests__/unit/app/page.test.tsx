@@ -1,7 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import HomePage from '@/app/page'
 import { redirect } from 'next/navigation'
+import type React from 'react'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+
+import HomePage from '@/app/page'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 
 // Mock dependencies
@@ -88,12 +90,12 @@ describe('HomePage', () => {
       expect(getStartedButton).toHaveAttribute('href', '/auth/login')
     })
 
-    it('should have Try as Guest button linking to adventures', async () => {
+    it('should not have Try as Guest button', async () => {
       const result = await HomePage()
       render(result)
 
-      const guestButton = screen.getByRole('link', { name: 'Try as Guest' })
-      expect(guestButton).toHaveAttribute('href', '/adventures/new')
+      const guestButton = screen.queryByRole('link', { name: 'Try as Guest' })
+      expect(guestButton).not.toBeInTheDocument()
     })
   })
 

@@ -74,17 +74,20 @@ describe('Validation Schemas', () => {
       }
     })
 
-    it('should accept guest email', () => {
+    it('should reject guest email (no longer supported)', () => {
       const configWithEmail = {
         length: 'oneshot',
         primary_motif: 'high_fantasy',
         guestEmail: 'test@example.com',
       }
 
+      // guestEmail is no longer part of the schema
       const result = adventureConfigSchema.safeParse(configWithEmail)
+      // Should still succeed but guestEmail should be ignored
       expect(result.success).toBe(true)
       if (result.success) {
-        expect(result.data!.guestEmail).toBe('test@example.com')
+        // @ts-expect-error - guestEmail no longer in schema
+        expect(result.data!.guestEmail).toBeUndefined()
       }
     })
   })
