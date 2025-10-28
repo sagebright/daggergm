@@ -114,6 +114,9 @@ describe('Movement Server Actions', () => {
             single: vi.fn().mockResolvedValueOnce({ data: mockAdventureWithRegen }),
           }),
         }),
+        update: vi.fn().mockReturnValue({
+          eq: vi.fn().mockResolvedValueOnce({ data: null, error: null }),
+        }),
       })
 
       mockLLMProvider.expandMovement.mockResolvedValueOnce({
@@ -124,15 +127,13 @@ describe('Movement Server Actions', () => {
         gmNotes: 'Remember to describe the ancient carvings',
       })
 
-      // Mock update for movements
+      // Mock update for movements - Note: RPC increment is mocked globally in beforeEach
       mockSupabaseClient.from.mockReturnValueOnce({
-        update: vi.fn().mockReturnValue({
-          eq: vi.fn().mockResolvedValueOnce({ data: null, error: null }),
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            single: vi.fn().mockResolvedValueOnce({ data: null }),
+          }),
         }),
-      })
-
-      // Mock update for regeneration counter increment
-      mockSupabaseClient.from.mockReturnValueOnce({
         update: vi.fn().mockReturnValue({
           eq: vi.fn().mockResolvedValueOnce({ data: null, error: null }),
         }),
