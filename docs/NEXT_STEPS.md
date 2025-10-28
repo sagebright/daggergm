@@ -8,145 +8,64 @@
 
 ## 🎯 Executive Summary
 
-Following the successful removal of guest free adventures (PR #68), the next priority is fixing the credit consumption model and implementing regeneration limits. These are **critical business model features** that prevent infinite free content generation.
+Following the successful completion of regeneration limits and expansion UX improvements, the system now has a **complete business model implementation**. All critical gaps have been addressed.
 
 ### Current State
 
 - ✅ **Authentication**: Required for all adventure generation
 - ✅ **Phase 2 Features**: Guest removal & six-component expansion complete
-- 🔴 **Critical Gap**: Expansions/refinements still consume credits (should be free with limits)
-- 🔴 **Critical Gap**: No regeneration limit tracking (users can regenerate infinitely)
+- ✅ **Credit Model**: Fixed - expansions/refinements are FREE with regeneration limits
+- ✅ **Regeneration Limits**: Tracking implemented (10 scaffold, 20 expansion per adventure)
+- ✅ **Expansion UX**: Visual budget display and confirmation dialogs complete
 
 ---
 
-## 🚨 Priority 1: Fix Credit Consumption Model (CRITICAL)
+## ✅ Priority 1: Fix Credit Consumption Model (COMPLETED)
 
-### Problem
+### Status: COMPLETED ✅
 
-The system currently consumes credits for expansions and refinements, which is incorrect. Per the business model:
+**Completed**: 2025-10-28 (Commit e9dee50)
+
+The credit consumption model has been fixed. The system now correctly:
 
 - **1 credit** = 1 adventure generation (initial scaffold)
-- **Expansions/Refinements** = FREE but LIMITED (10 scaffold regens, 20 expansion regens)
+- **Expansions/Refinements** = FREE with regeneration limits (10 scaffold, 20 expansion)
 
-### Impact
+All implementation tasks completed with 100% test coverage.
 
-- 🔴 **CRITICAL** - Users are charged for what should be free
-- 🔴 **CRITICAL** - Business model broken (users can't afford refinements)
-- 🔴 **BLOCKER** - Prevents natural UX flow (Focus Mode unusable due to cost)
+### Implementation Summary
 
-### Implementation Tasks
+All tasks completed:
 
-#### Task 1.1: Add Regeneration Tracking to Database
+- ✅ **Task 1.1**: Database migration added (`scaffold_regenerations_used`, `expansion_regenerations_used`)
+- ✅ **Task 1.2**: Credit consumption removed from expansions/refinements
+- ✅ **Task 1.3**: Regeneration limit logic implemented with atomic increments
+- ✅ **Task 1.4**: Comprehensive integration tests added (100% coverage)
+- ✅ **Task 1.5**: RegenerationBudget component displays usage in Focus Mode
 
-**File**: `supabase/migrations/XXXXX_add_regeneration_tracking.sql`
-
-```sql
--- Add regeneration tracking columns to adventures table
-ALTER TABLE adventures
-ADD COLUMN scaffold_regenerations_used INT DEFAULT 0 CHECK (scaffold_regenerations_used >= 0),
-ADD COLUMN expansion_regenerations_used INT DEFAULT 0 CHECK (expansion_regenerations_used >= 0);
-
--- Add index for performance
-CREATE INDEX idx_adventures_regenerations
-ON adventures(scaffold_regenerations_used, expansion_regenerations_used);
-```
-
-**Time Estimate**: 30 minutes
-
-#### Task 1.2: Remove Credit Consumption from Expansions
-
-**Files**:
-
-- `app/actions/movements.ts:75-86` (expandMovement)
-- `app/actions/movements.ts:240-252` (refineMovement)
-
-**Changes**:
-
-1. Remove `creditManager.consumeCredit()` calls from expansion/refinement actions
-2. Add regeneration limit checks instead
-3. Increment regeneration counters
-
-**Time Estimate**: 1 hour
-
-#### Task 1.3: Implement Regeneration Limit Logic
-
-**File**: `lib/regeneration/limit-checker.ts` (new)
-
-```typescript
-export class RegenerationLimitChecker {
-  async checkScaffoldLimit(adventureId: string): Promise<boolean> {
-    // Check if < 10 scaffold regenerations used
-  }
-
-  async checkExpansionLimit(adventureId: string): Promise<boolean> {
-    // Check if < 20 expansion regenerations used
-  }
-
-  async incrementScaffoldCount(adventureId: string): Promise<void> {
-    // Increment scaffold_regenerations_used
-  }
-
-  async incrementExpansionCount(adventureId: string): Promise<void> {
-    // Increment expansion_regenerations_used
-  }
-}
-```
-
-**Time Estimate**: 2 hours
-
-#### Task 1.4: Add Tests
-
-**Files**:
-
-- `__tests__/integration/regeneration-limits.test.ts`
-- `__tests__/unit/lib/regeneration/limit-checker.test.ts`
-
-**Coverage Target**: 100% (security-critical)
-
-**Time Estimate**: 2 hours
-
-#### Task 1.5: Update UI to Show Regeneration Counts
-
-**Files**:
-
-- `features/focus-mode/components/RegenerationCounter.tsx` (new)
-- Update Focus Mode UI to display "X/10 scaffolds used" and "X/20 expansions used"
-
-**Time Estimate**: 1 hour
-
-### Total Time: ~6-7 hours
+**Reference**: See archived FEATURE documents in `docs/FEATURES/archive/`
 
 ---
 
-## 📋 Priority 2: Improve Expansion UX
+## ✅ Priority 2: Improve Expansion UX (COMPLETED)
 
-### Problem
+### Status: COMPLETED ✅
 
-Current expansion implementation works but could be more user-friendly:
+**Completed**: 2025-10-28 (PR #69)
 
-- No visual feedback for what's being expanded
-- Component regeneration not clearly separated from scene regeneration
-- No clear indication of remaining regeneration budget
+All expansion UX improvements implemented:
 
-### Implementation Tasks
+- ✅ **Task 2.1**: RegenerationBudget component shows visual progress bars and remaining counts
+- ✅ **Task 2.2**: RegenerationConfirmDialog shows confirmation before regeneration
+- ✅ **Task 2.3**: Integrated into Focus Mode UI with localStorage persistence
+- ✅ **100% test coverage**: 11 new unit tests, all passing
 
-#### Task 2.1: Add Visual Regeneration Budget Display
+**Features**:
 
-Show users: "10 scaffold regens remaining" or "15 expansion regens remaining"
-
-**Time Estimate**: 1 hour
-
-#### Task 2.2: Add Regeneration Confirmation Dialog
-
-Before regenerating, show:
-
-- What will be regenerated
-- How many regenerations remain
-- Option to cancel
-
-**Time Estimate**: 1.5 hours
-
-### Total Time: ~2.5 hours
+- Visual budget display with color-coded warnings (green/amber/red)
+- Confirmation dialogs with "Don't ask again" checkbox
+- Keyboard navigation support (Escape to cancel)
+- Low regeneration warnings (≤2 remaining)
 
 ---
 
@@ -231,13 +150,13 @@ ALTER COLUMN credits SET DEFAULT 0;
 
 ## 📅 Recommended Implementation Order
 
-### Week 1: Critical Business Model Fixes
+### ✅ Week 1: Critical Business Model Fixes (COMPLETED)
 
-1. **Day 1-2**: Fix credit consumption model (Task 1.1-1.5) - 6-7 hours
-2. **Day 3**: Improve expansion UX (Task 2.1-2.2) - 2.5 hours
-3. **Day 4-5**: Testing, QA, deployment
+1. ✅ **Day 1-2**: Fix credit consumption model (Task 1.1-1.5) - 6-7 hours
+2. ✅ **Day 3**: Improve expansion UX (Task 2.1-2.2) - 2.5 hours
+3. ✅ **Day 4-5**: Testing, QA, deployment
 
-### Week 2: Content & Polish
+### Week 2: Content & Polish (CURRENT FOCUS)
 
 1. **Day 1-3**: Daggerheart content seeding (Phase 2-4) - 7-10 hours
 2. **Day 4**: Daggerheart theme implementation - 3-4 hours
@@ -279,20 +198,20 @@ ALTER COLUMN credits SET DEFAULT 0;
 
 ## 🚀 Quick Start (Next Session)
 
-To begin implementing Priority 1:
+**Recommended**: Begin implementing Priority 3 (UI/UX Polish)
 
 ```bash
-# 1. Create feature branch
-git checkout -b feature/fix-credit-consumption
+# Option A: Daggerheart Theme
+git checkout -b feature/daggerheart-theme
+# Implement: docs/FEATURES/FEATURE_daggerheart_theme.md
 
-# 2. Create migration file
-npm run db:migration:create add_regeneration_tracking
+# Option B: Dark Mode
+git checkout -b feature/dark-mode
+# Implement: docs/FEATURES/FEATURE_dark_mode.md
 
-# 3. Run tests in watch mode
-npm run test:watch
-
-# 4. Start implementing Task 1.1
-# Edit: supabase/migrations/[timestamp]_add_regeneration_tracking.sql
+# Option C: Content Seeding Phase 2
+git checkout -b feature/content-phase2
+# Implement: docs/FEATURES/FEATURE_daggerheart_content_phase2.md
 ```
 
 ---
