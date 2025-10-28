@@ -1,8 +1,12 @@
 # FEATURE: Dark Mode Implementation
 
-**Purpose**: Implement a dark mode toggle for DaggerGM, providing users with a comfortable viewing experience during extended prep sessions and late-night gaming.
+**Status**: Not Started
+**Priority**: P3.2 (Medium - UI/UX Polish)
+**Estimated Time**: 2-3 hours
+**Dependencies**: FEATURE_daggerheart_theme.md (must be completed first)
+**Business Impact**: User comfort and extended session support
 
-**Priority**: HIGH - Core user experience feature
+**Purpose**: Implement a dark mode toggle for DaggerGM, providing users with a comfortable viewing experience during extended prep sessions and late-night gaming
 
 ---
 
