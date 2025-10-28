@@ -8,6 +8,7 @@ export const ANALYTICS_EVENTS = {
   SCAFFOLD_GENERATED: 'scaffold_generated',
   SCAFFOLD_MOVEMENT_REGENERATED: 'scaffold_movement_regenerated',
   MOVEMENT_EXPANDED: 'movement_expanded',
+  SCENE_EXPANDED: 'scene_expanded', // NEW: Six-component scene expansion
   AI_REFINEMENT_USED: 'ai_refinement_used',
   ADVENTURE_EXPORTED: 'adventure_exported',
   CREDIT_PURCHASED: 'credit_purchased',

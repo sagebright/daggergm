@@ -113,6 +113,7 @@ export class PerformanceMonitor {
     const thresholds: Record<string, number> = {
       adventure_generation: 15.0, // 15 seconds for full adventure generation
       movement_expansion: 8.0, // 8 seconds for movement expansion
+      scene_expansion: 10.0, // 10 seconds for scene expansion (more complex with vector search)
       content_refinement: 5.0, // 5 seconds for content refinement
       export_generation: 3.0, // 3 seconds for export
       database_query: 1.0, // 1 second for database operations

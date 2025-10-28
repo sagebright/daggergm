@@ -47,6 +47,119 @@ export interface ExpansionParams {
   nextMovements?: Movement[]
 }
 
+// =============================================
+// NEW: Scene Expansion Types (Six-Component Structure)
+// =============================================
+
+// NPC with Daggerheart character data
+export interface NPC {
+  id: string
+  name: string
+
+  // Character references
+  classId: string
+  className: string
+  communityId: string
+  communityName: string
+  ancestryId: string
+  ancestryName: string
+
+  // Stats
+  level: number
+  hp: number
+  stress: number
+  evasion: number
+
+  // Optional equipment
+  abilities?: Array<{
+    abilityId: string
+    abilityName: string
+  }>
+  armor?: {
+    armorId: string
+    armorName: string
+    tier: number
+  }
+  weapon?: {
+    weaponId: string
+    weaponName: string
+    tier: number
+  }
+
+  // Personality
+  personality: string
+  role: 'ally' | 'neutral' | 'antagonist' | 'quest_giver'
+  description: string
+}
+
+// Adversary from database
+export interface SceneAdversary {
+  id: string
+  adversaryId: string
+  adversaryName: string
+  quantity: number
+  customizations?: {
+    nameOverride?: string
+    hpModifier?: number
+    stressModifier?: number
+    customTactics?: string
+    customDescription?: string
+  }
+}
+
+// Environment from database
+export interface SceneEnvironment {
+  environmentId: string
+  environmentName: string
+  customDescription?: string
+}
+
+// Loot from database
+export interface SceneLoot {
+  items: Array<{
+    itemId: string
+    itemName: string
+    itemType: 'item' | 'weapon' | 'armor' | 'consumable'
+    tier?: number
+    quantity: number
+  }>
+}
+
+// Full expansion result for a Scene (replaces MovementResult)
+export interface SceneExpansion {
+  // REQUIRED
+  descriptions: string[]
+
+  // OPTIONAL components
+  narration?: string | null
+  npcs?: NPC[]
+  adversaries?: SceneAdversary[]
+  environment?: SceneEnvironment
+  loot?: SceneLoot
+
+  // Legacy fields (for backward compatibility)
+  gmNotes?: string
+  transitions?: {
+    fromPrevious?: string
+    toNext?: string
+  }
+}
+
+// Scene type (replaces Movement concept entirely)
+export interface Scene {
+  id: string
+  title: string
+  type: 'combat' | 'exploration' | 'social' | 'puzzle'
+  description: string // Scaffold summary
+  estimatedTime?: string
+  orderIndex?: number
+  locked?: boolean
+
+  // Expansion data (populated after expansion)
+  expansion?: SceneExpansion
+}
+
+// LEGACY: MovementResult (kept for backward compatibility during migration)
 export interface MovementResult {
   content: string
   mechanics?: {
@@ -127,7 +240,8 @@ export interface TemperatureStrategy {
 
 export interface LLMProvider {
   generateAdventureScaffold(_params: ScaffoldParams): Promise<ScaffoldResult>
-  expandMovement(_params: ExpansionParams): Promise<MovementResult>
+  expandMovement(_params: ExpansionParams): Promise<MovementResult> // LEGACY
+  expandScene(_params: ExpansionParams): Promise<SceneExpansion> // NEW
   refineContent(_params: RefinementParams): Promise<RefinementResult>
   regenerateMovement(_params: RegenerateMovementParams): Promise<MovementScaffoldResult>
 }
