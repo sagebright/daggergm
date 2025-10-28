@@ -10,6 +10,20 @@ import * as useCreditBalanceModule from '@/components/features/credits/useCredit
 // Mock the useCreditBalance hook
 vi.mock('@/components/features/credits/useCreditBalance')
 
+// Mock credit actions to avoid Stripe initialization
+vi.mock('@/app/actions/credits', () => ({
+  getUserCredits: vi.fn().mockResolvedValue({
+    success: true,
+    adventureCredits: 10,
+    expansionCredits: 0,
+  }),
+  purchaseCredits: vi.fn().mockResolvedValue({
+    success: true,
+    sessionId: 'mock-session-id',
+    url: 'https://checkout.stripe.com/mock',
+  }),
+}))
+
 describe('CreditBalance Component', () => {
   beforeEach(() => {
     vi.clearAllMocks()

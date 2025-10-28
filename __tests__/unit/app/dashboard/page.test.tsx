@@ -16,6 +16,19 @@ vi.mock('@/lib/supabase/server', () => ({
   createServerSupabaseClient: vi.fn(),
 }))
 
+vi.mock('@/app/actions/credits', () => ({
+  getUserCredits: vi.fn().mockResolvedValue({
+    success: true,
+    adventureCredits: 10,
+    expansionCredits: 0,
+  }),
+  purchaseCredits: vi.fn().mockResolvedValue({
+    success: true,
+    sessionId: 'mock-session-id',
+    url: 'https://checkout.stripe.com/mock',
+  }),
+}))
+
 vi.mock('next/link', () => ({
   default: ({
     children,
