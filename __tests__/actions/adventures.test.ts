@@ -1,10 +1,11 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { generateAdventure, getAdventure, getUserAdventures } from '@/app/actions/adventures'
-import { createServerSupabaseClient, createServiceRoleClient } from '@/lib/supabase/server'
 import { OpenAI } from 'openai'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+
+import { generateAdventure, getAdventure, getUserAdventures } from '@/app/actions/adventures'
 import { CreditManager } from '@/lib/credits/credit-manager'
 import { InsufficientCreditsError } from '@/lib/credits/errors'
 import { getLLMProvider } from '@/lib/llm/provider'
+import { createServerSupabaseClient, createServiceRoleClient } from '@/lib/supabase/server'
 
 // Mock dependencies
 vi.mock('@/lib/supabase/server', () => ({
@@ -186,10 +187,10 @@ describe('Adventure Server Actions', () => {
       })
 
       // Assert
-      expect(result).toEqual({
-        success: false,
-        error: 'Authentication required',
-      })
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        expect(result.error).toContain('Authentication required')
+      }
     })
 
     it('should handle LLM errors gracefully and refund credits', async () => {

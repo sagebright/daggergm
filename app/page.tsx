@@ -32,11 +32,6 @@ export default async function Home() {
               <Link href="/auth/login">
                 <Button size="lg">Get Started</Button>
               </Link>
-              <Link href="/adventures/new">
-                <Button variant="outline" size="lg">
-                  Try as Guest
-                </Button>
-              </Link>
             </div>
           </div>
         </div>

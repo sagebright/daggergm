@@ -196,7 +196,7 @@ describe('Adventure Generation with Credits', () => {
     )
   })
 
-  it('should handle guest users without authentication', async () => {
+  it('should block unauthenticated users (guests no longer supported)', async () => {
     // Mock no authenticated user
     const { createServerSupabaseClient } = await import('@/lib/supabase/server')
     vi.mocked(createServerSupabaseClient).mockResolvedValueOnce({
@@ -221,7 +221,7 @@ describe('Adventure Generation with Credits', () => {
 
     expect(result.success).toBe(false)
     if (!result.success && 'error' in result) {
-      expect(result.error).toBe('Authentication required')
+      expect(result.error).toContain('Authentication required')
     }
     expect(mockCreditManager.consumeCredit).not.toHaveBeenCalled()
   })

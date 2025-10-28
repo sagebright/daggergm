@@ -1,15 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+
 import {
   generateAdventure,
   getUserAdventures,
   updateAdventureState,
 } from '@/app/actions/adventures'
-import { createServerSupabaseClient, createServiceRoleClient } from '@/lib/supabase/server'
 import { CreditManager } from '@/lib/credits/credit-manager'
-import { getLLMProvider } from '@/lib/llm/provider'
 import { InsufficientCreditsError } from '@/lib/credits/errors'
-import { RateLimitError } from '@/lib/rate-limiting/rate-limiter'
+import { getLLMProvider } from '@/lib/llm/provider'
 import * as rateLimitMiddleware from '@/lib/rate-limiting/middleware'
+import { RateLimitError } from '@/lib/rate-limiting/rate-limiter'
+import { createServerSupabaseClient, createServiceRoleClient } from '@/lib/supabase/server'
 
 // Mock dependencies
 vi.mock('@/lib/supabase/server', () => ({
@@ -137,41 +138,24 @@ describe('Adventure Actions - Full Coverage', () => {
     })
   })
 
-  describe('generateAdventure - Guest Users', () => {
-    it('should allow guest user with valid email', async () => {
+  describe('generateAdventure - Guest Users (No Longer Supported)', () => {
+    it('should block guest user even with valid email', async () => {
       mockSupabaseClient.auth.getUser.mockResolvedValue({
         data: { user: null },
       })
 
-      mockLLMProvider.generateAdventureScaffold.mockResolvedValue({
-        title: 'Test Adventure',
-        movements: [],
-      })
-
-      const mockInsert = vi.fn().mockReturnThis()
-      const mockSelect = vi.fn().mockReturnThis()
-      const mockSingle = vi.fn().mockResolvedValue({
-        data: { id: 'test-uuid', title: 'Test Adventure', guest_token: 'token-123' },
-        error: null,
-      })
-
-      const mockFrom = vi.fn().mockReturnValue({
-        insert: mockInsert,
-        select: mockSelect,
-        single: mockSingle,
-      })
-
-      mockServiceRoleClient.from = mockFrom
-
       const config = {
         length: 'oneshot',
         primary_motif: 'high_fantasy',
-        guestEmail: 'guest@example.com',
+        guestEmail: 'guest@example.com', // Guest email is now ignored
       }
 
       const result = await generateAdventure(config)
 
-      expect(result.success).toBe(true)
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        expect(result.error).toContain('Authentication required')
+      }
       expect(mockCreditManager.consumeCredit).not.toHaveBeenCalled()
     })
 
@@ -189,7 +173,7 @@ describe('Adventure Actions - Full Coverage', () => {
 
       expect(result.success).toBe(false)
       if (!result.success && 'error' in result) {
-        expect(result.error).toBe('Authentication required')
+        expect(result.error).toContain('Authentication required')
       }
     })
   })

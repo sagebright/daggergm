@@ -24,7 +24,6 @@ export interface AdventureConfig {
   party_level?: number
   difficulty?: string
   stakes?: string
-  guestEmail?: string
 }
 
 export async function generateAdventure(config: AdventureConfig) {
@@ -38,7 +37,6 @@ export async function generateAdventure(config: AdventureConfig) {
     party_level: config.party_level || config.partyLevel,
     difficulty: config.difficulty,
     stakes: config.stakes,
-    guestEmail: config.guestEmail,
   })
 
   if (!validationResult.success) {
@@ -52,7 +50,6 @@ export async function generateAdventure(config: AdventureConfig) {
   const creditManager = new CreditManager()
   let userId: string | null = null
   let adventureId: string | null = null
-  let isGuest = false
 
   try {
     const supabase = await createServerSupabaseClient()
@@ -80,43 +77,37 @@ export async function generateAdventure(config: AdventureConfig) {
       throw error
     }
 
-    // Check if this is a guest user
-    if (!userId && validatedConfig.guestEmail) {
-      isGuest = true
-      // For guests, we'll create one free adventure
-      // In a full implementation, you'd check if this email has already created a free adventure
-    } else if (!userId) {
-      return { success: false, error: 'Authentication required' }
+    // Require authentication
+    if (!userId) {
+      return {
+        success: false,
+        error: 'Authentication required. Please log in to generate adventures.',
+      }
     }
 
     // Generate a temporary adventure ID for credit metadata
     adventureId = crypto.randomUUID()
 
-    // Only consume credit for authenticated users
-    if (userId && !isGuest) {
-      try {
-        await creditManager.consumeCredit(userId, 'adventure', { adventureId })
-      } catch (error) {
-        if (error instanceof InsufficientCreditsError) {
-          return { success: false, error: 'Insufficient credits to generate adventure' }
-        }
-        throw error
+    // Consume credit
+    try {
+      await creditManager.consumeCredit(userId, 'adventure', { adventureId })
+    } catch (error) {
+      if (error instanceof InsufficientCreditsError) {
+        return { success: false, error: 'Insufficient credits to generate adventure' }
       }
+      throw error
     }
 
     // Track adventure start event
-    if (userId || isGuest) {
-      await analytics.track(ANALYTICS_EVENTS.ADVENTURE_STARTED, {
-        userId: userId || 'guest',
-        sessionId: crypto.randomUUID(), // Generate session ID for tracking
-        frame: validatedConfig.frame || 'witherwild',
-        partySize: validatedConfig.party_size,
-        partyLevel: validatedConfig.party_level,
-        difficulty: validatedConfig.difficulty,
-        stakes: validatedConfig.stakes,
-        isGuest,
-      })
-    }
+    await analytics.track(ANALYTICS_EVENTS.ADVENTURE_STARTED, {
+      userId,
+      sessionId: crypto.randomUUID(), // Generate session ID for tracking
+      frame: validatedConfig.frame || 'witherwild',
+      partySize: validatedConfig.party_size,
+      partyLevel: validatedConfig.party_level,
+      difficulty: validatedConfig.difficulty,
+      stakes: validatedConfig.stakes,
+    })
 
     // Generate adventure using LLM provider
     const llmProvider = getLLMProvider()
@@ -132,15 +123,13 @@ export async function generateAdventure(config: AdventureConfig) {
     const duration = (Date.now() - startTime) / 1000
 
     // Track scaffold generation completion
-    if (userId || isGuest) {
-      await analytics.track(ANALYTICS_EVENTS.SCAFFOLD_GENERATED, {
-        userId: userId || 'guest',
-        adventureId,
-        duration,
-        frame: validatedConfig.frame || 'witherwild',
-        movementCount: scaffoldData.movements?.length || 0,
-      })
-    }
+    await analytics.track(ANALYTICS_EVENTS.SCAFFOLD_GENERATED, {
+      userId,
+      adventureId,
+      duration,
+      frame: validatedConfig.frame || 'witherwild',
+      movementCount: scaffoldData.movements?.length || 0,
+    })
 
     // Save to database with the pre-generated ID
     const adventureData = {
@@ -158,17 +147,7 @@ export async function generateAdventure(config: AdventureConfig) {
         stakes: validatedConfig.stakes,
       },
       movements: scaffoldData.movements,
-      user_id: null as string | null,
-      guest_email: null as string | null,
-      guest_token: null as string | null,
-    }
-
-    // Add user_id for authenticated users, guest_email for guests
-    if (isGuest) {
-      adventureData.guest_email = validatedConfig.guestEmail || null
-      adventureData.guest_token = crypto.randomUUID()
-    } else {
-      adventureData.user_id = userId
+      user_id: userId,
     }
 
     // Use service role client for insert to bypass RLS
@@ -184,25 +163,13 @@ export async function generateAdventure(config: AdventureConfig) {
     }
 
     // Adventure saved to database
-
     revalidatePath('/dashboard')
-    // For guest users, return the guest token along with the adventure ID
-    if (isGuest && adventure.guest_token) {
-      // Returning guest adventure with token
-      return {
-        success: true,
-        adventureId: adventure.id,
-        guestToken: adventure.guest_token,
-        isGuest: true,
-      }
-    }
 
-    // Returning authenticated adventure
     return { success: true, adventureId: adventure.id }
   } catch (error) {
     console.error('Error in generateAdventure:', error)
-    // Refund credit if generation failed after consumption (only for authenticated users)
-    if (userId && adventureId && !isGuest) {
+    // Refund credit if generation failed after consumption
+    if (userId && adventureId) {
       try {
         await creditManager.refundCredit(userId, 'adventure', {
           adventureId,
