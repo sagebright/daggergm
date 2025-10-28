@@ -561,6 +561,309 @@ describe('OpenAIProvider', () => {
 
       await expect(provider.generateAdventureScaffold(params)).rejects.toThrow()
     })
+
+    it('should handle network timeout errors', async () => {
+      const params: ScaffoldParams = {
+        frame: 'witherwild',
+        focus: 'mystery',
+        partySize: 4,
+        partyLevel: 2,
+        difficulty: 'standard',
+        stakes: 'personal',
+      }
+
+      vi.mocked(mockOpenAI.chat.completions.create).mockRejectedValueOnce(
+        new Error('Request timeout'),
+      )
+
+      await expect(provider.generateAdventureScaffold(params)).rejects.toThrow('Request timeout')
+    })
+
+    it('should handle 503 service unavailable errors', async () => {
+      const params: ScaffoldParams = {
+        frame: 'witherwild',
+        focus: 'combat',
+        partySize: 4,
+        partyLevel: 2,
+        difficulty: 'standard',
+        stakes: 'personal',
+      }
+
+      const error = new Error('Service temporarily unavailable')
+      ;(error as any).status = 503
+
+      vi.mocked(mockOpenAI.chat.completions.create).mockRejectedValueOnce(error)
+
+      await expect(provider.generateAdventureScaffold(params)).rejects.toThrow(
+        'Service temporarily unavailable',
+      )
+    })
+
+    it('should handle 401 authentication errors', async () => {
+      const params: ScaffoldParams = {
+        frame: 'witherwild',
+        focus: 'exploration',
+        partySize: 4,
+        partyLevel: 2,
+        difficulty: 'standard',
+        stakes: 'personal',
+      }
+
+      const error = new Error('Invalid API key')
+      ;(error as any).status = 401
+
+      vi.mocked(mockOpenAI.chat.completions.create).mockRejectedValueOnce(error)
+
+      await expect(provider.generateAdventureScaffold(params)).rejects.toThrow('Invalid API key')
+    })
+
+    it('should handle empty response choices array', async () => {
+      const params: ScaffoldParams = {
+        frame: 'witherwild',
+        focus: 'mystery',
+        partySize: 4,
+        partyLevel: 2,
+        difficulty: 'standard',
+        stakes: 'personal',
+      }
+
+      vi.mocked(mockOpenAI.chat.completions.create).mockResolvedValueOnce({
+        id: 'test-completion-empty',
+        object: 'chat.completion' as const,
+        created: Date.now(),
+        model: 'gpt-4-turbo-preview',
+        choices: [],
+      })
+
+      await expect(provider.generateAdventureScaffold(params)).rejects.toThrow()
+    })
+
+    it('should handle undefined content in response', async () => {
+      const params: ScaffoldParams = {
+        frame: 'witherwild',
+        focus: 'social',
+        partySize: 4,
+        partyLevel: 2,
+        difficulty: 'standard',
+        stakes: 'personal',
+      }
+
+      vi.mocked(mockOpenAI.chat.completions.create).mockResolvedValueOnce({
+        id: 'test-completion-undefined',
+        object: 'chat.completion' as const,
+        created: Date.now(),
+        model: 'gpt-4-turbo-preview',
+        choices: [
+          {
+            message: {
+              role: 'assistant' as const,
+              content: undefined as any,
+            },
+            finish_reason: 'stop' as const,
+            index: 0,
+            logprobs: null,
+          },
+        ],
+      })
+
+      await expect(provider.generateAdventureScaffold(params)).rejects.toThrow()
+    })
+
+    it('should handle missing finish_reason in response', async () => {
+      const params: ScaffoldParams = {
+        frame: 'witherwild',
+        focus: 'combat',
+        partySize: 4,
+        partyLevel: 2,
+        difficulty: 'standard',
+        stakes: 'personal',
+      }
+
+      vi.mocked(mockOpenAI.chat.completions.create).mockResolvedValueOnce({
+        id: 'test-completion-missing-finish',
+        object: 'chat.completion' as const,
+        created: Date.now(),
+        model: 'gpt-4-turbo-preview',
+        choices: [
+          {
+            message: {
+              role: 'assistant' as const,
+              content: JSON.stringify({
+                title: 'Test',
+                description: 'Test',
+                movements: [],
+              }),
+            },
+            finish_reason: undefined as any,
+            index: 0,
+            logprobs: null,
+          },
+        ],
+      })
+
+      // Should still work even with missing finish_reason
+      const result = await provider.generateAdventureScaffold(params)
+      expect(result).toBeDefined()
+    })
+
+    it('should handle JSON with extra unexpected fields', async () => {
+      const params: ScaffoldParams = {
+        frame: 'witherwild',
+        focus: 'exploration',
+        partySize: 4,
+        partyLevel: 2,
+        difficulty: 'standard',
+        stakes: 'personal',
+      }
+
+      vi.mocked(mockOpenAI.chat.completions.create).mockResolvedValueOnce({
+        id: 'test-completion-extra-fields',
+        object: 'chat.completion' as const,
+        created: Date.now(),
+        model: 'gpt-4-turbo-preview',
+        choices: [
+          {
+            message: {
+              role: 'assistant' as const,
+              content: JSON.stringify({
+                title: 'Test Adventure',
+                description: 'Test description',
+                estimatedDuration: '2-3 hours',
+                movements: [],
+                unexpectedField: 'should be ignored',
+                anotherExtra: 12345,
+              }),
+            },
+            finish_reason: 'stop' as const,
+            index: 0,
+            logprobs: null,
+          },
+        ],
+      })
+
+      const result = await provider.generateAdventureScaffold(params)
+      expect(result).toBeDefined()
+      expect(result.title).toBe('Test Adventure')
+    })
+
+    it('should handle incomplete JSON with wrong types', async () => {
+      const params: ScaffoldParams = {
+        frame: 'witherwild',
+        focus: 'mystery',
+        partySize: 4,
+        partyLevel: 2,
+        difficulty: 'standard',
+        stakes: 'personal',
+      }
+
+      vi.mocked(mockOpenAI.chat.completions.create).mockResolvedValueOnce({
+        id: 'test-completion-incomplete',
+        object: 'chat.completion' as const,
+        created: Date.now(),
+        model: 'gpt-4-turbo-preview',
+        choices: [
+          {
+            message: {
+              role: 'assistant' as const,
+              content: JSON.stringify({
+                title: 'Test Adventure',
+                description: 'Test description',
+                estimatedDuration: '2-3 hours',
+                movements: 'not an array', // Wrong type - should be array
+              }),
+            },
+            finish_reason: 'stop' as const,
+            index: 0,
+            logprobs: null,
+          },
+        ],
+      })
+
+      // This tests that the code handles unexpected types gracefully
+      // Since we're using JSON.parse without Zod validation in the current implementation,
+      // this will actually succeed but return invalid data
+      const result = await provider.generateAdventureScaffold(params)
+      // The provider doesn't validate, so it will parse successfully
+      expect(result).toBeDefined()
+    })
+
+    it('should handle expansion with malformed JSON', async () => {
+      const params: ExpansionParams = {
+        movement: {
+          id: 'mov-1',
+          title: 'Test Movement',
+          type: 'exploration',
+          content: '',
+          estimatedTime: '15 minutes',
+        },
+        adventure: {
+          frame: 'witherwild',
+          focus: 'test',
+          partySize: 4,
+          partyLevel: 2,
+        },
+      }
+
+      vi.mocked(mockOpenAI.chat.completions.create).mockResolvedValueOnce({
+        id: 'test-expansion-malformed',
+        object: 'chat.completion' as const,
+        created: Date.now(),
+        model: 'gpt-4-turbo-preview',
+        choices: [
+          {
+            message: {
+              role: 'assistant' as const,
+              content: '{invalid json structure',
+            },
+            finish_reason: 'stop' as const,
+            index: 0,
+            logprobs: null,
+          },
+        ],
+      })
+
+      // The provider doesn't validate content, it just returns what the LLM provides
+      const result = await provider.expandMovement(params)
+      expect(result.content).toBe('{invalid json structure')
+    })
+
+    it('should handle refinement with empty instruction', async () => {
+      const params: RefinementParams = {
+        content: 'The party enters the tavern.',
+        instruction: '',
+        context: {
+          movement: {
+            type: 'social',
+            title: 'The Rusty Tankard',
+          },
+          adventure: {
+            frame: 'witherwild',
+            tone: 'gritty',
+          },
+        },
+      }
+
+      vi.mocked(mockOpenAI.chat.completions.create).mockResolvedValueOnce({
+        id: 'test-refinement-empty',
+        object: 'chat.completion' as const,
+        created: Date.now(),
+        model: 'gpt-4-turbo-preview',
+        choices: [
+          {
+            message: {
+              role: 'assistant' as const,
+              content: 'The party enters the tavern.',
+            },
+            finish_reason: 'stop' as const,
+            index: 0,
+            logprobs: null,
+          },
+        ],
+      })
+
+      const result = await provider.refineContent(params)
+      expect(result.refinedContent).toBeDefined()
+    })
   })
 
   describe('refinement functionality', () => {
