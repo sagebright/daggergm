@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
+import { CreditBalance } from '@/components/features/credits/CreditBalance'
 import { Button } from '@/components/ui/button'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 
@@ -23,19 +24,14 @@ export default async function DashboardPage() {
     data: Array<{ id: string; title: string; frame: string; state: string }> | null
   }
 
-  // Fetch user profile for credits
-  const { data: profile } = (await supabase
-    .from('user_profiles')
-    .select('credits')
-    .eq('id', user.id)
-    .single()) as { data: { credits: number | null } | null }
-
   return (
     <div className="container mx-auto py-8">
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Your Adventures</h1>
-          <p className="text-muted-foreground">Credits remaining: {profile?.credits || 0}</p>
+          <div className="mt-2">
+            <CreditBalance variant="detailed" />
+          </div>
         </div>
         <Link href="/adventures/new">
           <Button>Generate New Adventure</Button>

@@ -5,6 +5,8 @@ import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 import { generateAdventure, type AdventureConfig } from '@/app/actions/adventures'
+import { CreditBalance } from '@/components/features/credits/CreditBalance'
+import { CreditCost } from '@/components/features/credits/CreditCost'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -159,15 +161,41 @@ export default function NewAdventurePage() {
 
   return (
     <div className="container max-w-2xl mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-2">Create Your Adventure</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-bold">Create Your Adventure</h1>
+        {!isGuest ? <CreditBalance variant="compact" /> : null}
+      </div>
+
+      {!isGuest ? (
+        <Card className="mb-6">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium">Adventure Generation Cost</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Each adventure costs 1 credit to generate
+                </p>
+              </div>
+              <CreditCost action="generate this adventure" cost={1} />
+            </div>
+          </CardContent>
+        </Card>
+      ) : null}
 
       {isGuest ? (
-        <Card className="mb-6">
+        <Card className="mb-6 border-dagger-gold-400/20 bg-dagger-gold-400/5">
           <CardContent className="pt-6 space-y-4">
-            <p className="text-sm text-muted-foreground">
-              You&apos;re creating as a guest. Sign up to save your adventures and access premium
-              features.
-            </p>
+            <div className="flex items-start gap-3">
+              <div className="flex-1">
+                <p className="text-sm font-medium text-dagger-gold-700 dark:text-dagger-gold-300">
+                  🎁 Free Adventure Trial
+                </p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  You&apos;re creating as a guest. Try one free adventure! Sign up to save your
+                  adventures and get more credits.
+                </p>
+              </div>
+            </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email (required for guest access)</Label>
               <Input

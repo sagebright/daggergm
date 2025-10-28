@@ -127,3 +127,6 @@ export async function getUserCredits() {
     }
   }
 }
+
+// TODO: Add getCreditTransactions when credit_transactions table types are generated
+// This will be added in Phase 4 after running: npm run db:types
