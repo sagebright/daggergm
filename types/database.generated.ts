@@ -1,5 +1,4 @@
 /* eslint-disable max-lines */
-// Auto-generated file - exceeds line limit due to comprehensive database types
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
 export type Database = {
@@ -1208,6 +1207,14 @@ export type Database = {
           name: string
           tier: number
         }[]
+      }
+      increment_expansion_regenerations: {
+        Args: { adventure_id: string }
+        Returns: undefined
+      }
+      increment_scaffold_regenerations: {
+        Args: { adventure_id: string }
+        Returns: undefined
       }
       match_adversaries: {
         Args: {

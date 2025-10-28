@@ -9,6 +9,7 @@ import { OpenAIProvider } from '@/lib/llm/openai-provider'
 import type { Movement } from '@/lib/llm/types'
 import { withRateLimit, getRateLimitContext } from '@/lib/rate-limiting/middleware'
 import { RateLimitError } from '@/lib/rate-limiting/rate-limiter'
+import { RegenerationLimitChecker } from '@/lib/regeneration/limit-checker'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { movementUpdateSchema } from '@/lib/validation/movement'
 import {
@@ -152,13 +153,9 @@ export async function expandMovement(adventureId: string, movementId: string) {
       throw error
     }
 
-    // Increment expansion regeneration counter after successful expansion
-    await supabase
-      .from('adventures')
-      .update({
-        expansion_regenerations_used: expansionRegensUsed + 1,
-      })
-      .eq('id', adventureId)
+    // Increment expansion regeneration counter atomically after successful expansion
+    const limitChecker = new RegenerationLimitChecker()
+    await limitChecker.incrementExpansionCount(adventureId)
 
     revalidatePath(`/adventures/${adventureId}`)
 
@@ -281,13 +278,9 @@ export async function refineMovementContent(
       frame: adventure.frame,
     })
 
-    // Increment expansion regeneration counter after successful refinement
-    await supabase
-      .from('adventures')
-      .update({
-        expansion_regenerations_used: expansionRegensUsed + 1,
-      })
-      .eq('id', adventureId)
+    // Increment expansion regeneration counter atomically after successful refinement
+    const limitChecker = new RegenerationLimitChecker()
+    await limitChecker.incrementExpansionCount(adventureId)
 
     return {
       success: true,
