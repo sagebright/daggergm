@@ -8,21 +8,45 @@ import { expandMovement, refineMovementContent } from '@/app/actions/movements'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
+import { RegenerationConfirmDialog } from '@/features/focus-mode/components/RegenerationConfirmDialog'
 
 import type { Movement } from './focus-mode'
 
 interface AIChatProps {
   movement: Movement
   adventureId: string
+  expansionRegenerationsUsed?: number
   onSuggestionApply: (_suggestion: string) => void
+  onRefreshAdventure?: (() => void) | undefined
 }
 
-export function AIChat({ movement, adventureId, onSuggestionApply }: AIChatProps) {
+export function AIChat({
+  movement,
+  adventureId,
+  expansionRegenerationsUsed = 0,
+  onSuggestionApply,
+  onRefreshAdventure,
+}: AIChatProps) {
   const [loading, setLoading] = useState(false)
   const [instruction, setInstruction] = useState('')
   const [_suggestions, setSuggestions] = useState<string[]>([])
+  const [showExpandConfirm, setShowExpandConfirm] = useState(false)
+  const [showRefineConfirm, setShowRefineConfirm] = useState(false)
 
-  const handleExpand = async () => {
+  const remainingExpansionRegens = 20 - expansionRegenerationsUsed
+
+  const handleExpandClick = () => {
+    // Check if user has disabled confirmation
+    const skipConfirm = localStorage.getItem('skip_regen_confirm_expansion') === 'true'
+
+    if (skipConfirm || remainingExpansionRegens === 0) {
+      void performExpand()
+    } else {
+      setShowExpandConfirm(true)
+    }
+  }
+
+  const performExpand = async () => {
     setLoading(true)
     try {
       const result = await expandMovement(adventureId, movement.id)
@@ -35,6 +59,9 @@ export function AIChat({ movement, adventureId, onSuggestionApply }: AIChatProps
         if (result.gmNotes) {
           setSuggestions((prev) => [...prev, `GM Notes: ${result.gmNotes}`])
         }
+
+        // Refresh adventure data to update regeneration counts
+        onRefreshAdventure?.()
       } else {
         toast.error(result.error || 'Failed to expand movement')
       }
@@ -45,12 +72,23 @@ export function AIChat({ movement, adventureId, onSuggestionApply }: AIChatProps
     }
   }
 
-  const handleRefine = async () => {
+  const handleRefineClick = () => {
     if (!instruction.trim()) {
       toast.error('Please provide refinement instructions')
       return
     }
 
+    // Check if user has disabled confirmation
+    const skipConfirm = localStorage.getItem('skip_regen_confirm_expansion') === 'true'
+
+    if (skipConfirm || remainingExpansionRegens === 0) {
+      void performRefine()
+    } else {
+      setShowRefineConfirm(true)
+    }
+  }
+
+  const performRefine = async () => {
     setLoading(true)
     try {
       const result = await refineMovementContent(adventureId, movement.id, instruction)
@@ -59,6 +97,9 @@ export function AIChat({ movement, adventureId, onSuggestionApply }: AIChatProps
         onSuggestionApply(result.content)
         toast.success('Content refined!')
         setInstruction('')
+
+        // Refresh adventure data to update regeneration counts
+        onRefreshAdventure?.()
       } else {
         toast.error(result.error || 'Failed to refine content')
       }
@@ -111,7 +152,16 @@ export function AIChat({ movement, adventureId, onSuggestionApply }: AIChatProps
             <p className="text-sm text-muted-foreground mb-4">
               This movement needs content. Let AI help you expand it!
             </p>
-            <Button onClick={handleExpand} disabled={loading} className="w-full">
+            <Button
+              onClick={handleExpandClick}
+              disabled={loading || remainingExpansionRegens === 0}
+              className="w-full"
+              title={
+                remainingExpansionRegens === 0
+                  ? 'No expansion regenerations remaining for this adventure'
+                  : undefined
+              }
+            >
               {loading ? (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
               ) : (
@@ -148,7 +198,16 @@ export function AIChat({ movement, adventureId, onSuggestionApply }: AIChatProps
               </div>
             </div>
 
-            <Button onClick={handleRefine} disabled={loading} className="w-full">
+            <Button
+              onClick={handleRefineClick}
+              disabled={loading || remainingExpansionRegens === 0}
+              className="w-full"
+              title={
+                remainingExpansionRegens === 0
+                  ? 'No expansion regenerations remaining for this adventure'
+                  : undefined
+              }
+            >
               {loading ? (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
               ) : (
@@ -172,6 +231,28 @@ export function AIChat({ movement, adventureId, onSuggestionApply }: AIChatProps
           </div>
         )}
       </div>
+
+      {/* Expand Confirmation Dialog */}
+      <RegenerationConfirmDialog
+        open={showExpandConfirm}
+        onOpenChange={setShowExpandConfirm}
+        onConfirm={() => void performExpand()}
+        type="expansion"
+        scope="Full scene (6 components)"
+        remainingRegens={remainingExpansionRegens - 1}
+        estimatedTime="~10-15 seconds"
+      />
+
+      {/* Refine Confirmation Dialog */}
+      <RegenerationConfirmDialog
+        open={showRefineConfirm}
+        onOpenChange={setShowRefineConfirm}
+        onConfirm={() => void performRefine()}
+        type="expansion"
+        scope="Content refinement"
+        remainingRegens={remainingExpansionRegens - 1}
+        estimatedTime="~5-10 seconds"
+      />
     </div>
   )
 }

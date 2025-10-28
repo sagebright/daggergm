@@ -19,6 +19,8 @@ interface Adventure {
   frame: string
   focus: string
   state: string
+  scaffold_regenerations_used?: number
+  expansion_regenerations_used?: number
   movements?: Array<{
     id?: string
     title: string
@@ -36,25 +38,26 @@ export default function AdventureDetailPage({ params }: { params: Promise<{ id: 
   const [exportDialogOpen, setExportDialogOpen] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false)
 
-  useEffect(() => {
-    async function loadAdventure() {
-      const { id } = await params
+  const loadAdventure = async () => {
+    const { id } = await params
 
-      // Check for guest token in localStorage
-      const guestToken = localStorage.getItem(`guest_token_${id}`)
+    // Check for guest token in localStorage
+    const guestToken = localStorage.getItem(`guest_token_${id}`)
 
-      const data = await getAdventure(id, guestToken || undefined)
+    const data = await getAdventure(id, guestToken || undefined)
 
-      if (!data) {
-        notFound()
-      }
-
-      // Adventure loaded
-      setAdventure(data as unknown as Adventure)
-      setLoading(false)
+    if (!data) {
+      notFound()
     }
 
+    // Adventure loaded
+    setAdventure(data as unknown as Adventure)
+    setLoading(false)
+  }
+
+  useEffect(() => {
     void loadAdventure()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params])
 
   if (loading) {
@@ -114,8 +117,11 @@ export default function AdventureDetailPage({ params }: { params: Promise<{ id: 
       <FocusMode
         movements={formattedMovements}
         adventureId={adventure.id}
+        scaffoldRegenerationsUsed={adventure.scaffold_regenerations_used ?? 0}
+        expansionRegenerationsUsed={adventure.expansion_regenerations_used ?? 0}
         onUpdate={handleMovementUpdate}
         onExit={() => setFocusMode(false)}
+        onRefreshAdventure={() => void loadAdventure()}
       />
     )
   }

@@ -7,6 +7,7 @@ import { useState, useCallback } from 'react'
 import { AIChat } from '@/components/features/ai-chat'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { RegenerationBudget } from '@/features/focus-mode/components/RegenerationBudget'
 // import { MarkdownEditor } from '@/components/features/markdown-editor' // TODO: Implement when ready
 import { useDebounce } from '@/lib/hooks/use-debounce'
 import { useHotkeys } from '@/lib/hooks/use-hotkeys'
@@ -23,11 +24,22 @@ export interface Movement {
 interface FocusModeProps {
   movements: Movement[]
   adventureId: string
+  scaffoldRegenerationsUsed?: number
+  expansionRegenerationsUsed?: number
   onUpdate: (_movementId: string, _updates: Partial<Movement>) => void
   onExit: () => void
+  onRefreshAdventure?: () => void
 }
 
-export function FocusMode({ movements, adventureId, onUpdate, onExit }: FocusModeProps) {
+export function FocusMode({
+  movements,
+  adventureId,
+  scaffoldRegenerationsUsed = 0,
+  expansionRegenerationsUsed = 0,
+  onUpdate,
+  onExit,
+  onRefreshAdventure,
+}: FocusModeProps) {
   const [focusedId, setFocusedId] = useState<string | null>(null)
   const [isPanelOpen, setIsPanelOpen] = useState(true)
 
@@ -135,12 +147,14 @@ export function FocusMode({ movements, adventureId, onUpdate, onExit }: FocusMod
             <AIChat
               movement={focusedMovement}
               adventureId={adventureId}
+              expansionRegenerationsUsed={expansionRegenerationsUsed}
               onSuggestionApply={(suggestion) => {
                 setLocalContent((prev) => ({ ...prev, [focusedId]: suggestion }))
                 onUpdate(focusedId, {
                   content: suggestion,
                 })
               }}
+              onRefreshAdventure={onRefreshAdventure}
             />
           </motion.div>
         ) : null}
@@ -156,6 +170,16 @@ export function FocusMode({ movements, adventureId, onUpdate, onExit }: FocusMod
       >
         <X className="h-4 w-4" />
       </Button>
+
+      {/* Regeneration Budget Display */}
+      <div className="fixed top-4 left-16 z-50 bg-card border rounded-lg p-3 shadow-sm max-w-sm">
+        <RegenerationBudget
+          scaffoldUsed={scaffoldRegenerationsUsed}
+          scaffoldLimit={10}
+          expansionUsed={expansionRegenerationsUsed}
+          expansionLimit={20}
+        />
+      </div>
     </div>
   )
 }
