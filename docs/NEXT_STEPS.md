@@ -97,22 +97,27 @@ All expansion UX improvements implemented:
 
 ---
 
-## 📊 Priority 4: Daggerheart Content Seeding
+## ✅ Priority 4: Daggerheart Content Seeding (COMPLETED)
 
-### Status
+### Status: COMPLETED ✅
 
-**Current**: Phase 1 complete (weapons/classes/armor seeded)
-**Reference**: Check `docs/archive/FEATURE_daggerheart_content_STATUS.md`
+**Completed**: 2025-10-27 (PR #67, commits 412a823, a72d94f, c64bf60)
 
-### Remaining Phases
+All phases complete:
 
-- **Phase 2**: Abilities/Items/Consumables (~3-4h)
-- **Phase 3**: Remaining content (~2-3h)
-- **Phase 4**: Embeddings generation (~2-3h)
+- ✅ **Phase 1**: Weapons/Classes/Armor parsers (~241 entries)
+- ✅ **Phase 2**: Abilities/Items/Consumables parsers (~315 entries)
+- ✅ **Phase 3**: All remaining content parsers (~215 entries)
+- ✅ **Phase 4**: Embeddings generation (~771 entries)
+- ✅ **Vector search**: Integration tests with 71.98% coverage
 
-**Total Time**: ~7-10 hours
+**Total**: ~771 Daggerheart SRD entries seeded with embeddings
 
-**Note**: This is lower priority than credit model fix but important for content quality.
+**Scripts Available**:
+
+- `npm run seed:daggerheart` - Seed all content
+- `npm run embeddings:generate` - Generate vector embeddings
+- `npm run seed:full` - Full pipeline (seed + embeddings + types)
 
 ---
 
@@ -156,11 +161,11 @@ ALTER COLUMN credits SET DEFAULT 0;
 2. ✅ **Day 3**: Improve expansion UX (Task 2.1-2.2) - 2.5 hours
 3. ✅ **Day 4-5**: Testing, QA, deployment
 
-### Week 2: Content & Polish (CURRENT FOCUS)
+### Week 2: UI/UX Polish (CURRENT FOCUS)
 
-1. **Day 1-3**: Daggerheart content seeding (Phase 2-4) - 7-10 hours
-2. **Day 4**: Daggerheart theme implementation - 3-4 hours
-3. **Day 5**: Dark mode implementation - 2-3 hours
+1. **Day 1-2**: Daggerheart theme implementation - 3-4 hours
+2. **Day 3**: Dark mode implementation - 2-3 hours
+3. **Day 4-5**: Testing, refinement, documentation
 
 ### Week 3: Technical Debt & Optimization
 
