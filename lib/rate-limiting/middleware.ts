@@ -15,6 +15,7 @@ export async function withRateLimit<R>(
   operation:
     | 'adventure_generation'
     | 'movement_expansion'
+    | 'scene_expansion' // NEW: Six-component scene expansion
     | 'movement_regeneration'
     | 'content_refinement'
     | 'export',

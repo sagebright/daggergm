@@ -1,4 +1,5 @@
 /* eslint-disable max-lines */
+// Auto-generated file - exceeds line limit due to comprehensive database types
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
 export type Database = {
@@ -1199,6 +1200,15 @@ export type Database = {
         Args: { p_adventure_id: string; p_user_id: string }
         Returns: boolean
       }
+      get_tier_appropriate_loot: {
+        Args: { item_type?: string; limit_count?: number; party_level: number }
+        Returns: {
+          id: string
+          item_table: string
+          name: string
+          tier: number
+        }[]
+      }
       match_adversaries: {
         Args: {
           match_count?: number
@@ -1290,6 +1300,22 @@ export type Database = {
           tier: number
         }[]
       }
+      search_adversaries: {
+        Args: {
+          limit_count?: number
+          party_level: number
+          search_query: string
+        }
+        Returns: {
+          description: string
+          difficulty: number
+          id: string
+          name: string
+          similarity: number
+          tier: number
+          type: string
+        }[]
+      }
       search_content_chunks: {
         Args: {
           match_count?: number
@@ -1305,6 +1331,15 @@ export type Database = {
           section_type: string
           similarity: number
           title: string
+        }[]
+      }
+      search_environments: {
+        Args: { limit_count?: number; search_query: string }
+        Returns: {
+          description: string
+          id: string
+          name: string
+          similarity: number
         }[]
       }
       search_game_content: {

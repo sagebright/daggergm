@@ -88,6 +88,7 @@ vi.mock('@/lib/llm/provider', () => ({
       ],
     }),
     expandMovement: vi.fn(),
+    expandScene: vi.fn(), // NEW: Six-component scene expansion
     refineContent: vi.fn(),
   })),
 }))
@@ -126,9 +127,6 @@ describe('Adventure Generation with Credits', () => {
       stakes: 'personal',
     })
 
-    if (!result.success) {
-      console.log('Test result:', JSON.stringify(result, null, 2))
-    }
     expect(result.success).toBe(true)
     expect(mockCreditManager.consumeCredit).toHaveBeenCalledWith('user-123', 'adventure', {
       adventureId: 'test-adventure-id',
@@ -166,6 +164,7 @@ describe('Adventure Generation with Credits', () => {
     vi.mocked(getLLMProvider).mockImplementationOnce(() => ({
       generateAdventureScaffold: vi.fn().mockRejectedValueOnce(new Error('LLM Error')),
       expandMovement: vi.fn(),
+      expandScene: vi.fn(), // NEW: Six-component scene expansion
       refineContent: vi.fn(),
       regenerateMovement: vi.fn(),
     }))
