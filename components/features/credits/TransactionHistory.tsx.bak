@@ -1,0 +1,180 @@
+'use client'
+
+import { formatDistanceToNow } from 'date-fns'
+import { useEffect, useState } from 'react'
+
+import { getCreditTransactions } from '@/app/actions/credits'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { cn } from '@/lib/utils'
+
+export interface Transaction {
+  id: string
+  type: string
+  credit_type: string | null
+  amount: number
+  balance_after: number
+  created_at: string
+}
+
+export interface TransactionHistoryProps {
+  limit?: number
+  className?: string
+}
+
+/**
+ * Component to display user's credit transaction history
+ * Shows purchases, consumptions, and refunds with timestamps
+ */
+export function TransactionHistory({ limit = 20, className }: TransactionHistoryProps) {
+  const [transactions, setTransactions] = useState<Transaction[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
+
+        const result = await getCreditTransactions(limit)
+
+        if (!result.success) {
+          setError(result.error || 'Failed to load transaction history')
+          return
+        }
+
+        setTransactions(result.transactions)
+      } catch (err) {
+        setError('Failed to load transaction history')
+        console.error('Transaction history error:', err)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    void fetchTransactions()
+  }, [limit])
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <Card className={className}>
+        <CardHeader>
+          <CardTitle>Transaction History</CardTitle>
+          <CardDescription>Loading your credit transactions...</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-16 bg-muted/50 rounded animate-pulse" />
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <Card className={className}>
+        <CardHeader>
+          <CardTitle>Transaction History</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-8">
+            <p className="text-sm text-destructive">{error}</p>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  // Empty state
+  if (transactions.length === 0) {
+    return (
+      <Card className={className}>
+        <CardHeader>
+          <CardTitle>Transaction History</CardTitle>
+          <CardDescription>Your credit transactions will appear here</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-8">
+            <p className="text-sm text-muted-foreground">No transactions yet</p>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  // Helper to format transaction type
+  const formatTransactionType = (type: string) => {
+    const typeMap: Record<string, string> = {
+      credit_added: 'Credit Added',
+      credit_consumed: 'Credit Used',
+      credit_refunded: 'Credit Refunded',
+      purchase: 'Purchase',
+      refund: 'Refund',
+    }
+    return typeMap[type] || type
+  }
+
+  return (
+    <Card className={className}>
+      <CardHeader>
+        <CardTitle>Transaction History</CardTitle>
+        <CardDescription>Your recent credit transactions</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ScrollArea className="h-[400px] pr-4">
+          <div className="space-y-3">
+            {transactions.map((transaction) => {
+              const isPositive = transaction.amount > 0
+              const date = new Date(transaction.created_at)
+
+              return (
+                <div
+                  key={transaction.id}
+                  className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors"
+                >
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-medium">
+                        {formatTransactionType(transaction.type)}
+                      </p>
+                      {transaction.credit_type ? (
+                        <span className="text-xs text-muted-foreground">
+                          ({transaction.credit_type})
+                        </span>
+                      ) : null}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {formatDistanceToNow(date, { addSuffix: true })}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p
+                      className={cn(
+                        'text-sm font-semibold',
+                        isPositive
+                          ? 'text-green-600 dark:text-green-400'
+                          : 'text-red-600 dark:text-red-400',
+                      )}
+                    >
+                      {isPositive ? '+' : ''}
+                      {transaction.amount}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Balance: {transaction.balance_after}
+                    </p>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </ScrollArea>
+      </CardContent>
+    </Card>
+  )
+}

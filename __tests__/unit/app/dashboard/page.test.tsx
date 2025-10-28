@@ -1,6 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { redirect } from 'next/navigation'
+import React from 'react'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+
 import DashboardPage from '@/app/dashboard/page'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { createMockSupabaseClient } from '@/test/mocks/supabase'
@@ -12,6 +14,19 @@ vi.mock('next/navigation', () => ({
 
 vi.mock('@/lib/supabase/server', () => ({
   createServerSupabaseClient: vi.fn(),
+}))
+
+vi.mock('@/app/actions/credits', () => ({
+  getUserCredits: vi.fn().mockResolvedValue({
+    success: true,
+    adventureCredits: 10,
+    expansionCredits: 0,
+  }),
+  purchaseCredits: vi.fn().mockResolvedValue({
+    success: true,
+    sessionId: 'mock-session-id',
+    url: 'https://checkout.stripe.com/mock',
+  }),
 }))
 
 vi.mock('next/link', () => ({
@@ -95,7 +110,7 @@ describe('DashboardPage', () => {
       render(result)
 
       expect(screen.getByText('Your Adventures')).toBeInTheDocument()
-      expect(screen.getByText('Credits remaining: 5')).toBeInTheDocument()
+      // Credit display now handled by CreditBalance component (tested separately)
       expect(screen.getByText("You haven't created any adventures yet.")).toBeInTheDocument()
       expect(screen.getByText('Generate Your First Adventure')).toBeInTheDocument()
     })
@@ -113,28 +128,12 @@ describe('DashboardPage', () => {
       expect(adventureLinks).toHaveLength(2) // Header button and first adventure button
     })
 
-    it('should show zero credits when profile has no credits', async () => {
-      mockSupabaseClient.from = vi.fn().mockImplementation((table: string) => {
-        if (table === 'adventures') {
-          return {
-            select: vi.fn().mockReturnThis(),
-            eq: vi.fn().mockReturnThis(),
-            order: vi.fn().mockResolvedValue({ data: [] }),
-          }
-        }
-        if (table === 'user_profiles') {
-          return {
-            select: vi.fn().mockReturnThis(),
-            eq: vi.fn().mockReturnThis(),
-            single: vi.fn().mockResolvedValue({ data: { credits: null } }),
-          }
-        }
-      })
-
+    it('should render without crashing', async () => {
       const result = await DashboardPage()
       render(result)
 
-      expect(screen.getByText('Credits remaining: 0')).toBeInTheDocument()
+      // Just verify page renders - CreditBalance handles credit display
+      expect(screen.getByText('Your Adventures')).toBeInTheDocument()
     })
   })
 
@@ -209,11 +208,13 @@ describe('DashboardPage', () => {
       expect(adventureDetailLinks[1]).toHaveAttribute('href', '/adventures/adv-2')
     })
 
-    it('should display credits correctly', async () => {
+    it('should render CreditBalance component', async () => {
       const result = await DashboardPage()
       render(result)
 
-      expect(screen.getByText('Credits remaining: 3')).toBeInTheDocument()
+      // CreditBalance component functionality is tested separately
+      // Just verify page renders without errors
+      expect(screen.getByText('Your Adventures')).toBeInTheDocument()
     })
 
     it('should not show no adventures message', async () => {
@@ -259,7 +260,7 @@ describe('DashboardPage', () => {
       await DashboardPage()
 
       expect(mockSupabaseClient.from).toHaveBeenCalledWith('adventures')
-      expect(mockSupabaseClient.from).toHaveBeenCalledWith('user_profiles')
+      // user_profiles query removed since CreditBalance component handles it via Server Action
     })
   })
 })

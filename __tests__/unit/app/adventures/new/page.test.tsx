@@ -26,6 +26,20 @@ vi.mock('@/app/actions/adventures', () => ({
   generateAdventure: vi.fn(),
 }))
 
+// Mock credit actions to avoid Stripe initialization
+vi.mock('@/app/actions/credits', () => ({
+  getUserCredits: vi.fn().mockResolvedValue({
+    success: true,
+    adventureCredits: 10,
+    expansionCredits: 0,
+  }),
+  purchaseCredits: vi.fn().mockResolvedValue({
+    success: true,
+    sessionId: 'mock-session-id',
+    url: 'https://checkout.stripe.com/mock',
+  }),
+}))
+
 // Mock sonner
 vi.mock('sonner', () => ({
   toast: {
