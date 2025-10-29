@@ -123,21 +123,23 @@ All phases complete:
 
 ## 🔧 Priority 5: Technical Debt
 
-### 5.1: Fix Default Credits (Low Priority)
+### ✅ 5.1: Fix Default Credits (COMPLETED)
 
-**Issue**: `user_profiles.credits` has `DEFAULT 1` but should be `DEFAULT 0`
+**Status**: COMPLETED ✅
 
-**File**: `supabase/migrations/XXXXX_fix_default_credits.sql`
+**Completed**: 2025-10-24 (Migration 00007, verified 2025-10-28)
 
-```sql
-ALTER TABLE user_profiles
-ALTER COLUMN credits SET DEFAULT 0;
+**What was fixed**:
 
--- Optional: Reset existing users to 0 (discuss with team first)
--- UPDATE user_profiles SET credits = 0 WHERE credits = 1;
-```
+- Changed `daggerheart_user_profiles.credits` from `DEFAULT 1` to `DEFAULT 0`
+- Added column comment explaining the credit system
+- Migration: `supabase/migrations/00007_fix_user_profiles_default_credits.sql`
 
-**Time Estimate**: 15 minutes
+**Verification**:
+
+- ✅ Default value confirmed as `0` in production database
+- ✅ Column comment properly set
+- ✅ Integration tests passing (see `__tests__/integration/schema/user-profiles-default-credits.test.ts`)
 
 ### 5.2: Clean Up Guest Data
 
