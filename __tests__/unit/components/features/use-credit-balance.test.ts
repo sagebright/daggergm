@@ -116,16 +116,4 @@ describe('useCreditBalance Hook', () => {
 
     expect(creditsActions.getUserCredits).toHaveBeenCalledTimes(2)
   })
-
-  // NOTE: Polling tests are skipped for now due to fake timer complexity
-  // The polling feature works in production but is challenging to test with fake timers
-  it.skip('should support polling for real-time updates', async () => {
-    // Polling is tested manually and works in production
-    // Will be covered by E2E tests
-  })
-
-  it.skip('should clean up polling interval on unmount', async () => {
-    // Cleanup is verified in production
-    // Will be covered by E2E tests
-  })
 })

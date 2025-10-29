@@ -468,7 +468,6 @@ export async function updateMovement(
   adventureId: string,
   movementId: string,
   updates: Partial<Movement>,
-  guestToken?: string,
 ) {
   // Update movement called
 
@@ -490,33 +489,17 @@ export async function updateMovement(
       data: { user },
     } = await supabase.auth.getUser()
 
-    // Get adventure - use service role for guest access
-    let adventure
-    if (!user && guestToken) {
-      // Guest user with token
-      const { createServiceRoleClient } = await import('@/lib/supabase/server')
-      const serviceClient = await createServiceRoleClient()
-      const { data } = await serviceClient
-        .from('daggerheart_adventures')
-        .select('*')
-        .eq('id', adventureId)
-        .eq('guest_token', guestToken)
-        .single()
-
-      adventure = data
-    } else if (user) {
-      // Authenticated user
-      const { data } = await supabase
-        .from('daggerheart_adventures')
-        .select('*')
-        .eq('id', adventureId)
-        .eq('user_id', user.id)
-        .single()
-
-      adventure = data
-    } else {
+    if (!user) {
       return { success: false, error: 'Unauthorized' }
     }
+
+    // Get adventure
+    const { data: adventure } = await supabase
+      .from('daggerheart_adventures')
+      .select('*')
+      .eq('id', adventureId)
+      .eq('user_id', user.id)
+      .single()
 
     if (!adventure) {
       return { success: false, error: 'Adventure not found or unauthorized' }

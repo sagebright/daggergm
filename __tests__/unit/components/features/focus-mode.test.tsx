@@ -1,6 +1,8 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, waitFor, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import type React from 'react'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+
 import { FocusMode } from '@/components/features/focus-mode'
 import { useHotkeys } from '@/lib/hooks/use-hotkeys'
 
@@ -208,7 +210,7 @@ describe('FocusMode', () => {
       )
     })
 
-    it.skip('should debounce content updates', async () => {
+    it('should debounce content updates', async () => {
       const user = userEvent.setup()
 
       render(
@@ -277,7 +279,9 @@ describe('FocusMode', () => {
     it('should unfocus movement on escape when focused', async () => {
       const escapeHandler = vi.fn()
       vi.mocked(useHotkeys).mockImplementation((key, handler) => {
-        if (key === 'escape') escapeHandler.mockImplementation(handler)
+        if (key === 'escape') {
+          escapeHandler.mockImplementation(handler)
+        }
       })
 
       const user = userEvent.setup()
@@ -318,7 +322,9 @@ describe('FocusMode', () => {
     it('should exit focus mode on escape when no movement focused', () => {
       const escapeHandler = vi.fn()
       vi.mocked(useHotkeys).mockImplementation((key, handler) => {
-        if (key === 'escape') escapeHandler.mockImplementation(handler)
+        if (key === 'escape') {
+          escapeHandler.mockImplementation(handler)
+        }
       })
 
       render(
@@ -366,7 +372,9 @@ describe('FocusMode', () => {
     it('should hide AI panel when toggled with cmd+k', async () => {
       const cmdKHandler = vi.fn()
       vi.mocked(useHotkeys).mockImplementation((key, handler) => {
-        if (key === 'cmd+k') cmdKHandler.mockImplementation(handler)
+        if (key === 'cmd+k') {
+          cmdKHandler.mockImplementation(handler)
+        }
       })
 
       const user = userEvent.setup()
