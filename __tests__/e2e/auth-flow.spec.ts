@@ -10,6 +10,7 @@ import { createConfirmedTestUser, deleteTestUser } from './fixtures/auth-helpers
  * 2. User is redirected to dashboard (NOT back to login - previous bug)
  *
  * Note: Requires SUPABASE_SERVICE_ROLE_KEY and STRIPE_SECRET_KEY environment variables
+ *       (both are now configured in GitHub Actions secrets)
  * 3. Dashboard content loads successfully
  *
  * This test catches integration issues that unit tests miss:
