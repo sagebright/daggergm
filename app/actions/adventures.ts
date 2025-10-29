@@ -24,6 +24,8 @@ export interface AdventureConfig {
   party_level?: number
   difficulty?: string
   stakes?: string
+  num_scenes?: number // NEW: Number of scenes for adventure
+  guestEmail?: string // Guest user email for trial adventures
 }
 
 export async function generateAdventure(config: AdventureConfig) {

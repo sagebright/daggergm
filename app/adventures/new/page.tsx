@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import type { FormEvent } from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -11,47 +12,34 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { createClient } from '@/lib/supabase/client'
 
-// Adventure creation steps based on requirements
-const ADVENTURE_STEPS = [
-  {
-    id: 'length',
-    title: 'Adventure Length',
-    description: 'How long will your adventure be?',
-    options: [{ value: 'oneshot', label: 'One-shot', description: '3-4 hours of play' }],
-  },
-  {
-    id: 'primary_motif',
-    title: 'Primary Motif',
-    description: 'Choose the main theme for your adventure',
-    options: [
-      {
-        value: 'high_fantasy',
-        label: 'High Fantasy',
-        description: 'Epic adventures with magic and heroism',
-      },
-      {
-        value: 'low_fantasy',
-        label: 'Low Fantasy',
-        description: 'Subtle magic in realistic settings',
-      },
-      { value: 'sword_sorcery', label: 'Sword & Sorcery', description: 'Combat and mysticism' },
-      { value: 'grimdark', label: 'Grimdark', description: 'Dark, morally ambiguous stories' },
-      { value: 'weird', label: 'Weird', description: 'Strange and surreal adventures' },
-    ],
-  },
-  // Add more steps as needed
-]
+type FormData = {
+  motif: string
+  partySize: string
+  partyTier: string
+  numScenes: string
+}
 
 export default function NewAdventurePage() {
   const router = useRouter()
-  const [currentStep, setCurrentStep] = useState(0)
-  const [selections, setSelections] = useState<Record<string, string>>({})
+  const [generating, setGenerating] = useState(false)
   const [isGuest, setIsGuest] = useState(true)
   const [guestEmail, setGuestEmail] = useState('')
   const [loading, setLoading] = useState(true)
-  const [generating, setGenerating] = useState(false)
+  const [formData, setFormData] = useState<FormData>({
+    motif: '',
+    partySize: '4', // Default to 4 players
+    partyTier: 'tier1', // Default to Tier 1
+    numScenes: '3', // Default to 3 scenes
+  })
 
   const checkAuth = useCallback(async () => {
     const supabase = createClient()
@@ -65,21 +53,27 @@ export default function NewAdventurePage() {
     void checkAuth()
   }, [checkAuth])
 
-  const handleSelection = async (value: string) => {
-    const newSelections = { ...selections, [ADVENTURE_STEPS[currentStep]!.id]: value }
-    setSelections(newSelections)
-
-    if (currentStep < ADVENTURE_STEPS.length - 1) {
-      setCurrentStep(currentStep + 1)
-    } else {
-      // All steps completed, generate adventure
-      await handleAdventureGeneration(newSelections)
+  const getTierLevel = (tier: string): number => {
+    switch (tier) {
+      case 'tier1':
+        return 1
+      case 'tier2':
+        return 3 // Mid-range of 2-4
+      case 'tier3':
+        return 6 // Mid-range of 5-7
+      case 'tier4':
+        return 9 // Mid-range of 8-10
+      default:
+        return 1
     }
   }
 
-  const handleAdventureGeneration = async (config: Record<string, string>) => {
-    // Prevent multiple calls
-    if (generating) {
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault()
+
+    // Validate all fields
+    if (!formData.motif || !formData.partySize || !formData.partyTier || !formData.numScenes) {
+      toast.error('Please fill in all fields')
       return
     }
 
@@ -89,20 +83,25 @@ export default function NewAdventurePage() {
       return
     }
 
+    // Prevent multiple calls
+    if (generating) {
+      return
+    }
+
     setGenerating(true)
 
     try {
       toast.info('Generating your adventure...', { duration: 2000 })
 
       const adventureConfig: AdventureConfig = {
-        length: config.length || '',
-        primary_motif: config.primary_motif || '',
-        // Add defaults for missing fields
+        length: 'oneshot', // Fixed for now
+        primary_motif: formData.motif,
         frame: 'witherwild', // Default frame
-        party_size: 4,
-        party_level: 1,
+        party_size: parseInt(formData.partySize),
+        party_level: getTierLevel(formData.partyTier),
         difficulty: 'standard',
         stakes: 'personal',
+        num_scenes: parseInt(formData.numScenes),
         // Add guest email if guest
         ...(isGuest && { guestEmail }),
       }
@@ -111,12 +110,8 @@ export default function NewAdventurePage() {
 
       if (result.success) {
         toast.success('Adventure created successfully!')
-
-        // Don't reset generating state on success to prevent UI flicker
-        const redirectUrl = `/adventures/${result.adventureId}`
-
         // Use replace to prevent back button issues
-        router.replace(redirectUrl)
+        router.replace(`/adventures/${result.adventureId}`)
         return // Exit early to avoid resetting generating state
       } else {
         toast.error('error' in result ? result.error : 'Failed to generate adventure')
@@ -126,12 +121,6 @@ export default function NewAdventurePage() {
       console.error('Generation error:', error)
       toast.error('Something went wrong. Please try again.')
       setGenerating(false)
-    }
-  }
-
-  const handleBack = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1)
     }
   }
 
@@ -156,8 +145,6 @@ export default function NewAdventurePage() {
       </div>
     )
   }
-
-  const step = ADVENTURE_STEPS[currentStep]
 
   return (
     <div className="container max-w-2xl mx-auto py-8">
@@ -214,51 +201,102 @@ export default function NewAdventurePage() {
         </Card>
       ) : null}
 
-      <div className="mb-8">
-        <p className="text-sm text-muted-foreground mb-2">
-          Step {currentStep + 1} of {ADVENTURE_STEPS.length}
-        </p>
-        <div className="w-full bg-secondary rounded-full h-2">
-          <div
-            className="bg-primary h-2 rounded-full transition-all"
-            style={{ width: `${((currentStep + 1) / ADVENTURE_STEPS.length) * 100}%` }}
-          />
-        </div>
-      </div>
-
       <Card>
         <CardHeader>
-          <CardTitle>{step!.title}</CardTitle>
-          <CardDescription>{step!.description}</CardDescription>
+          <CardTitle>Adventure Details</CardTitle>
+          <CardDescription>Configure your adventure settings below</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            {step!.options.map((option) => (
-              <Button
-                key={option.value}
-                variant="outline"
-                className="w-full justify-start text-left h-auto p-4"
-                onClick={() => handleSelection(option.value)}
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Primary Motif */}
+            <div className="space-y-2">
+              <Label htmlFor="motif">Primary Motif *</Label>
+              <Select
+                value={formData.motif}
+                onValueChange={(value: string) => setFormData({ ...formData, motif: value })}
               >
-                <div>
-                  <div className="font-semibold">{option.label}</div>
-                  {option.description ? (
-                    <div className="text-sm text-muted-foreground mt-1">{option.description}</div>
-                  ) : null}
-                </div>
-              </Button>
-            ))}
-          </div>
+                <SelectTrigger id="motif">
+                  <SelectValue placeholder="Select a motif" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="high_fantasy">High Fantasy</SelectItem>
+                  <SelectItem value="low_fantasy">Low Fantasy</SelectItem>
+                  <SelectItem value="sword_sorcery">Sword & Sorcery</SelectItem>
+                  <SelectItem value="grimdark">Grimdark</SelectItem>
+                  <SelectItem value="weird">Weird</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Choose the main theme for your adventure
+              </p>
+            </div>
+
+            {/* Party Size */}
+            <div className="space-y-2">
+              <Label htmlFor="partySize">Party Size *</Label>
+              <Select
+                value={formData.partySize}
+                onValueChange={(value: string) => setFormData({ ...formData, partySize: value })}
+              >
+                <SelectTrigger id="partySize">
+                  <SelectValue placeholder="Select party size" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">1 Player</SelectItem>
+                  <SelectItem value="2">2 Players</SelectItem>
+                  <SelectItem value="3">3 Players</SelectItem>
+                  <SelectItem value="4">4 Players</SelectItem>
+                  <SelectItem value="5">5+ Players</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">Number of players in your group</p>
+            </div>
+
+            {/* Party Tier */}
+            <div className="space-y-2">
+              <Label htmlFor="partyTier">Party Tier *</Label>
+              <Select
+                value={formData.partyTier}
+                onValueChange={(value: string) => setFormData({ ...formData, partyTier: value })}
+              >
+                <SelectTrigger id="partyTier">
+                  <SelectValue placeholder="Select party tier" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="tier1">Tier 1 [Level 1]</SelectItem>
+                  <SelectItem value="tier2">Tier 2 [Levels 2-4]</SelectItem>
+                  <SelectItem value="tier3">Tier 3 [Levels 5-7]</SelectItem>
+                  <SelectItem value="tier4">Tier 4 [Levels 8-10]</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">Experience level of your party</p>
+            </div>
+
+            {/* Number of Scenes */}
+            <div className="space-y-2">
+              <Label htmlFor="numScenes">Number of Scenes *</Label>
+              <Select
+                value={formData.numScenes}
+                onValueChange={(value: string) => setFormData({ ...formData, numScenes: value })}
+              >
+                <SelectTrigger id="numScenes">
+                  <SelectValue placeholder="Select number of scenes" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="3">3 Scenes</SelectItem>
+                  <SelectItem value="4">4 Scenes</SelectItem>
+                  <SelectItem value="5">5 Scenes</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">Number of scenes in your adventure</p>
+            </div>
+
+            <Button type="submit" className="w-full" disabled={generating}>
+              {generating ? 'Generating...' : 'Generate Adventure'}
+            </Button>
+          </form>
         </CardContent>
       </Card>
-
-      {currentStep > 0 && (
-        <div className="mt-6">
-          <Button variant="ghost" onClick={handleBack}>
-            Back
-          </Button>
-        </div>
-      )}
     </div>
   )
 }
