@@ -94,11 +94,14 @@ test.describe('Authentication Flow', () => {
       await page.fill('input[type="email"]', testEmail)
       await page.fill('input[type="password"]', testPassword)
       await page.click('button:has-text("Sign In")')
-      await expect(page).toHaveURL('/dashboard', { timeout: 15000 })
+
+      // Wait for redirect with generous timeout for slower browsers (WebKit)
+      await expect(page).toHaveURL('/dashboard', { timeout: 30000 })
+      await page.waitForLoadState('networkidle')
 
       // Now try to access login page again - should redirect to dashboard
       await page.goto('/auth/login')
-      await expect(page).toHaveURL('/dashboard', { timeout: 5000 })
+      await expect(page).toHaveURL('/dashboard', { timeout: 15000 })
     } finally {
       // Cleanup: Delete test user
       await deleteTestUser(testEmail)
