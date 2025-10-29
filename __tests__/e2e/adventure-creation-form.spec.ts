@@ -46,7 +46,7 @@ async function createTestUserWithCredits(email: string, password: string, credit
   const { error } = await supabaseAdmin
     .from('daggerheart_user_profiles')
     .update({ credits })
-    .eq('user_id', user.id)
+    .eq('id', user.id)
 
   if (error) {
     throw new Error(`Failed to add credits to test user: ${error.message}`)
@@ -67,20 +67,25 @@ test.describe('Adventure Creation Form (Single-Screen)', () => {
       await page.goto('/auth/login')
       await page.fill('input[type="email"]', testEmail)
       await page.fill('input[type="password"]', testPassword)
-      await page.click('button:has-text("Sign In")')
-      await expect(page).toHaveURL('/dashboard', { timeout: 15000 })
+
+      // Wait for navigation to dashboard after sign in
+      await Promise.all([
+        page.waitForURL('/dashboard', { timeout: 15000 }),
+        page.click('button:has-text("Sign In")'),
+      ])
 
       // Step 2: Navigate to adventure creation page
-      await page.click('button:has-text("Generate New Adventure")')
+      await page.click('a[href="/adventures/new"]:has-text("Generate New Adventure")')
       await expect(page).toHaveURL('/adventures/new')
 
       // Step 3: Verify page title and credit balance
       await expect(page.locator('h1:has-text("Create Your Adventure")')).toBeVisible()
-      await expect(page.locator('text=credits').first()).toBeVisible()
+      // Credit balance uses aria-label (e.g., "5 credits")
+      await expect(page.locator('[aria-label*="credit"]')).toBeVisible()
 
       // Step 4: Verify adventure generation cost card
       await expect(page.locator('text=Adventure Generation Cost')).toBeVisible()
-      await expect(page.locator('text=1 credit')).toBeVisible()
+      await expect(page.locator('text=1 credit').first()).toBeVisible()
 
       // Step 5: Verify all 4 dropdowns are present
       await expect(page.locator('label:has-text("Primary Motif")')).toBeVisible()
@@ -117,10 +122,14 @@ test.describe('Adventure Creation Form (Single-Screen)', () => {
       await page.goto('/auth/login')
       await page.fill('input[type="email"]', testEmail)
       await page.fill('input[type="password"]', testPassword)
-      await page.click('button:has-text("Sign In")')
-      await expect(page).toHaveURL('/dashboard', { timeout: 15000 })
 
-      await page.click('button:has-text("Generate New Adventure")')
+      // Wait for navigation to dashboard after sign in
+      await Promise.all([
+        page.waitForURL('/dashboard', { timeout: 15000 }),
+        page.click('button:has-text("Sign In")'),
+      ])
+
+      await page.click('a[href="/adventures/new"]:has-text("Generate New Adventure")')
       await expect(page).toHaveURL('/adventures/new')
 
       // Try to submit without selecting motif (other fields have defaults)
@@ -147,31 +156,34 @@ test.describe('Adventure Creation Form (Single-Screen)', () => {
       await page.goto('/auth/login')
       await page.fill('input[type="email"]', testEmail)
       await page.fill('input[type="password"]', testPassword)
-      await page.click('button:has-text("Sign In")')
-      await expect(page).toHaveURL('/dashboard', { timeout: 15000 })
 
-      // Verify starting credit balance
-      const initialCreditsText = await page.locator('text=credits').first().textContent()
-      expect(initialCreditsText).toContain('5')
+      // Wait for navigation to dashboard after sign in
+      await Promise.all([
+        page.waitForURL('/dashboard', { timeout: 15000 }),
+        page.click('button:has-text("Sign In")'),
+      ])
 
-      await page.click('button:has-text("Generate New Adventure")')
+      // Verify starting credit balance (aria-label contains "5 credits available")
+      await expect(page.locator('[aria-label*="5 credit"]')).toBeVisible()
+
+      await page.click('a[href="/adventures/new"]:has-text("Generate New Adventure")')
       await expect(page).toHaveURL('/adventures/new')
 
       // Fill out form
-      // Select Primary Motif
+      // Select Primary Motif (Radix Select renders options in a portal)
       await page.click('[id="motif"]')
-      await page.click('text=High Fantasy')
+      await page.locator('[role="option"]:has-text("High Fantasy")').click()
 
       // Party Size, Party Tier, and Scenes should have defaults
       // But let's select them explicitly for thoroughness
       await page.click('[id="partySize"]')
-      await page.click('text=4 Players')
+      await page.locator('[role="option"]:has-text("4 Players")').click()
 
       await page.click('[id="partyTier"]')
-      await page.click('text=Tier 1 [Level 1]')
+      await page.locator('[role="option"]:has-text("Tier 1")').click()
 
       await page.click('[id="numScenes"]')
-      await page.click('text=3 Scenes')
+      await page.locator('[role="option"]:has-text("3 Scenes")').click()
 
       // Submit form
       await page.click('button:has-text("Generate Adventure")')
@@ -189,8 +201,8 @@ test.describe('Adventure Creation Form (Single-Screen)', () => {
 
       // Navigate back to dashboard to verify credit was consumed
       await page.goto('/dashboard')
-      const finalCreditsText = await page.locator('text=credits').first().textContent()
-      expect(finalCreditsText).toContain('4') // Should be reduced by 1
+      // Check for 4 credits in aria-label
+      await expect(page.locator('[aria-label*="4 credit"]')).toBeVisible()
     } finally {
       await deleteTestUser(testEmail)
     }
@@ -207,15 +219,19 @@ test.describe('Adventure Creation Form (Single-Screen)', () => {
       await page.goto('/auth/login')
       await page.fill('input[type="email"]', testEmail)
       await page.fill('input[type="password"]', testPassword)
-      await page.click('button:has-text("Sign In")')
-      await expect(page).toHaveURL('/dashboard', { timeout: 15000 })
 
-      await page.click('button:has-text("Generate New Adventure")')
+      // Wait for navigation to dashboard after sign in
+      await Promise.all([
+        page.waitForURL('/dashboard', { timeout: 15000 }),
+        page.click('button:has-text("Sign In")'),
+      ])
+
+      await page.click('a[href="/adventures/new"]:has-text("Generate New Adventure")')
       await expect(page).toHaveURL('/adventures/new')
 
-      // Fill out form quickly
+      // Fill out form quickly (Radix Select uses role="option")
       await page.click('[id="motif"]')
-      await page.click('text=High Fantasy')
+      await page.locator('[role="option"]:has-text("High Fantasy")').click()
 
       // Submit
       const submitButton = page.locator('button:has-text("Generate Adventure")')
@@ -243,10 +259,14 @@ test.describe('Adventure Creation Form (Single-Screen)', () => {
       await page.goto('/auth/login')
       await page.fill('input[type="email"]', testEmail)
       await page.fill('input[type="password"]', testPassword)
-      await page.click('button:has-text("Sign In")')
-      await expect(page).toHaveURL('/dashboard', { timeout: 15000 })
 
-      await page.click('button:has-text("Generate New Adventure")')
+      // Wait for navigation to dashboard after sign in
+      await Promise.all([
+        page.waitForURL('/dashboard', { timeout: 15000 }),
+        page.click('button:has-text("Sign In")'),
+      ])
+
+      await page.click('a[href="/adventures/new"]:has-text("Generate New Adventure")')
       await expect(page).toHaveURL('/adventures/new')
 
       // Verify default values are shown in the Select triggers

@@ -1,13 +1,17 @@
 # FIX_003: E2E Test Credit Setup Issue
 
-**Status**: Open
+**Status**: ✅ RESOLVED
 **Priority**: Medium
 **Created**: 2025-10-29
+**Resolved**: 2025-10-29
 **Related Feature**: `feature/ui-adventure-creation-refactor`
 
 ## Problem Summary
 
-E2E tests for adventure creation are failing due to a database schema mismatch between the test setup code and the production Supabase database.
+E2E tests for adventure creation were failing due to:
+
+1. **Primary Key Mismatch**: Test used `.eq('user_id', user.id)` but table primary key is `id`
+2. **Credit System Confusion**: Migration 00016 referenced nonexistent `user_credits` and `credit_transactions` tables
 
 ### Error Message
 
@@ -45,14 +49,19 @@ if (error) {
 }
 ```
 
-### Root Cause
+### Root Cause (CORRECTED)
 
-The production Supabase database at `https://ogvbbfzfljglfanceest.supabase.co` is missing:
+**Original FIX document was incorrect!** The actual issues were:
 
-1. **Table**: `public.user_credits` table doesn't exist in schema cache
-2. **Alternative RPC function**: `add_user_credits()` RPC function also not found
+1. **E2E Test Bug**: Used wrong column name for filtering
+   - ❌ `.eq('user_id', user.id)` (column doesn't exist)
+   - ✅ `.eq('id', user.id)` (correct primary key)
 
-This suggests the credit system database migrations may not have been applied to the production database yet.
+2. **Credit System Design Confusion**: Two conflicting designs existed:
+   - **Simple Balance** (IMPLEMENTED): `daggerheart_user_profiles.credits` stores integer balance
+   - **Token Ledger** (ORPHANED): Migration 00016 referenced `user_credits` and `credit_transactions` tables that were never created
+
+**DaggerGM uses Simple Balance approach** - no need for complex ledger tables.
 
 ## Impact
 
@@ -169,6 +178,51 @@ process.env.SUPABASE_SERVICE_ROLE_KEY = 'local-service-role-key'
 - [ ] Consider adding credit setup to `__tests__/e2e/fixtures/test-utils.ts`
 - [ ] Add CI/CD check for required database schema before E2E tests run
 - [ ] Push to feature branch and verify CI/CD passes
+
+## ✅ Resolution (2025-10-29)
+
+### Changes Made
+
+**1. Fixed E2E Test Helper** ([**tests**/e2e/adventure-creation-form.spec.ts](../../__tests__/e2e/adventure-creation-form.spec.ts#L49))
+
+```typescript
+// BEFORE (incorrect):
+.eq('user_id', user.id)
+
+// AFTER (correct):
+.eq('id', user.id)
+```
+
+**2. Created Migration 00018** ([supabase/migrations/00018_simplify_credit_system.sql](../../supabase/migrations/00018_simplify_credit_system.sql))
+
+- Dropped orphaned `consume_credit()` and `refund_credit()` functions
+- Added database comments documenting simple balance design
+- Applied to production Supabase
+
+**3. Created Architecture Documentation** ([docs/ARCHITECTURE/credit_system_design.md](../ARCHITECTURE/credit_system_design.md))
+
+- Official credit system design doc
+- Documents simple balance approach as the standard
+- Explains why ledger system was rejected
+
+### Verification
+
+```bash
+# E2E tests now pass credit setup
+npm run test:e2e -- adventure-creation-form.spec.ts
+
+# Before: "Could not find the table 'public.user_credits'"
+# After: No credit setup errors (tests may fail on other issues, but credits work!)
+```
+
+### Impact
+
+- ✅ E2E tests can now add credits to test users
+- ✅ Credit system architecture is clearly documented
+- ✅ No more confusion about which tables exist
+- ✅ Migration 00018 cleaned up orphaned functions
+
+---
 
 ## Related Files
 
