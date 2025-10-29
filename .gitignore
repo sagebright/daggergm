@@ -12,6 +12,10 @@
 
 # testing
 /coverage
+/test-results
+/playwright-report
+test-login.js
+app/actions/test-auth.ts
 
 # next.js
 /.next/
