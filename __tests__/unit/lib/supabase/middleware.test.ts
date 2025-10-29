@@ -124,10 +124,11 @@ describe('updateSession', () => {
     const request = createMockRequest()
     mockSupabaseClient.auth.getUser.mockResolvedValue({ data: { user: null } })
 
-    const response = await updateSession(request)
+    const { response, user } = await updateSession(request)
 
     expect(response).toBeDefined()
     expect(response.cookies!.set).toBeDefined()
+    expect(user).toBeNull()
   })
 
   it('should pass request headers to NextResponse', async () => {
@@ -210,11 +211,12 @@ describe('updateSession', () => {
       error: null,
     })
 
-    const response = await updateSession(request)
+    const { response, user } = await updateSession(request)
 
     expect(mockSupabaseClient.auth.getUser).toHaveBeenCalled()
     expect(response).toBeDefined()
     expect(response.cookies!.set).toBeDefined()
+    expect(user).toEqual(mockUser)
   })
 
   it('should handle authentication errors', async () => {
@@ -224,10 +226,11 @@ describe('updateSession', () => {
       error: { message: 'Invalid token' },
     })
 
-    const response = await updateSession(request)
+    const { response, user } = await updateSession(request)
 
     expect(mockSupabaseClient.auth.getUser).toHaveBeenCalled()
     expect(response).toBeDefined()
     expect(response.cookies!.set).toBeDefined()
+    expect(user).toBeNull()
   })
 })

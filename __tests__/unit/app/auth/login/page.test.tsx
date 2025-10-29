@@ -152,8 +152,11 @@ describe('LoginPage', () => {
 
   describe('password authentication', () => {
     it('should sign in with password', async () => {
-      // Mock successful Server Action
-      vi.mocked(signInWithPassword).mockResolvedValueOnce({ success: true })
+      // Mock successful Server Action that uses redirect()
+      // When redirect() is called in Server Actions, it throws a NEXT_REDIRECT error
+      // The framework catches this and performs the redirect
+      // In tests, the function simply doesn't return anything (undefined)
+      vi.mocked(signInWithPassword).mockResolvedValueOnce(undefined as any)
 
       const user = userEvent.setup()
       render(<LoginPage />)
@@ -168,8 +171,7 @@ describe('LoginPage', () => {
 
       await waitFor(() => {
         expect(signInWithPassword).toHaveBeenCalledWith('test@example.com', 'password123')
-        expect(toast.success).toHaveBeenCalledWith('Login successful!')
-        expect(mockPush).toHaveBeenCalledWith('/dashboard')
+        // redirect() doesn't show a toast or call router.push - it handles redirect server-side
       })
     })
 

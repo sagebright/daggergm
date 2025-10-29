@@ -1,7 +1,8 @@
+import type { NextRequest, NextResponse } from 'next/server'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { NextRequest, NextResponse } from 'next/server'
-import { middleware, config } from '@/middleware'
+
 import { updateSession } from '@/lib/supabase/middleware'
+import { middleware, config } from '@/middleware'
 
 // Mock dependencies
 vi.mock('@/lib/supabase/middleware', () => ({
@@ -9,7 +10,7 @@ vi.mock('@/lib/supabase/middleware', () => ({
 }))
 
 vi.mock('next/server', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('next/server')>()
+  const actual = (await importOriginal()) as any
   return {
     ...actual,
     NextResponse: {
@@ -43,7 +44,10 @@ describe('middleware', () => {
   describe('updateSession call', () => {
     it('should always call updateSession', async () => {
       const mockResponse = { status: 200 }
-      mockUpdateSession.mockResolvedValueOnce(mockResponse as NextResponse)
+      mockUpdateSession.mockResolvedValueOnce({
+        response: mockResponse as NextResponse,
+        user: null,
+      })
 
       const request = createRequest('/')
 
@@ -57,7 +61,10 @@ describe('middleware', () => {
   describe('protected routes', () => {
     it('should redirect to login if accessing dashboard without session', async () => {
       const mockResponse = { status: 200 }
-      mockUpdateSession.mockResolvedValueOnce(mockResponse as NextResponse)
+      mockUpdateSession.mockResolvedValueOnce({
+        response: mockResponse as NextResponse,
+        user: null,
+      })
 
       const request = createRequest('/dashboard')
 
@@ -68,7 +75,11 @@ describe('middleware', () => {
 
     it('should allow access to dashboard with session', async () => {
       const mockResponse = { status: 200 }
-      mockUpdateSession.mockResolvedValueOnce(mockResponse as NextResponse)
+      const mockUser = { id: 'user-123', email: 'user@example.com' }
+      mockUpdateSession.mockResolvedValueOnce({
+        response: mockResponse as NextResponse,
+        user: mockUser as any,
+      })
 
       const request = createRequest('/dashboard', { 'sb-access-token': 'token' })
 
@@ -80,7 +91,10 @@ describe('middleware', () => {
 
     it('should protect nested dashboard routes', async () => {
       const mockResponse = { status: 200 }
-      mockUpdateSession.mockResolvedValueOnce(mockResponse as NextResponse)
+      mockUpdateSession.mockResolvedValueOnce({
+        response: mockResponse as NextResponse,
+        user: null,
+      })
 
       const request = createRequest('/dashboard/settings')
 
@@ -93,7 +107,11 @@ describe('middleware', () => {
   describe('auth routes', () => {
     it('should redirect to dashboard if accessing login with session', async () => {
       const mockResponse = { status: 200 }
-      mockUpdateSession.mockResolvedValueOnce(mockResponse as NextResponse)
+      const mockUser = { id: 'user-123', email: 'user@example.com' }
+      mockUpdateSession.mockResolvedValueOnce({
+        response: mockResponse as NextResponse,
+        user: mockUser as any,
+      })
 
       const request = createRequest('/auth/login', { 'sb-access-token': 'token' })
 
@@ -104,7 +122,10 @@ describe('middleware', () => {
 
     it('should allow access to login without session', async () => {
       const mockResponse = { status: 200 }
-      mockUpdateSession.mockResolvedValueOnce(mockResponse as NextResponse)
+      mockUpdateSession.mockResolvedValueOnce({
+        response: mockResponse as NextResponse,
+        user: null,
+      })
 
       const request = createRequest('/auth/login')
 
@@ -116,7 +137,11 @@ describe('middleware', () => {
 
     it('should redirect from auth callback with session', async () => {
       const mockResponse = { status: 200 }
-      mockUpdateSession.mockResolvedValueOnce(mockResponse as NextResponse)
+      const mockUser = { id: 'user-123', email: 'user@example.com' }
+      mockUpdateSession.mockResolvedValueOnce({
+        response: mockResponse as NextResponse,
+        user: mockUser as any,
+      })
 
       const request = createRequest('/auth/callback', { 'sb-access-token': 'token' })
 
@@ -127,7 +152,10 @@ describe('middleware', () => {
 
     it('should allow access to auth callback without session', async () => {
       const mockResponse = { status: 200 }
-      mockUpdateSession.mockResolvedValueOnce(mockResponse as NextResponse)
+      mockUpdateSession.mockResolvedValueOnce({
+        response: mockResponse as NextResponse,
+        user: null,
+      })
 
       const request = createRequest('/auth/callback')
 
@@ -141,7 +169,10 @@ describe('middleware', () => {
   describe('public routes', () => {
     it('should allow access to home page without session', async () => {
       const mockResponse = { status: 200 }
-      mockUpdateSession.mockResolvedValueOnce(mockResponse as NextResponse)
+      mockUpdateSession.mockResolvedValueOnce({
+        response: mockResponse as NextResponse,
+        user: null,
+      })
 
       const request = createRequest('/')
 
@@ -153,7 +184,10 @@ describe('middleware', () => {
 
     it('should allow access to adventures/new without session', async () => {
       const mockResponse = { status: 200 }
-      mockUpdateSession.mockResolvedValueOnce(mockResponse as NextResponse)
+      mockUpdateSession.mockResolvedValueOnce({
+        response: mockResponse as NextResponse,
+        user: null,
+      })
 
       const request = createRequest('/adventures/new')
 
