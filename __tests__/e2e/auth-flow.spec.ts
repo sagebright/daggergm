@@ -9,7 +9,7 @@ import { createConfirmedTestUser, deleteTestUser } from './fixtures/auth-helpers
  * 1. User logs in with email/password
  * 2. User is redirected to dashboard (NOT back to login - previous bug)
  *
- * Note: Requires SUPABASE_SERVICE_ROLE_KEY environment variable for creating test users
+ * Note: Requires SUPABASE_SERVICE_ROLE_KEY and STRIPE_SECRET_KEY environment variables
  * 3. Dashboard content loads successfully
  *
  * This test catches integration issues that unit tests miss:
