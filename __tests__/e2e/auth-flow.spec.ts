@@ -8,6 +8,8 @@ import { createConfirmedTestUser, deleteTestUser } from './fixtures/auth-helpers
  * This test verifies the critical user journey:
  * 1. User logs in with email/password
  * 2. User is redirected to dashboard (NOT back to login - previous bug)
+ *
+ * Note: Requires SUPABASE_SERVICE_ROLE_KEY environment variable for creating test users
  * 3. Dashboard content loads successfully
  *
  * This test catches integration issues that unit tests miss:
