@@ -1,4 +1,3 @@
-/* eslint-disable max-lines */
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
 export type Database = {
@@ -1190,6 +1189,10 @@ export type Database = {
         Args: { p_adventure_id: string; p_user_id: string }
         Returns: boolean
       }
+      consume_credit: {
+        Args: { p_credit_type?: string; p_metadata?: Json; p_user_id: string }
+        Returns: Json
+      }
       get_tier_appropriate_loot: {
         Args: { item_type?: string; limit_count?: number; party_level: number }
         Returns: {
@@ -1297,6 +1300,10 @@ export type Database = {
           similarity: number
           tier: number
         }[]
+      }
+      refund_credit: {
+        Args: { p_credit_type?: string; p_metadata?: Json; p_user_id: string }
+        Returns: Json
       }
       search_adversaries: {
         Args: {

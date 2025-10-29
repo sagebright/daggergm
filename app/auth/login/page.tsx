@@ -34,15 +34,14 @@ export default function LoginPage() {
           toast.success(result.message)
         }
       } else {
-        // Server Action establishes session server-side
+        // Server Action establishes session server-side and redirects
+        // If signInWithPassword succeeds, it will redirect to /dashboard
+        // If it fails, it returns an error object
         const result = await signInWithPassword(email, password)
 
+        // If we get here, it means there was an error (redirect throws and doesn't return)
         if (result && !result.success) {
           toast.error(result.error)
-        } else if (result && result.success) {
-          // Session established - redirect to dashboard
-          toast.success('Login successful!')
-          window.location.href = '/dashboard'
         }
       }
     } catch (error) {
