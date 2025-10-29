@@ -43,9 +43,8 @@ describe('updateMovement Server Action', () => {
       id: movementId,
       title: 'Original Title',
       type: 'exploration',
-      description: 'Original description',
+      content: 'Original description',
       estimatedTime: '30 minutes',
-      orderIndex: 0,
     }
 
     const mockAdventure = {
@@ -109,7 +108,7 @@ describe('updateMovement Server Action', () => {
       vi.mocked(createServiceRoleClient).mockResolvedValue(mockServiceClient)
 
       const result = await updateMovement(adventureId, movementId, {
-        description: 'New description with more details',
+        content: 'New description with more details',
       })
 
       expect(result.success).toBe(true)
@@ -120,8 +119,8 @@ describe('updateMovement Server Action', () => {
       vi.mocked(createServiceRoleClient).mockResolvedValue(mockServiceClient)
 
       const result = await updateMovement(adventureId, movementId, {
-        locked: true,
-      })
+        isLocked: true,
+      } as any)
 
       expect(result.success).toBe(true)
     })
@@ -132,8 +131,7 @@ describe('updateMovement Server Action', () => {
 
       const result = await updateMovement(adventureId, movementId, {
         title: 'New Title',
-        description: 'New description',
-        locked: true,
+        content: 'New content',
       })
 
       expect(result.success).toBe(true)
@@ -287,7 +285,7 @@ describe('updateMovement Server Action', () => {
         }),
       }
 
-      vi.mocked(createServiceRoleClient).mockResolvedValue(errorClient)
+      vi.mocked(createServiceRoleClient).mockResolvedValue(errorClient as any)
 
       const result = await updateMovement(adventureId, movementId, {
         title: 'Updated',
@@ -332,19 +330,19 @@ describe('updateMovement Server Action', () => {
         id: 'mov-1',
         title: 'Movement 1',
         type: 'exploration' as const,
-        description: 'First',
+        content: 'First',
       }
       const movement2 = {
         id: movementId,
         title: 'Movement 2',
         type: 'combat' as const,
-        description: 'Second',
+        content: 'Second',
       }
       const movement3 = {
         id: 'mov-3',
         title: 'Movement 3',
         type: 'social' as const,
-        description: 'Third',
+        content: 'Third',
       }
 
       mockSupabase.from.mockReturnValue({

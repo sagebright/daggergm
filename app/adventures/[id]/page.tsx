@@ -85,15 +85,11 @@ export default function AdventureDetailPage({ params }: { params: Promise<{ id: 
     // Save to database
     const { updateMovement } = await import('@/app/actions/movements')
 
-    // Get guest token if needed
-    const guestToken = localStorage.getItem(`guest_token_${adventure.id}`)
-
     const result = await updateMovement(
       adventure.id,
       movementId,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       updates as any,
-      guestToken || undefined,
     )
 
     if (!result.success) {

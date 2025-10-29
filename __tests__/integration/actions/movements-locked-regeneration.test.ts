@@ -14,7 +14,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 
 import { regenerateScaffoldMovement } from '@/app/actions/movements'
-import type { Movement } from '@/lib/llm/types'
+import type { Scene } from '@/lib/llm/types'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 
 // Mock Next.js cache
@@ -77,7 +77,7 @@ describe('Movement Regeneration with Locked Movements', () => {
     adventureId = '00000000-0000-4000-8000-000000000002'
     movementToRegenerate = 'mov-2'
 
-    const mockMovements: Movement[] = [
+    const mockMovements: Scene[] = [
       {
         id: 'mov-1',
         title: 'Opening Scene',
@@ -192,7 +192,7 @@ describe('Movement Regeneration with Locked Movements', () => {
 
     it('should handle adventure with no locked movements', async () => {
       // Mock adventure with no locked movements
-      const noLockedMovements: Movement[] = [
+      const noLockedMovements: Scene[] = [
         {
           id: 'mov-1',
           title: 'Scene 1',

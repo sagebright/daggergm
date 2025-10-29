@@ -14,7 +14,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 
 import { getRegenerationCounts } from '@/app/actions/regeneration'
-import { REGENERATION_LIMITS } from '@/lib/constants/regeneration'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 
 // Mock Supabase server client
@@ -30,16 +29,10 @@ vi.mock('@/lib/supabase/server', async () => {
 vi.mock('@/lib/regeneration/limit-checker', () => ({
   RegenerationLimitChecker: vi.fn().mockImplementation(() => ({
     getRegenerationCounts: vi.fn().mockResolvedValue({
-      scaffold: {
-        used: 3,
-        remaining: 7,
-        limit: 10,
-      },
-      expansion: {
-        used: 5,
-        remaining: 15,
-        limit: 20,
-      },
+      scaffold: 3,
+      scaffoldRemaining: 7,
+      expansion: 5,
+      expansionRemaining: 15,
     }),
   })),
 }))
@@ -84,18 +77,10 @@ describe('getRegenerationCounts Server Action', () => {
     it('should return regeneration counts for owned adventure', async () => {
       const result = await getRegenerationCounts(adventureId)
 
-      expect(result).toEqual({
-        scaffold: {
-          used: 3,
-          remaining: 7,
-          limit: REGENERATION_LIMITS.SCAFFOLD,
-        },
-        expansion: {
-          used: 5,
-          remaining: 15,
-          limit: REGENERATION_LIMITS.EXPANSION,
-        },
-      })
+      expect(result.scaffold).toBe(3)
+      expect(result.scaffoldRemaining).toBe(7)
+      expect(result.expansion).toBe(5)
+      expect(result.expansionRemaining).toBe(15)
     })
 
     it('should handle zero usage (new adventure)', async () => {
@@ -104,26 +89,20 @@ describe('getRegenerationCounts Server Action', () => {
         () =>
           ({
             getRegenerationCounts: vi.fn().mockResolvedValue({
-              scaffold: {
-                used: 0,
-                remaining: 10,
-                limit: 10,
-              },
-              expansion: {
-                used: 0,
-                remaining: 20,
-                limit: 20,
-              },
+              scaffold: 0,
+              scaffoldRemaining: 10,
+              expansion: 0,
+              expansionRemaining: 20,
             }),
           }) as any,
       )
 
       const result = await getRegenerationCounts(adventureId)
 
-      expect(result.scaffold.used).toBe(0)
-      expect(result.scaffold.remaining).toBe(10)
-      expect(result.expansion.used).toBe(0)
-      expect(result.expansion.remaining).toBe(20)
+      expect(result.scaffold).toBe(0)
+      expect(result.scaffoldRemaining).toBe(10)
+      expect(result.expansion).toBe(0)
+      expect(result.expansionRemaining).toBe(20)
     })
 
     it('should handle at-limit usage', async () => {
@@ -132,24 +111,18 @@ describe('getRegenerationCounts Server Action', () => {
         () =>
           ({
             getRegenerationCounts: vi.fn().mockResolvedValue({
-              scaffold: {
-                used: 10,
-                remaining: 0,
-                limit: 10,
-              },
-              expansion: {
-                used: 20,
-                remaining: 0,
-                limit: 20,
-              },
+              scaffold: 10,
+              scaffoldRemaining: 0,
+              expansion: 20,
+              expansionRemaining: 0,
             }),
           }) as any,
       )
 
       const result = await getRegenerationCounts(adventureId)
 
-      expect(result.scaffold.remaining).toBe(0)
-      expect(result.expansion.remaining).toBe(0)
+      expect(result.scaffoldRemaining).toBe(0)
+      expect(result.expansionRemaining).toBe(0)
     })
   })
 
