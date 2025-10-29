@@ -484,8 +484,6 @@ export type Database = {
           exported_at: string | null
           focus: string
           frame: string
-          guest_email: string | null
-          guest_token: string | null
           id: string
           metadata: Json | null
           movements: Json[] | null
@@ -502,8 +500,6 @@ export type Database = {
           exported_at?: string | null
           focus: string
           frame: string
-          guest_email?: string | null
-          guest_token?: string | null
           id?: string
           metadata?: Json | null
           movements?: Json[] | null
@@ -520,8 +516,6 @@ export type Database = {
           exported_at?: string | null
           focus?: string
           frame?: string
-          guest_email?: string | null
-          guest_token?: string | null
           id?: string
           metadata?: Json | null
           movements?: Json[] | null
@@ -1000,34 +994,31 @@ export type Database = {
           amount: number
           created_at: string | null
           credits: number
-          guest_email: string | null
           id: string
           metadata: Json | null
           status: string
           stripe_payment_intent_id: string
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           amount: number
           created_at?: string | null
           credits: number
-          guest_email?: string | null
           id?: string
           metadata?: Json | null
           status: string
           stripe_payment_intent_id: string
-          user_id?: string | null
+          user_id: string
         }
         Update: {
           amount?: number
           created_at?: string | null
           credits?: number
-          guest_email?: string | null
           id?: string
           metadata?: Json | null
           status?: string
           stripe_payment_intent_id?: string
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: []
       }

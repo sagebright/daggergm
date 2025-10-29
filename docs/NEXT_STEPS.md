@@ -141,17 +141,29 @@ All phases complete:
 - ✅ Column comment properly set
 - ✅ Integration tests passing (see `__tests__/integration/schema/user-profiles-default-credits.test.ts`)
 
-### 5.2: Clean Up Guest Data
+### ✅ 5.2: Clean Up Guest Data (COMPLETED)
 
-**Status**: Low priority (no harm in keeping historical data)
+**Status**: COMPLETED ✅
 
-**Options**:
+**Completed**: 2025-10-28 (Migration 00017)
 
-1. Keep guest adventures as historical data
-2. Delete guest adventures after 30 days (add cron job)
-3. Convert to sample/showcase adventures
+**What was cleaned up**:
 
-**Time Estimate**: 1-2 hours (if implemented)
+- Removed `guest_email` and `guest_token` columns from `daggerheart_adventures`
+- Removed `guest_email` column from `daggerheart_purchases`
+- Dropped RLS policies: "Guests can create adventures", "Guests can view adventures with token"
+- Replaced `guest_adventure_email` constraint with `adventures_require_user_id` (user_id now required)
+- Made `user_id` required (NOT NULL) on both adventures and purchases tables
+
+**Migration**: `supabase/migrations/00017_remove_guest_system.sql`
+
+**Verification**:
+
+- ✅ 0 guest adventures found before cleanup
+- ✅ 0 guest purchases found before cleanup
+- ✅ All guest columns removed from schema
+- ✅ TypeScript types regenerated (no guest fields)
+- ✅ All 664 tests passing
 
 ---
 
