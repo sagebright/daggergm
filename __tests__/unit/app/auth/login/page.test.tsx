@@ -46,13 +46,16 @@ describe('LoginPage', () => {
     vi.mocked(useRouter).mockReturnValue(mockRouter)
     vi.mocked(createClient).mockReturnValue(mockSupabaseClient)
 
-    // Mock NEXT_PUBLIC_SITE_URL and window.location.origin
+    // Mock NEXT_PUBLIC_SITE_URL and window.location
     process.env.NEXT_PUBLIC_SITE_URL = 'http://localhost:3000'
+    delete (window as any).location
     Object.defineProperty(window, 'location', {
       value: {
         origin: 'http://localhost:3000',
+        href: 'http://localhost:3000/auth/login',
       },
       writable: true,
+      configurable: true,
     })
   })
 
@@ -266,9 +269,11 @@ describe('LoginPage', () => {
         password: 'password123',
       })
 
-      expect(toast.success).toHaveBeenCalledWith('Login successful!')
-      expect(mockRouter.refresh).toHaveBeenCalled()
-      expect(mockPush).toHaveBeenCalledWith('/dashboard')
+      await waitFor(() => {
+        expect(toast.success).toHaveBeenCalledWith('Login successful!')
+        // Should use window.location.href for full page reload
+        expect(window.location.href).toBe('/dashboard')
+      })
     })
 
     it('should sign up with password', async () => {

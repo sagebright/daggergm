@@ -1,6 +1,5 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
 import type React from 'react'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -19,7 +18,6 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [authMode, setAuthMode] = useState<AuthMode>('password')
   const [isSignUp, setIsSignUp] = useState(false)
-  const router = useRouter()
   const supabase = createClient()
 
   async function handlePasswordAuth(e: React.FormEvent) {
@@ -51,8 +49,8 @@ export default function LoginPage() {
           toast.error(error.message)
         } else {
           toast.success('Login successful!')
-          router.refresh()
-          router.push('/dashboard')
+          // Use window.location for full page reload to ensure session is synced
+          window.location.href = '/dashboard'
         }
       }
     } catch {
@@ -114,6 +112,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                autoComplete="email"
               />
             </div>
 
@@ -128,6 +127,7 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   minLength={6}
+                  autoComplete={isSignUp ? 'new-password' : 'current-password'}
                 />
               </div>
             )}
