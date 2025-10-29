@@ -1,10 +1,16 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 import { signInWithOtp, signInWithPassword, signUpWithPassword } from '@/app/actions/auth'
 import LoginPage from '@/app/auth/login/page'
+
+// Mock next/navigation
+vi.mock('next/navigation', () => ({
+  useRouter: vi.fn(),
+}))
 
 // Mock Server Actions
 vi.mock('@/app/actions/auth', () => ({
@@ -20,9 +26,21 @@ vi.mock('sonner', () => ({
   },
 }))
 
+const mockPush = vi.fn()
+const mockRouter = {
+  push: mockPush,
+  refresh: vi.fn(),
+  back: vi.fn(),
+  forward: vi.fn(),
+  replace: vi.fn(),
+  prefetch: vi.fn(),
+}
+
 describe('LoginPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    mockPush.mockClear()
+    vi.mocked(useRouter).mockReturnValue(mockRouter as any)
 
     // Mock NEXT_PUBLIC_SITE_URL and window.location
     process.env.NEXT_PUBLIC_SITE_URL = 'http://localhost:3000'
@@ -134,8 +152,8 @@ describe('LoginPage', () => {
 
   describe('password authentication', () => {
     it('should sign in with password', async () => {
-      // Mock successful Server Action (will redirect, so no return value)
-      vi.mocked(signInWithPassword).mockResolvedValueOnce(undefined as any)
+      // Mock successful Server Action
+      vi.mocked(signInWithPassword).mockResolvedValueOnce({ success: true })
 
       const user = userEvent.setup()
       render(<LoginPage />)
@@ -150,6 +168,8 @@ describe('LoginPage', () => {
 
       await waitFor(() => {
         expect(signInWithPassword).toHaveBeenCalledWith('test@example.com', 'password123')
+        expect(toast.success).toHaveBeenCalledWith('Login successful!')
+        expect(mockPush).toHaveBeenCalledWith('/dashboard')
       })
     })
 

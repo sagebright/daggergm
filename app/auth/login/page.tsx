@@ -1,5 +1,6 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import type React from 'react'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -13,6 +14,7 @@ import { Label } from '@/components/ui/label'
 type AuthMode = 'password' | 'magic-link'
 
 export default function LoginPage() {
+  const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -34,22 +36,19 @@ export default function LoginPage() {
           toast.success(result.message)
         }
       } else {
-        // Server Action handles redirect automatically on success
-        // redirect() throws NEXT_REDIRECT which is caught here - this is normal behavior
+        // Server Action establishes session server-side
         const result = await signInWithPassword(email, password)
 
-        // Only handle error case - success will redirect via Server Action
         if (result && !result.success) {
           toast.error(result.error)
+        } else if (result && result.success) {
+          // Session established - now safe to redirect
+          toast.success('Login successful!')
+          router.push('/dashboard')
         }
       }
     } catch (error) {
-      // Check if this is a Next.js redirect (expected behavior for successful login)
-      if (error && typeof error === 'object' && 'digest' in error) {
-        // This is a Next.js redirect - let it propagate
-        throw error
-      }
-      // Otherwise, this is a real error
+      console.error('Login error:', error)
       toast.error('Something went wrong. Please try again.')
     } finally {
       setIsLoading(false)

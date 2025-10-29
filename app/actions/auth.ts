@@ -1,7 +1,5 @@
 'use server'
 
-import { redirect } from 'next/navigation'
-
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 
 export async function signInWithPassword(email: string, password: string) {
@@ -17,8 +15,8 @@ export async function signInWithPassword(email: string, password: string) {
   }
 
   // Session is now established server-side
-  // Redirect will work correctly because auth state is synced
-  redirect('/dashboard')
+  // Return success - client will handle redirect
+  return { success: true }
 }
 
 export async function signUpWithPassword(email: string, password: string, siteUrl: string) {
