@@ -51,6 +51,7 @@ export default function LoginPage() {
           toast.error(error.message)
         } else {
           toast.success('Login successful!')
+          router.refresh()
           router.push('/dashboard')
         }
       }

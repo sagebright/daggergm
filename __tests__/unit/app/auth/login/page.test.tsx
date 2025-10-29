@@ -267,6 +267,7 @@ describe('LoginPage', () => {
       })
 
       expect(toast.success).toHaveBeenCalledWith('Login successful!')
+      expect(mockRouter.refresh).toHaveBeenCalled()
       expect(mockPush).toHaveBeenCalledWith('/dashboard')
     })
 
