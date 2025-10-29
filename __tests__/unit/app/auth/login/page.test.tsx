@@ -41,27 +41,31 @@ describe('LoginPage', () => {
     vi.clearAllMocks()
     // Reset all mock implementations to ensure test isolation
     mockSupabaseClient.auth.signInWithOtp = vi.fn()
+    mockSupabaseClient.auth.signInWithPassword = vi.fn()
+    mockSupabaseClient.auth.signUp = vi.fn()
     vi.mocked(useRouter).mockReturnValue(mockRouter)
     vi.mocked(createClient).mockReturnValue(mockSupabaseClient)
 
-    // Mock window.location.origin
+    // Mock NEXT_PUBLIC_SITE_URL and window.location.origin
+    process.env.NEXT_PUBLIC_SITE_URL = 'http://localhost:3000'
     Object.defineProperty(window, 'location', {
       value: {
-        origin: 'http://localhost:3002',
+        origin: 'http://localhost:3000',
       },
       writable: true,
     })
   })
 
   describe('rendering', () => {
-    it('should render login form correctly', () => {
+    it('should render login form in password mode by default', () => {
       render(<LoginPage />)
 
       expect(screen.getByText('Welcome to DaggerGM')).toBeInTheDocument()
       expect(screen.getByText('Create epic Daggerheart adventures in minutes')).toBeInTheDocument()
       expect(screen.getByLabelText('Email')).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: 'Send Magic Link' })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: 'Continue as Guest' })).toBeInTheDocument()
+      expect(screen.getByLabelText('Password')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Sign In' })).toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Continue as Guest' })).not.toBeInTheDocument()
     })
 
     it('should have proper form elements', () => {
@@ -71,6 +75,34 @@ describe('LoginPage', () => {
       expect(emailInput).toHaveAttribute('type', 'email')
       expect(emailInput).toHaveAttribute('required')
       expect(emailInput).toHaveAttribute('placeholder', 'you@example.com')
+
+      const passwordInput = screen.getByLabelText('Password')
+      expect(passwordInput).toHaveAttribute('type', 'password')
+      expect(passwordInput).toHaveAttribute('required')
+      expect(passwordInput).toHaveAttribute('minLength', '6')
+    })
+
+    it('should allow toggling between password and magic link modes', async () => {
+      const user = userEvent.setup()
+      render(<LoginPage />)
+
+      // Start in password mode
+      expect(screen.getByLabelText('Password')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Sign In' })).toBeInTheDocument()
+
+      // Toggle to magic link mode
+      const toggleButton = screen.getByRole('button', { name: 'Use magic link instead' })
+      await user.click(toggleButton)
+
+      expect(screen.queryByLabelText('Password')).not.toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Send Magic Link' })).toBeInTheDocument()
+
+      // Toggle back to password mode
+      const backButton = screen.getByRole('button', { name: 'Use password instead' })
+      await user.click(backButton)
+
+      expect(screen.getByLabelText('Password')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Sign In' })).toBeInTheDocument()
     })
   })
 
@@ -83,6 +115,10 @@ describe('LoginPage', () => {
       const user = userEvent.setup()
       render(<LoginPage />)
 
+      // Switch to magic link mode
+      const toggleButton = screen.getByRole('button', { name: 'Use magic link instead' })
+      await user.click(toggleButton)
+
       const emailInput = screen.getByLabelText('Email')
       const submitButton = screen.getByRole('button', { name: 'Send Magic Link' })
 
@@ -92,7 +128,7 @@ describe('LoginPage', () => {
       expect(mockSupabaseClient.auth.signInWithOtp).toHaveBeenCalledWith({
         email: 'test@example.com',
         options: {
-          emailRedirectTo: 'http://localhost:3002/auth/callback',
+          emailRedirectTo: 'http://localhost:3000/auth/callback',
         },
       })
 
@@ -107,13 +143,17 @@ describe('LoginPage', () => {
       const user = userEvent.setup()
       render(<LoginPage />)
 
+      // Switch to magic link mode
+      const toggleButton = screen.getByRole('button', { name: 'Use magic link instead' })
+      await user.click(toggleButton)
+
       const emailInput = screen.getByLabelText('Email')
       const submitButton = screen.getByRole('button', { name: 'Send Magic Link' })
 
       await user.type(emailInput, 'test@example.com')
       await user.click(submitButton)
 
-      expect(screen.getByText('Sending...')).toBeInTheDocument()
+      expect(screen.getByText('Processing...')).toBeInTheDocument()
       expect(submitButton).toBeDisabled()
     })
 
@@ -125,6 +165,10 @@ describe('LoginPage', () => {
 
       const user = userEvent.setup()
       render(<LoginPage />)
+
+      // Switch to magic link mode
+      const toggleButton = screen.getByRole('button', { name: 'Use magic link instead' })
+      await user.click(toggleButton)
 
       const emailInput = screen.getByLabelText('Email')
       const form = emailInput.closest('form')!
@@ -140,7 +184,7 @@ describe('LoginPage', () => {
           expect(mockSupabaseClient.auth.signInWithOtp).toHaveBeenCalledWith({
             email: 'invalid-email',
             options: {
-              emailRedirectTo: 'http://localhost:3002/auth/callback',
+              emailRedirectTo: 'http://localhost:3000/auth/callback',
             },
           })
         },
@@ -164,6 +208,10 @@ describe('LoginPage', () => {
       const user = userEvent.setup()
       render(<LoginPage />)
 
+      // Switch to magic link mode
+      const toggleButton = screen.getByRole('button', { name: 'Use magic link instead' })
+      await user.click(toggleButton)
+
       const emailInput = screen.getByLabelText('Email')
       const form = emailInput.closest('form')!
 
@@ -178,7 +226,7 @@ describe('LoginPage', () => {
           expect(mockSupabaseClient.auth.signInWithOtp).toHaveBeenCalledWith({
             email: 'test@example.com',
             options: {
-              emailRedirectTo: 'http://localhost:3002/auth/callback',
+              emailRedirectTo: 'http://localhost:3000/auth/callback',
             },
           })
         },
@@ -194,21 +242,11 @@ describe('LoginPage', () => {
     })
   })
 
-  describe('guest mode', () => {
-    it('should navigate to adventures/new when continuing as guest', async () => {
-      const user = userEvent.setup()
-      render(<LoginPage />)
-
-      const guestButton = screen.getByRole('button', { name: 'Continue as Guest' })
-      await user.click(guestButton)
-
-      expect(mockPush).toHaveBeenCalledWith('/adventures/new')
-    })
-  })
-
-  describe('signup flow', () => {
-    it('should trigger same login flow for signup button', async () => {
-      ;(mockSupabaseClient.auth.signInWithOtp as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+  describe('password authentication', () => {
+    it('should sign in with password', async () => {
+      ;(
+        mockSupabaseClient.auth.signInWithPassword as ReturnType<typeof vi.fn>
+      ).mockResolvedValueOnce({
         error: null,
       })
 
@@ -216,30 +254,111 @@ describe('LoginPage', () => {
       render(<LoginPage />)
 
       const emailInput = screen.getByLabelText('Email')
-      const signupButton = screen.getByRole('button', { name: 'Sign up with the same form' })
+      const passwordInput = screen.getByLabelText('Password')
+      const submitButton = screen.getByRole('button', { name: 'Sign In' })
+
+      await user.type(emailInput, 'test@example.com')
+      await user.type(passwordInput, 'password123')
+      await user.click(submitButton)
+
+      expect(mockSupabaseClient.auth.signInWithPassword).toHaveBeenCalledWith({
+        email: 'test@example.com',
+        password: 'password123',
+      })
+
+      expect(toast.success).toHaveBeenCalledWith('Login successful!')
+      expect(mockPush).toHaveBeenCalledWith('/dashboard')
+    })
+
+    it('should sign up with password', async () => {
+      ;(mockSupabaseClient.auth.signUp as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        error: null,
+      })
+
+      const user = userEvent.setup()
+      render(<LoginPage />)
+
+      // Toggle to sign up mode
+      const signUpToggle = screen.getByRole('button', { name: 'Create account' })
+      await user.click(signUpToggle)
+
+      const emailInput = screen.getByLabelText('Email')
+      const passwordInput = screen.getByLabelText('Password')
+      const submitButton = screen.getByRole('button', { name: 'Sign Up' })
 
       await user.type(emailInput, 'newuser@example.com')
-      await user.click(signupButton)
+      await user.type(passwordInput, 'password123')
+      await user.click(submitButton)
 
-      expect(mockSupabaseClient.auth.signInWithOtp).toHaveBeenCalledWith({
+      expect(mockSupabaseClient.auth.signUp).toHaveBeenCalledWith({
         email: 'newuser@example.com',
+        password: 'password123',
         options: {
-          emailRedirectTo: 'http://localhost:3002/auth/callback',
+          emailRedirectTo: 'http://localhost:3000/auth/callback',
         },
       })
+
+      expect(toast.success).toHaveBeenCalledWith('Check your email to confirm your account!')
+    })
+
+    it('should handle password authentication errors', async () => {
+      const errorMessage = 'Invalid login credentials'
+      ;(
+        mockSupabaseClient.auth.signInWithPassword as ReturnType<typeof vi.fn>
+      ).mockResolvedValueOnce({
+        error: { message: errorMessage },
+      })
+
+      const user = userEvent.setup()
+      render(<LoginPage />)
+
+      const emailInput = screen.getByLabelText('Email')
+      const passwordInput = screen.getByLabelText('Password')
+      const submitButton = screen.getByRole('button', { name: 'Sign In' })
+
+      await user.type(emailInput, 'test@example.com')
+      await user.type(passwordInput, 'wrongpassword')
+      await user.click(submitButton)
+
+      await waitFor(() => {
+        expect(toast.error).toHaveBeenCalledWith(errorMessage)
+      })
+    })
+
+    it('should toggle between sign in and sign up modes', async () => {
+      const user = userEvent.setup()
+      render(<LoginPage />)
+
+      // Start in sign in mode
+      expect(screen.getByText('Welcome to DaggerGM')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Sign In' })).toBeInTheDocument()
+
+      // Toggle to sign up
+      const signUpToggle = screen.getByRole('button', { name: 'Create account' })
+      await user.click(signUpToggle)
+
+      expect(screen.getByText('Create Account')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Sign Up' })).toBeInTheDocument()
+
+      // Toggle back to sign in
+      const signInToggle = screen.getByRole('button', { name: 'Sign in' })
+      await user.click(signInToggle)
+
+      expect(screen.getByText('Welcome to DaggerGM')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Sign In' })).toBeInTheDocument()
     })
   })
 
   describe('form validation', () => {
-    it('should require email field', async () => {
+    it('should require email and password fields', async () => {
       const user = userEvent.setup()
       render(<LoginPage />)
 
-      const submitButton = screen.getByRole('button', { name: 'Send Magic Link' })
+      const submitButton = screen.getByRole('button', { name: 'Sign In' })
       await user.click(submitButton)
 
-      // Should not call supabase without email
-      expect(mockSupabaseClient.auth.signInWithOtp).not.toHaveBeenCalled()
+      // Should not call supabase without email/password
+      expect(mockSupabaseClient.auth.signInWithPassword).not.toHaveBeenCalled()
     })
 
     it('should update email state on input change', async () => {
@@ -250,6 +369,23 @@ describe('LoginPage', () => {
       await user.type(emailInput, 'test@example.com')
 
       expect(emailInput).toHaveValue('test@example.com')
+    })
+
+    it('should update password state on input change', async () => {
+      const user = userEvent.setup()
+      render(<LoginPage />)
+
+      const passwordInput = screen.getByLabelText('Password')
+      await user.type(passwordInput, 'password123')
+
+      expect(passwordInput).toHaveValue('password123')
+    })
+
+    it('should enforce minimum password length', () => {
+      render(<LoginPage />)
+
+      const passwordInput = screen.getByLabelText('Password')
+      expect(passwordInput).toHaveAttribute('minLength', '6')
     })
   })
 })
