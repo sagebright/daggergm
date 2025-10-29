@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+
 import { updateSession } from '@/lib/supabase/middleware'
 
 export async function middleware(request: NextRequest) {
   // Update user's session
-  const response = await updateSession(request)
+  const { response, user } = await updateSession(request)
 
   // Protected routes
   const protectedPaths = ['/dashboard']
@@ -14,8 +15,8 @@ export async function middleware(request: NextRequest) {
   const isProtectedPath = protectedPaths.some((path) => currentPath.startsWith(path))
   const isAuthPath = authPaths.some((path) => currentPath.startsWith(path))
 
-  // Check if user is authenticated
-  const hasSession = request.cookies.get('sb-access-token')
+  // Check if user is authenticated (using actual user from getUser())
+  const hasSession = !!user
 
   // Redirect logic
   if (isProtectedPath && !hasSession) {
