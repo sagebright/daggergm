@@ -1,4 +1,5 @@
-import type { NextRequest, NextResponse } from 'next/server'
+import type { NextRequest, NextResponse as NextResponseType } from 'next/server'
+import { NextResponse } from 'next/server'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 import { updateSession } from '@/lib/supabase/middleware'
@@ -45,7 +46,7 @@ describe('middleware', () => {
     it('should always call updateSession', async () => {
       const mockResponse = { status: 200 }
       mockUpdateSession.mockResolvedValueOnce({
-        response: mockResponse as NextResponse,
+        response: mockResponse as NextResponseType,
         user: null,
       })
 
@@ -62,7 +63,7 @@ describe('middleware', () => {
     it('should redirect to login if accessing dashboard without session', async () => {
       const mockResponse = { status: 200 }
       mockUpdateSession.mockResolvedValueOnce({
-        response: mockResponse as NextResponse,
+        response: mockResponse as NextResponseType,
         user: null,
       })
 
@@ -77,7 +78,7 @@ describe('middleware', () => {
       const mockResponse = { status: 200 }
       const mockUser = { id: 'user-123', email: 'user@example.com' }
       mockUpdateSession.mockResolvedValueOnce({
-        response: mockResponse as NextResponse,
+        response: mockResponse as NextResponseType,
         user: mockUser as any,
       })
 
@@ -92,7 +93,7 @@ describe('middleware', () => {
     it('should protect nested dashboard routes', async () => {
       const mockResponse = { status: 200 }
       mockUpdateSession.mockResolvedValueOnce({
-        response: mockResponse as NextResponse,
+        response: mockResponse as NextResponseType,
         user: null,
       })
 
@@ -109,7 +110,7 @@ describe('middleware', () => {
       const mockResponse = { status: 200 }
       const mockUser = { id: 'user-123', email: 'user@example.com' }
       mockUpdateSession.mockResolvedValueOnce({
-        response: mockResponse as NextResponse,
+        response: mockResponse as NextResponseType,
         user: mockUser as any,
       })
 
@@ -123,7 +124,7 @@ describe('middleware', () => {
     it('should allow access to login without session', async () => {
       const mockResponse = { status: 200 }
       mockUpdateSession.mockResolvedValueOnce({
-        response: mockResponse as NextResponse,
+        response: mockResponse as NextResponseType,
         user: null,
       })
 
@@ -139,7 +140,7 @@ describe('middleware', () => {
       const mockResponse = { status: 200 }
       const mockUser = { id: 'user-123', email: 'user@example.com' }
       mockUpdateSession.mockResolvedValueOnce({
-        response: mockResponse as NextResponse,
+        response: mockResponse as NextResponseType,
         user: mockUser as any,
       })
 
@@ -153,7 +154,7 @@ describe('middleware', () => {
     it('should allow access to auth callback without session', async () => {
       const mockResponse = { status: 200 }
       mockUpdateSession.mockResolvedValueOnce({
-        response: mockResponse as NextResponse,
+        response: mockResponse as NextResponseType,
         user: null,
       })
 
@@ -170,7 +171,7 @@ describe('middleware', () => {
     it('should allow access to home page without session', async () => {
       const mockResponse = { status: 200 }
       mockUpdateSession.mockResolvedValueOnce({
-        response: mockResponse as NextResponse,
+        response: mockResponse as NextResponseType,
         user: null,
       })
 
@@ -185,7 +186,7 @@ describe('middleware', () => {
     it('should allow access to adventures/new without session', async () => {
       const mockResponse = { status: 200 }
       mockUpdateSession.mockResolvedValueOnce({
-        response: mockResponse as NextResponse,
+        response: mockResponse as NextResponseType,
         user: null,
       })
 
