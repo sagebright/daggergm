@@ -44,7 +44,7 @@ describe('User Profiles - Default Credits', () => {
     // Cleanup: Delete test users created during this test
     if (testUserIds.length > 0) {
       // Delete user profiles first (due to foreign key constraints)
-      await supabase.from('user_profiles').delete().in('id', testUserIds)
+      await supabase.from('daggerheart_user_profiles').delete().in('id', testUserIds)
 
       // Delete auth users
       for (const userId of testUserIds) {
@@ -72,7 +72,7 @@ describe('User Profiles - Default Credits', () => {
 
       // User profile should be auto-created by trigger with 0 credits
       const { data: profile, error: profileError } = await supabase
-        .from('user_profiles')
+        .from('daggerheart_user_profiles')
         .select('credits, email')
         .eq('id', authData.user.id)
         .single()
@@ -102,11 +102,11 @@ describe('User Profiles - Default Credits', () => {
       testUserIds.push(authData.user.id)
 
       // Delete the auto-created profile so we can test manual insert
-      await supabase.from('user_profiles').delete().eq('id', authData.user.id)
+      await supabase.from('daggerheart_user_profiles').delete().eq('id', authData.user.id)
 
       // Manually insert profile with explicit credits
       const { data: profile, error: profileError } = await supabase
-        .from('user_profiles')
+        .from('daggerheart_user_profiles')
         .insert({
           id: authData.user.id,
           email: testEmail,
@@ -139,11 +139,11 @@ describe('User Profiles - Default Credits', () => {
       testUserIds.push(authData.user.id)
 
       // Delete the auto-created profile
-      await supabase.from('user_profiles').delete().eq('id', authData.user.id)
+      await supabase.from('daggerheart_user_profiles').delete().eq('id', authData.user.id)
 
       // Insert profile without specifying credits - should use DEFAULT 0
       const { data: profile, error: profileError } = await supabase
-        .from('user_profiles')
+        .from('daggerheart_user_profiles')
         .insert({
           id: authData.user.id,
           email: testEmail,
@@ -176,10 +176,10 @@ describe('User Profiles - Default Credits', () => {
       testUserIds.push(authData.user.id)
 
       // Delete auto-created profile
-      await supabase.from('user_profiles').delete().eq('id', authData.user.id)
+      await supabase.from('daggerheart_user_profiles').delete().eq('id', authData.user.id)
 
       // Try to insert profile with negative credits - should fail
-      const { error: profileError } = await supabase.from('user_profiles').insert({
+      const { error: profileError } = await supabase.from('daggerheart_user_profiles').insert({
         id: authData.user.id,
         email: testEmail,
         credits: -1, // Invalid: negative credits

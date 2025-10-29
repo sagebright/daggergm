@@ -129,6 +129,15 @@ export default [
     },
   },
 
+  // Generated types (no line limit)
+  {
+    files: ['src/types/supabase.ts'],
+    rules: {
+      'max-lines': 'off', // Generated file from Supabase CLI
+      '@typescript-eslint/no-explicit-any': 'off', // Generated types may use any
+    },
+  },
+
   // Test files (relaxed rules)
   {
     files: ['**/__tests__/**/*.ts', '**/__tests__/**/*.tsx', '**/*.test.ts', '**/*.test.tsx'],

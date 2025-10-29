@@ -1,5 +1,3 @@
-/* eslint-disable max-lines */
-// Generated file - auto-generated from Supabase schema
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
 export type Database = {
@@ -10,63 +8,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      adventures: {
-        Row: {
-          config: Json
-          created_at: string | null
-          expansion_regenerations_used: number | null
-          exported_at: string | null
-          focus: string
-          frame: string
-          guest_email: string | null
-          guest_token: string | null
-          id: string
-          metadata: Json | null
-          movements: Json[] | null
-          scaffold_regenerations_used: number | null
-          state: string | null
-          title: string
-          updated_at: string | null
-          user_id: string | null
-        }
-        Insert: {
-          config?: Json
-          created_at?: string | null
-          expansion_regenerations_used?: number | null
-          exported_at?: string | null
-          focus: string
-          frame: string
-          guest_email?: string | null
-          guest_token?: string | null
-          id?: string
-          metadata?: Json | null
-          movements?: Json[] | null
-          scaffold_regenerations_used?: number | null
-          state?: string | null
-          title: string
-          updated_at?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          config?: Json
-          created_at?: string | null
-          expansion_regenerations_used?: number | null
-          exported_at?: string | null
-          focus?: string
-          frame?: string
-          guest_email?: string | null
-          guest_token?: string | null
-          id?: string
-          metadata?: Json | null
-          movements?: Json[] | null
-          scaffold_regenerations_used?: number | null
-          state?: string | null
-          title?: string
-          updated_at?: string | null
-          user_id?: string | null
-        }
-        Relationships: []
-      }
       archon_code_examples: {
         Row: {
           chunk_number: number
@@ -535,6 +476,63 @@ export type Database = {
         }
         Relationships: []
       }
+      daggerheart_adventures: {
+        Row: {
+          config: Json
+          created_at: string | null
+          expansion_regenerations_used: number | null
+          exported_at: string | null
+          focus: string
+          frame: string
+          guest_email: string | null
+          guest_token: string | null
+          id: string
+          metadata: Json | null
+          movements: Json[] | null
+          scaffold_regenerations_used: number | null
+          state: string | null
+          title: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          config?: Json
+          created_at?: string | null
+          expansion_regenerations_used?: number | null
+          exported_at?: string | null
+          focus: string
+          frame: string
+          guest_email?: string | null
+          guest_token?: string | null
+          id?: string
+          metadata?: Json | null
+          movements?: Json[] | null
+          scaffold_regenerations_used?: number | null
+          state?: string | null
+          title: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          config?: Json
+          created_at?: string | null
+          expansion_regenerations_used?: number | null
+          exported_at?: string | null
+          focus?: string
+          frame?: string
+          guest_email?: string | null
+          guest_token?: string | null
+          id?: string
+          metadata?: Json | null
+          movements?: Json[] | null
+          scaffold_regenerations_used?: number | null
+          state?: string | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       daggerheart_adversaries: {
         Row: {
           atk: string
@@ -886,6 +884,42 @@ export type Database = {
         }
         Relationships: []
       }
+      daggerheart_game_content: {
+        Row: {
+          content_type: string
+          created_at: string | null
+          embedding: string | null
+          frame: string | null
+          game_element: Json
+          id: string
+          metadata: Json | null
+          searchable_text: string
+          source_book: string
+        }
+        Insert: {
+          content_type: string
+          created_at?: string | null
+          embedding?: string | null
+          frame?: string | null
+          game_element: Json
+          id?: string
+          metadata?: Json | null
+          searchable_text: string
+          source_book: string
+        }
+        Update: {
+          content_type?: string
+          created_at?: string | null
+          embedding?: string | null
+          frame?: string | null
+          game_element?: Json
+          id?: string
+          metadata?: Json | null
+          searchable_text?: string
+          source_book?: string
+        }
+        Relationships: []
+      }
       daggerheart_items: {
         Row: {
           created_at: string | null
@@ -919,6 +953,84 @@ export type Database = {
         }
         Relationships: []
       }
+      daggerheart_llm_cache: {
+        Row: {
+          access_count: number | null
+          accessed_at: string | null
+          created_at: string | null
+          id: string
+          model: string
+          prompt_hash: string
+          prompt_params: Json
+          response: string
+          response_metadata: Json | null
+          temperature: number | null
+          token_count: number | null
+        }
+        Insert: {
+          access_count?: number | null
+          accessed_at?: string | null
+          created_at?: string | null
+          id?: string
+          model: string
+          prompt_hash: string
+          prompt_params: Json
+          response: string
+          response_metadata?: Json | null
+          temperature?: number | null
+          token_count?: number | null
+        }
+        Update: {
+          access_count?: number | null
+          accessed_at?: string | null
+          created_at?: string | null
+          id?: string
+          model?: string
+          prompt_hash?: string
+          prompt_params?: Json
+          response?: string
+          response_metadata?: Json | null
+          temperature?: number | null
+          token_count?: number | null
+        }
+        Relationships: []
+      }
+      daggerheart_purchases: {
+        Row: {
+          amount: number
+          created_at: string | null
+          credits: number
+          guest_email: string | null
+          id: string
+          metadata: Json | null
+          status: string
+          stripe_payment_intent_id: string
+          user_id: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          credits: number
+          guest_email?: string | null
+          id?: string
+          metadata?: Json | null
+          status: string
+          stripe_payment_intent_id: string
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          credits?: number
+          guest_email?: string | null
+          id?: string
+          metadata?: Json | null
+          status?: string
+          stripe_payment_intent_id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       daggerheart_subclasses: {
         Row: {
           created_at: string | null
@@ -946,6 +1058,33 @@ export type Database = {
           name?: string
           parent_class?: string
           source_book?: string | null
+        }
+        Relationships: []
+      }
+      daggerheart_user_profiles: {
+        Row: {
+          created_at: string | null
+          credits: number | null
+          email: string
+          id: string
+          total_purchased: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          credits?: number | null
+          email: string
+          id: string
+          total_purchased?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          credits?: number | null
+          email?: string
+          id?: string
+          total_purchased?: number | null
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -997,42 +1136,6 @@ export type Database = {
         }
         Relationships: []
       }
-      game_content: {
-        Row: {
-          content_type: string
-          created_at: string | null
-          embedding: string | null
-          frame: string | null
-          game_element: Json
-          id: string
-          metadata: Json | null
-          searchable_text: string
-          source_book: string
-        }
-        Insert: {
-          content_type: string
-          created_at?: string | null
-          embedding?: string | null
-          frame?: string | null
-          game_element: Json
-          id?: string
-          metadata?: Json | null
-          searchable_text: string
-          source_book: string
-        }
-        Update: {
-          content_type?: string
-          created_at?: string | null
-          embedding?: string | null
-          frame?: string | null
-          game_element?: Json
-          id?: string
-          metadata?: Json | null
-          searchable_text?: string
-          source_book?: string
-        }
-        Relationships: []
-      }
       image_ocr_data: {
         Row: {
           avg_confidence: number | null
@@ -1078,111 +1181,6 @@ export type Database = {
         }
         Relationships: []
       }
-      llm_cache: {
-        Row: {
-          access_count: number | null
-          accessed_at: string | null
-          created_at: string | null
-          id: string
-          model: string
-          prompt_hash: string
-          prompt_params: Json
-          response: string
-          response_metadata: Json | null
-          temperature: number | null
-          token_count: number | null
-        }
-        Insert: {
-          access_count?: number | null
-          accessed_at?: string | null
-          created_at?: string | null
-          id?: string
-          model: string
-          prompt_hash: string
-          prompt_params: Json
-          response: string
-          response_metadata?: Json | null
-          temperature?: number | null
-          token_count?: number | null
-        }
-        Update: {
-          access_count?: number | null
-          accessed_at?: string | null
-          created_at?: string | null
-          id?: string
-          model?: string
-          prompt_hash?: string
-          prompt_params?: Json
-          response?: string
-          response_metadata?: Json | null
-          temperature?: number | null
-          token_count?: number | null
-        }
-        Relationships: []
-      }
-      purchases: {
-        Row: {
-          amount: number
-          created_at: string | null
-          credits: number
-          guest_email: string | null
-          id: string
-          metadata: Json | null
-          status: string
-          stripe_payment_intent_id: string
-          user_id: string | null
-        }
-        Insert: {
-          amount: number
-          created_at?: string | null
-          credits: number
-          guest_email?: string | null
-          id?: string
-          metadata?: Json | null
-          status: string
-          stripe_payment_intent_id: string
-          user_id?: string | null
-        }
-        Update: {
-          amount?: number
-          created_at?: string | null
-          credits?: number
-          guest_email?: string | null
-          id?: string
-          metadata?: Json | null
-          status?: string
-          stripe_payment_intent_id?: string
-          user_id?: string | null
-        }
-        Relationships: []
-      }
-      user_profiles: {
-        Row: {
-          created_at: string | null
-          credits: number | null
-          email: string
-          id: string
-          total_purchased: number | null
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          credits?: number | null
-          email: string
-          id: string
-          total_purchased?: number | null
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          credits?: number | null
-          email?: string
-          id?: string
-          total_purchased?: number | null
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
     }
     Views: {
       [_ in never]: never
@@ -1199,6 +1197,37 @@ export type Database = {
       consume_adventure_credit: {
         Args: { p_adventure_id: string; p_user_id: string }
         Returns: boolean
+      }
+      get_tier_appropriate_loot: {
+        Args: { item_type?: string; limit_count?: number; party_level: number }
+        Returns: {
+          id: string
+          item_table: string
+          name: string
+          tier: number
+        }[]
+      }
+      increment_expansion_regenerations: {
+        Args: { adventure_id: string }
+        Returns: undefined
+      }
+      increment_scaffold_regenerations: {
+        Args: { adventure_id: string }
+        Returns: undefined
+      }
+      match_adversaries: {
+        Args: {
+          match_count?: number
+          match_threshold?: number
+          query_embedding: string
+        }
+        Returns: {
+          description: string
+          id: string
+          name: string
+          similarity: number
+          tier: number
+        }[]
       }
       match_archon_code_examples: {
         Args: {
@@ -1235,6 +1264,64 @@ export type Database = {
           url: string
         }[]
       }
+      match_environments: {
+        Args: {
+          match_count?: number
+          match_threshold?: number
+          query_embedding: string
+        }
+        Returns: {
+          description: string
+          id: string
+          name: string
+          similarity: number
+          tier: number
+        }[]
+      }
+      match_items: {
+        Args: {
+          match_count?: number
+          match_threshold?: number
+          query_embedding: string
+        }
+        Returns: {
+          description: string
+          id: string
+          name: string
+          similarity: number
+          tier: number
+        }[]
+      }
+      match_weapons: {
+        Args: {
+          match_count?: number
+          match_threshold?: number
+          query_embedding: string
+        }
+        Returns: {
+          description: string
+          id: string
+          name: string
+          similarity: number
+          tier: number
+        }[]
+      }
+      search_adversaries: {
+        Args: {
+          limit_count?: number
+          party_level: number
+          search_query: string
+        }
+        Returns: {
+          description: string
+          difficulty: number
+          id: string
+          name: string
+          similarity: number
+          tier: number
+          type: string
+        }[]
+      }
       search_content_chunks: {
         Args: {
           match_count?: number
@@ -1250,6 +1337,15 @@ export type Database = {
           section_type: string
           similarity: number
           title: string
+        }[]
+      }
+      search_environments: {
+        Args: { limit_count?: number; search_query: string }
+        Returns: {
+          description: string
+          id: string
+          name: string
+          similarity: number
         }[]
       }
       search_game_content: {

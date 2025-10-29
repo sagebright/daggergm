@@ -67,7 +67,7 @@ describe('Scene Expansion with Six-Component Structure', () => {
     ]
 
     const { data: adventure, error: advError } = await supabase
-      .from('adventures')
+      .from('daggerheart_adventures')
       .insert({
         user_id: testUserId,
         title: 'Test Adventure for Scene Expansion',
@@ -96,7 +96,7 @@ describe('Scene Expansion with Six-Component Structure', () => {
   afterEach(async () => {
     // Cleanup: Delete test adventure and user
     if (adventureId) {
-      await supabase.from('adventures').delete().eq('id', adventureId)
+      await supabase.from('daggerheart_adventures').delete().eq('id', adventureId)
     }
     if (testUserId) {
       await supabase.auth.admin.deleteUser(testUserId)
@@ -399,7 +399,7 @@ describe('Scene Expansion with Six-Component Structure', () => {
       ]
 
       const { error } = await supabase
-        .from('adventures')
+        .from('daggerheart_adventures')
         .update({
           movements: updatedScenes as any,
           updated_at: new Date().toISOString(),
@@ -410,7 +410,7 @@ describe('Scene Expansion with Six-Component Structure', () => {
 
       // Verify it was saved
       const { data: retrieved, error: retrieveError } = await supabase
-        .from('adventures')
+        .from('daggerheart_adventures')
         .select('movements')
         .eq('id', adventureId)
         .single()

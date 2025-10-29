@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+
 import { GET } from '@/app/api/health/route'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { createMockSupabaseClient } from '@/test/mocks/supabase'
@@ -25,7 +26,7 @@ describe('Health Route', () => {
 
   describe('GET /api/health', () => {
     it('should return healthy status when supabase connection works', async () => {
-      const mockQuery = mockSupabaseClient.from('adventures')
+      const mockQuery = mockSupabaseClient.from('daggerheart_adventures')
       ;(mockQuery.select().limit(1).single as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
         data: null,
         error: null,
@@ -45,7 +46,7 @@ describe('Health Route', () => {
     })
 
     it('should return error status when supabase query fails', async () => {
-      const mockQuery = mockSupabaseClient.from('adventures')
+      const mockQuery = mockSupabaseClient.from('daggerheart_adventures')
       ;(mockQuery.select().limit(1).single as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
         data: null,
         error: { message: 'Connection failed' },
@@ -83,7 +84,7 @@ describe('Health Route', () => {
     })
 
     it('should include valid timestamp in ISO format', async () => {
-      const mockQuery = mockSupabaseClient.from('adventures')
+      const mockQuery = mockSupabaseClient.from('daggerheart_adventures')
       ;(mockQuery.select().limit(1).single as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
         data: null,
         error: null,
@@ -100,7 +101,7 @@ describe('Health Route', () => {
     })
 
     it('should have proper response headers', async () => {
-      const mockQuery = mockSupabaseClient.from('adventures')
+      const mockQuery = mockSupabaseClient.from('daggerheart_adventures')
       ;(mockQuery.select().limit(1).single as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
         data: null,
         error: null,
