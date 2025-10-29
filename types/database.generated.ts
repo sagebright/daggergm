@@ -9,63 +9,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      adventures: {
-        Row: {
-          config: Json
-          created_at: string | null
-          expansion_regenerations_used: number | null
-          exported_at: string | null
-          focus: string
-          frame: string
-          guest_email: string | null
-          guest_token: string | null
-          id: string
-          metadata: Json | null
-          movements: Json[] | null
-          scaffold_regenerations_used: number | null
-          state: string | null
-          title: string
-          updated_at: string | null
-          user_id: string | null
-        }
-        Insert: {
-          config?: Json
-          created_at?: string | null
-          expansion_regenerations_used?: number | null
-          exported_at?: string | null
-          focus: string
-          frame: string
-          guest_email?: string | null
-          guest_token?: string | null
-          id?: string
-          metadata?: Json | null
-          movements?: Json[] | null
-          scaffold_regenerations_used?: number | null
-          state?: string | null
-          title: string
-          updated_at?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          config?: Json
-          created_at?: string | null
-          expansion_regenerations_used?: number | null
-          exported_at?: string | null
-          focus?: string
-          frame?: string
-          guest_email?: string | null
-          guest_token?: string | null
-          id?: string
-          metadata?: Json | null
-          movements?: Json[] | null
-          scaffold_regenerations_used?: number | null
-          state?: string | null
-          title?: string
-          updated_at?: string | null
-          user_id?: string | null
-        }
-        Relationships: []
-      }
       archon_code_examples: {
         Row: {
           chunk_number: number
@@ -534,6 +477,57 @@ export type Database = {
         }
         Relationships: []
       }
+      daggerheart_adventures: {
+        Row: {
+          config: Json
+          created_at: string | null
+          expansion_regenerations_used: number | null
+          exported_at: string | null
+          focus: string
+          frame: string
+          id: string
+          metadata: Json | null
+          movements: Json[] | null
+          scaffold_regenerations_used: number | null
+          state: string | null
+          title: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          config?: Json
+          created_at?: string | null
+          expansion_regenerations_used?: number | null
+          exported_at?: string | null
+          focus: string
+          frame: string
+          id?: string
+          metadata?: Json | null
+          movements?: Json[] | null
+          scaffold_regenerations_used?: number | null
+          state?: string | null
+          title: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          config?: Json
+          created_at?: string | null
+          expansion_regenerations_used?: number | null
+          exported_at?: string | null
+          focus?: string
+          frame?: string
+          id?: string
+          metadata?: Json | null
+          movements?: Json[] | null
+          scaffold_regenerations_used?: number | null
+          state?: string | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       daggerheart_adversaries: {
         Row: {
           atk: string
@@ -885,6 +879,42 @@ export type Database = {
         }
         Relationships: []
       }
+      daggerheart_game_content: {
+        Row: {
+          content_type: string
+          created_at: string | null
+          embedding: string | null
+          frame: string | null
+          game_element: Json
+          id: string
+          metadata: Json | null
+          searchable_text: string
+          source_book: string
+        }
+        Insert: {
+          content_type: string
+          created_at?: string | null
+          embedding?: string | null
+          frame?: string | null
+          game_element: Json
+          id?: string
+          metadata?: Json | null
+          searchable_text: string
+          source_book: string
+        }
+        Update: {
+          content_type?: string
+          created_at?: string | null
+          embedding?: string | null
+          frame?: string | null
+          game_element?: Json
+          id?: string
+          metadata?: Json | null
+          searchable_text?: string
+          source_book?: string
+        }
+        Relationships: []
+      }
       daggerheart_items: {
         Row: {
           created_at: string | null
@@ -918,6 +948,81 @@ export type Database = {
         }
         Relationships: []
       }
+      daggerheart_llm_cache: {
+        Row: {
+          access_count: number | null
+          accessed_at: string | null
+          created_at: string | null
+          id: string
+          model: string
+          prompt_hash: string
+          prompt_params: Json
+          response: string
+          response_metadata: Json | null
+          temperature: number | null
+          token_count: number | null
+        }
+        Insert: {
+          access_count?: number | null
+          accessed_at?: string | null
+          created_at?: string | null
+          id?: string
+          model: string
+          prompt_hash: string
+          prompt_params: Json
+          response: string
+          response_metadata?: Json | null
+          temperature?: number | null
+          token_count?: number | null
+        }
+        Update: {
+          access_count?: number | null
+          accessed_at?: string | null
+          created_at?: string | null
+          id?: string
+          model?: string
+          prompt_hash?: string
+          prompt_params?: Json
+          response?: string
+          response_metadata?: Json | null
+          temperature?: number | null
+          token_count?: number | null
+        }
+        Relationships: []
+      }
+      daggerheart_purchases: {
+        Row: {
+          amount: number
+          created_at: string | null
+          credits: number
+          id: string
+          metadata: Json | null
+          status: string
+          stripe_payment_intent_id: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          credits: number
+          id?: string
+          metadata?: Json | null
+          status: string
+          stripe_payment_intent_id: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          credits?: number
+          id?: string
+          metadata?: Json | null
+          status?: string
+          stripe_payment_intent_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       daggerheart_subclasses: {
         Row: {
           created_at: string | null
@@ -945,6 +1050,33 @@ export type Database = {
           name?: string
           parent_class?: string
           source_book?: string | null
+        }
+        Relationships: []
+      }
+      daggerheart_user_profiles: {
+        Row: {
+          created_at: string | null
+          credits: number | null
+          email: string
+          id: string
+          total_purchased: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          credits?: number | null
+          email: string
+          id: string
+          total_purchased?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          credits?: number | null
+          email?: string
+          id?: string
+          total_purchased?: number | null
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -996,42 +1128,6 @@ export type Database = {
         }
         Relationships: []
       }
-      game_content: {
-        Row: {
-          content_type: string
-          created_at: string | null
-          embedding: string | null
-          frame: string | null
-          game_element: Json
-          id: string
-          metadata: Json | null
-          searchable_text: string
-          source_book: string
-        }
-        Insert: {
-          content_type: string
-          created_at?: string | null
-          embedding?: string | null
-          frame?: string | null
-          game_element: Json
-          id?: string
-          metadata?: Json | null
-          searchable_text: string
-          source_book: string
-        }
-        Update: {
-          content_type?: string
-          created_at?: string | null
-          embedding?: string | null
-          frame?: string | null
-          game_element?: Json
-          id?: string
-          metadata?: Json | null
-          searchable_text?: string
-          source_book?: string
-        }
-        Relationships: []
-      }
       image_ocr_data: {
         Row: {
           avg_confidence: number | null
@@ -1074,111 +1170,6 @@ export type Database = {
           relative_path?: string
           text_length?: number | null
           ui_elements?: Json | null
-        }
-        Relationships: []
-      }
-      llm_cache: {
-        Row: {
-          access_count: number | null
-          accessed_at: string | null
-          created_at: string | null
-          id: string
-          model: string
-          prompt_hash: string
-          prompt_params: Json
-          response: string
-          response_metadata: Json | null
-          temperature: number | null
-          token_count: number | null
-        }
-        Insert: {
-          access_count?: number | null
-          accessed_at?: string | null
-          created_at?: string | null
-          id?: string
-          model: string
-          prompt_hash: string
-          prompt_params: Json
-          response: string
-          response_metadata?: Json | null
-          temperature?: number | null
-          token_count?: number | null
-        }
-        Update: {
-          access_count?: number | null
-          accessed_at?: string | null
-          created_at?: string | null
-          id?: string
-          model?: string
-          prompt_hash?: string
-          prompt_params?: Json
-          response?: string
-          response_metadata?: Json | null
-          temperature?: number | null
-          token_count?: number | null
-        }
-        Relationships: []
-      }
-      purchases: {
-        Row: {
-          amount: number
-          created_at: string | null
-          credits: number
-          guest_email: string | null
-          id: string
-          metadata: Json | null
-          status: string
-          stripe_payment_intent_id: string
-          user_id: string | null
-        }
-        Insert: {
-          amount: number
-          created_at?: string | null
-          credits: number
-          guest_email?: string | null
-          id?: string
-          metadata?: Json | null
-          status: string
-          stripe_payment_intent_id: string
-          user_id?: string | null
-        }
-        Update: {
-          amount?: number
-          created_at?: string | null
-          credits?: number
-          guest_email?: string | null
-          id?: string
-          metadata?: Json | null
-          status?: string
-          stripe_payment_intent_id?: string
-          user_id?: string | null
-        }
-        Relationships: []
-      }
-      user_profiles: {
-        Row: {
-          created_at: string | null
-          credits: number | null
-          email: string
-          id: string
-          total_purchased: number | null
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          credits?: number | null
-          email: string
-          id: string
-          total_purchased?: number | null
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          credits?: number | null
-          email?: string
-          id?: string
-          total_purchased?: number | null
-          updated_at?: string | null
         }
         Relationships: []
       }

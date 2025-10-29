@@ -88,7 +88,7 @@ describe('DashboardPage', () => {
       }
 
       mockSupabaseClient.from = vi.fn().mockImplementation((table: string) => {
-        if (table === 'adventures') {
+        if (table === 'daggerheart_adventures') {
           return {
             ...mockSelect,
             order: vi.fn().mockResolvedValue({ data: [] }),
@@ -164,7 +164,7 @@ describe('DashboardPage', () => {
       ]
 
       mockSupabaseClient.from = vi.fn().mockImplementation((table: string) => {
-        if (table === 'adventures') {
+        if (table === 'daggerheart_adventures') {
           return {
             select: vi.fn().mockReturnThis(),
             eq: vi.fn().mockReturnThis(),
@@ -251,7 +251,7 @@ describe('DashboardPage', () => {
       })
 
       mockSupabaseClient.from = vi.fn().mockImplementation((table: string) => {
-        if (table === 'adventures') {
+        if (table === 'daggerheart_adventures') {
           return mockFrom(table)
         }
         return mockFromProfiles(table)
@@ -259,7 +259,7 @@ describe('DashboardPage', () => {
 
       await DashboardPage()
 
-      expect(mockSupabaseClient.from).toHaveBeenCalledWith('adventures')
+      expect(mockSupabaseClient.from).toHaveBeenCalledWith('daggerheart_adventures')
       // user_profiles query removed since CreditBalance component handles it via Server Action
     })
   })

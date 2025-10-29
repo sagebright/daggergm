@@ -30,7 +30,7 @@ export async function expandScene(adventureId: string, sceneId: string) {
 
     // Get adventure with scene
     const { data: adventure, error: fetchError } = await supabase
-      .from('adventures')
+      .from('daggerheart_adventures')
       .select('*')
       .eq('id', adventureId)
       .single()
@@ -89,7 +89,7 @@ export async function expandScene(adventureId: string, sceneId: string) {
     )
 
     const { error: updateError } = await supabase
-      .from('adventures')
+      .from('daggerheart_adventures')
       .update({
         movements: updatedScenes as unknown as Json[],
         updated_at: new Date().toISOString(),

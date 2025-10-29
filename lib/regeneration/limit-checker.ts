@@ -40,7 +40,7 @@ export class RegenerationLimitChecker {
     const supabase = await createServiceRoleClient()
 
     const { data, error } = await supabase
-      .from('adventures')
+      .from('daggerheart_adventures')
       .select('scaffold_regenerations_used')
       .eq('id', adventureId)
       .single()
@@ -64,7 +64,7 @@ export class RegenerationLimitChecker {
     const supabase = await createServiceRoleClient()
 
     const { data, error } = await supabase
-      .from('adventures')
+      .from('daggerheart_adventures')
       .select('expansion_regenerations_used')
       .eq('id', adventureId)
       .single()
@@ -122,7 +122,7 @@ export class RegenerationLimitChecker {
     const supabase = await createServiceRoleClient()
 
     const { data, error } = await supabase
-      .from('adventures')
+      .from('daggerheart_adventures')
       .select('scaffold_regenerations_used, expansion_regenerations_used')
       .eq('id', adventureId)
       .single()

@@ -72,7 +72,7 @@ export async function expandMovement(adventureId: string, movementId: string) {
 
     // Get adventure with movements
     const { data: adventure } = await supabase
-      .from('adventures')
+      .from('daggerheart_adventures')
       .select('*')
       .eq('id', adventureId)
       .single()
@@ -142,7 +142,7 @@ export async function expandMovement(adventureId: string, movementId: string) {
 
     // Update movement with expanded content
     const { error } = await supabase
-      .from('adventures')
+      .from('daggerheart_adventures')
       .update({
         movements: updatedMovements as unknown as Json[],
         updated_at: new Date().toISOString(),
@@ -224,7 +224,7 @@ export async function refineMovementContent(
 
     // Get adventure
     const { data: adventure } = await supabase
-      .from('adventures')
+      .from('daggerheart_adventures')
       .select('*')
       .eq('id', adventureId)
       .single()
@@ -343,7 +343,7 @@ export async function regenerateScaffoldMovement(adventureId: string, movementId
 
     // Get adventure
     const { data: adventure } = await supabase
-      .from('adventures')
+      .from('daggerheart_adventures')
       .select('*')
       .eq('id', adventureId)
       .single()
@@ -436,7 +436,7 @@ export async function regenerateScaffoldMovement(adventureId: string, movementId
 
     // Increment regeneration counter and save
     const { error } = await supabase
-      .from('adventures')
+      .from('daggerheart_adventures')
       .update({
         movements: updatedMovements as unknown as Json[],
         scaffold_regenerations_used: scaffoldRegensUsed + 1,
@@ -497,7 +497,7 @@ export async function updateMovement(
       const { createServiceRoleClient } = await import('@/lib/supabase/server')
       const serviceClient = await createServiceRoleClient()
       const { data } = await serviceClient
-        .from('adventures')
+        .from('daggerheart_adventures')
         .select('*')
         .eq('id', adventureId)
         .eq('guest_token', guestToken)
@@ -507,7 +507,7 @@ export async function updateMovement(
     } else if (user) {
       // Authenticated user
       const { data } = await supabase
-        .from('adventures')
+        .from('daggerheart_adventures')
         .select('*')
         .eq('id', adventureId)
         .eq('user_id', user.id)
@@ -535,7 +535,7 @@ export async function updateMovement(
     // Starting database update
 
     const { error } = await serviceClient
-      .from('adventures')
+      .from('daggerheart_adventures')
       .update({
         movements: updatedMovements as unknown as Json[],
         updated_at: new Date().toISOString(),

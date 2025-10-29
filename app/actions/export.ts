@@ -69,7 +69,7 @@ export async function exportAdventure(
 
     // Fetch adventure
     const { data: adventure, error: adventureError } = await supabase
-      .from('adventures')
+      .from('daggerheart_adventures')
       .select('*')
       .eq('id', adventureId)
       .single()

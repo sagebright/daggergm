@@ -36,7 +36,7 @@ export async function getRegenerationCounts(adventureId: string) {
 
     // Verify ownership
     const { data: adventure, error: adventureError } = await supabase
-      .from('adventures')
+      .from('daggerheart_adventures')
       .select('user_id')
       .eq('id', adventureId)
       .single()

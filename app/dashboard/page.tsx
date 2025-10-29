@@ -17,7 +17,7 @@ export default async function DashboardPage() {
 
   // Fetch user's adventures
   const { data: adventures } = (await supabase
-    .from('adventures')
+    .from('daggerheart_adventures')
     .select('*')
     .eq('user_id', user.id)
     .order('updated_at', { ascending: false })) as {

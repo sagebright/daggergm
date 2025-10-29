@@ -153,7 +153,7 @@ export async function generateAdventure(config: AdventureConfig) {
     // Use service role client for insert to bypass RLS
     const serviceClient = await createServiceRoleClient()
     const { data: adventure, error } = await serviceClient
-      .from('adventures')
+      .from('daggerheart_adventures')
       .insert(adventureData)
       .select()
       .single()
@@ -200,7 +200,7 @@ export async function getAdventure(id: string, guestToken?: string) {
 
   // First try to get as authenticated user
   const { data: authData, error: authError } = await supabase
-    .from('adventures')
+    .from('daggerheart_adventures')
     .select('*')
     .eq('id', id)
     .single()
@@ -213,7 +213,7 @@ export async function getAdventure(id: string, guestToken?: string) {
   if (guestToken) {
     const serviceClient = await createServiceRoleClient()
     const { data: guestData, error: guestError } = await serviceClient
-      .from('adventures')
+      .from('daggerheart_adventures')
       .select('*')
       .eq('id', id)
       .eq('guest_token', guestToken)
@@ -239,7 +239,7 @@ export async function getUserAdventures() {
   }
 
   const { data, error } = await supabase
-    .from('adventures')
+    .from('daggerheart_adventures')
     .select('*')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
@@ -271,7 +271,7 @@ export async function updateAdventureState(
       // Guest user with token
       const serviceClient = await createServiceRoleClient()
       const { data } = await serviceClient
-        .from('adventures')
+        .from('daggerheart_adventures')
         .select('*')
         .eq('id', adventureId)
         .eq('guest_token', guestToken)
@@ -281,7 +281,7 @@ export async function updateAdventureState(
     } else if (user) {
       // Authenticated user
       const { data } = await supabase
-        .from('adventures')
+        .from('daggerheart_adventures')
         .select('*')
         .eq('id', adventureId)
         .eq('user_id', user.id)
@@ -299,7 +299,7 @@ export async function updateAdventureState(
     // Update state using service role
     const serviceClient = await createServiceRoleClient()
     const { error } = await serviceClient
-      .from('adventures')
+      .from('daggerheart_adventures')
       .update({
         state: newState,
         updated_at: new Date().toISOString(),

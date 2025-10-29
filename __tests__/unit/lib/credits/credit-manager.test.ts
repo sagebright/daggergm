@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+
 import { CreditManager } from '@/lib/credits/credit-manager'
-import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { InsufficientCreditsError, CreditConsumptionError } from '@/lib/credits/errors'
+import { createServerSupabaseClient } from '@/lib/supabase/server'
 
 // Mock dependencies
 vi.mock('@/lib/supabase/server', () => ({
@@ -38,7 +39,7 @@ describe('CreditManager', () => {
       const credits = await creditManager.getUserCredits('user-123')
 
       expect(credits).toBe(10)
-      expect(mockSupabaseClient.from).toHaveBeenCalledWith('user_profiles')
+      expect(mockSupabaseClient.from).toHaveBeenCalledWith('daggerheart_user_profiles')
     })
 
     it('should return 0 for users with no profile', async () => {

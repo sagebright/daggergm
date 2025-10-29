@@ -454,13 +454,13 @@ JSON: {"title":"","description":"","type":"combat|exploration|social|puzzle","es
     const promptHash = await this.hashPrompt(params)
     const supabase = await createServerSupabaseClient()
     const { data } = await supabase
-      .from('llm_cache')
+      .from('daggerheart_llm_cache')
       .select('*')
       .eq('prompt_hash', promptHash)
       .single()
     if (data) {
       await supabase
-        .from('llm_cache')
+        .from('daggerheart_llm_cache')
         .update({
           accessed_at: new Date().toISOString(),
           access_count: (data.access_count || 0) + 1,
@@ -478,7 +478,7 @@ JSON: {"title":"","description":"","type":"combat|exploration|social|puzzle","es
   ): Promise<void> {
     const promptHash = await this.hashPrompt(params)
     const supabase = await createServerSupabaseClient()
-    await supabase.from('llm_cache').insert({
+    await supabase.from('daggerheart_llm_cache').insert({
       prompt_hash: promptHash,
       prompt_params: params as Json,
       response: JSON.stringify(response),
