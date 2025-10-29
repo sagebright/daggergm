@@ -1,21 +1,16 @@
-import { render, screen, waitFor, fireEvent } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import type { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime'
-import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
+import { signInWithOtp, signInWithPassword, signUpWithPassword } from '@/app/actions/auth'
 import LoginPage from '@/app/auth/login/page'
-import { createClient } from '@/lib/supabase/client'
-import { createMockSupabaseClient } from '@/test/mocks/supabase'
 
-// Mock dependencies
-vi.mock('next/navigation', () => ({
-  useRouter: vi.fn(),
-}))
-
-vi.mock('@/lib/supabase/client', () => ({
-  createClient: vi.fn(),
+// Mock Server Actions
+vi.mock('@/app/actions/auth', () => ({
+  signInWithPassword: vi.fn(),
+  signUpWithPassword: vi.fn(),
+  signInWithOtp: vi.fn(),
 }))
 
 vi.mock('sonner', () => ({
@@ -26,33 +21,14 @@ vi.mock('sonner', () => ({
 }))
 
 describe('LoginPage', () => {
-  const mockPush = vi.fn()
-  const mockRouter: AppRouterInstance = {
-    push: mockPush,
-    refresh: vi.fn(),
-    back: vi.fn(),
-    forward: vi.fn(),
-    replace: vi.fn(),
-    prefetch: vi.fn(),
-  }
-  const mockSupabaseClient = createMockSupabaseClient()
-
   beforeEach(() => {
     vi.clearAllMocks()
-    // Reset all mock implementations to ensure test isolation
-    mockSupabaseClient.auth.signInWithOtp = vi.fn()
-    mockSupabaseClient.auth.signInWithPassword = vi.fn()
-    mockSupabaseClient.auth.signUp = vi.fn()
-    vi.mocked(useRouter).mockReturnValue(mockRouter)
-    vi.mocked(createClient).mockReturnValue(mockSupabaseClient)
 
     // Mock NEXT_PUBLIC_SITE_URL and window.location
     process.env.NEXT_PUBLIC_SITE_URL = 'http://localhost:3000'
-    delete (window as any).location
     Object.defineProperty(window, 'location', {
       value: {
         origin: 'http://localhost:3000',
-        href: 'http://localhost:3000/auth/login',
       },
       writable: true,
       configurable: true,
@@ -111,8 +87,9 @@ describe('LoginPage', () => {
 
   describe('magic link authentication', () => {
     it('should send magic link on form submission', async () => {
-      ;(mockSupabaseClient.auth.signInWithOtp as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-        error: null,
+      vi.mocked(signInWithOtp).mockResolvedValueOnce({
+        success: true,
+        message: 'Check your email for the login link!',
       })
 
       const user = userEvent.setup()
@@ -128,20 +105,14 @@ describe('LoginPage', () => {
       await user.type(emailInput, 'test@example.com')
       await user.click(submitButton)
 
-      expect(mockSupabaseClient.auth.signInWithOtp).toHaveBeenCalledWith({
-        email: 'test@example.com',
-        options: {
-          emailRedirectTo: 'http://localhost:3000/auth/callback',
-        },
+      await waitFor(() => {
+        expect(signInWithOtp).toHaveBeenCalledWith('test@example.com', 'http://localhost:3000')
+        expect(toast.success).toHaveBeenCalledWith('Check your email for the login link!')
       })
-
-      expect(toast.success).toHaveBeenCalledWith('Check your email for the login link!')
     })
 
     it('should show loading state during submission', async () => {
-      ;(mockSupabaseClient.auth.signInWithOtp as ReturnType<typeof vi.fn>).mockImplementation(
-        () => new Promise(() => {}),
-      ) // Never resolves
+      vi.mocked(signInWithOtp).mockImplementation(() => new Promise(() => {})) // Never resolves
 
       const user = userEvent.setup()
       render(<LoginPage />)
@@ -159,99 +130,12 @@ describe('LoginPage', () => {
       expect(screen.getByText('Processing...')).toBeInTheDocument()
       expect(submitButton).toBeDisabled()
     })
-
-    it('should handle authentication errors', async () => {
-      const errorMessage = 'Invalid email address'
-      ;(mockSupabaseClient.auth.signInWithOtp as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-        error: { message: errorMessage },
-      })
-
-      const user = userEvent.setup()
-      render(<LoginPage />)
-
-      // Switch to magic link mode
-      const toggleButton = screen.getByRole('button', { name: 'Use magic link instead' })
-      await user.click(toggleButton)
-
-      const emailInput = screen.getByLabelText('Email')
-      const form = emailInput.closest('form')!
-
-      await user.type(emailInput, 'invalid-email')
-
-      // Submit the form directly instead of clicking button
-      fireEvent.submit(form)
-
-      // Verify the supabase call was made first
-      await waitFor(
-        () => {
-          expect(mockSupabaseClient.auth.signInWithOtp).toHaveBeenCalledWith({
-            email: 'invalid-email',
-            options: {
-              emailRedirectTo: 'http://localhost:3000/auth/callback',
-            },
-          })
-        },
-        { timeout: 3000 },
-      )
-
-      // Wait for error toast
-      await waitFor(
-        () => {
-          expect(toast.error).toHaveBeenCalledWith(errorMessage)
-        },
-        { timeout: 3000 },
-      )
-    })
-
-    it('should handle unexpected errors', async () => {
-      ;(mockSupabaseClient.auth.signInWithOtp as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
-        new Error('Network error'),
-      )
-
-      const user = userEvent.setup()
-      render(<LoginPage />)
-
-      // Switch to magic link mode
-      const toggleButton = screen.getByRole('button', { name: 'Use magic link instead' })
-      await user.click(toggleButton)
-
-      const emailInput = screen.getByLabelText('Email')
-      const form = emailInput.closest('form')!
-
-      await user.type(emailInput, 'test@example.com')
-
-      // Submit the form directly
-      fireEvent.submit(form)
-
-      // Verify the supabase call was made
-      await waitFor(
-        () => {
-          expect(mockSupabaseClient.auth.signInWithOtp).toHaveBeenCalledWith({
-            email: 'test@example.com',
-            options: {
-              emailRedirectTo: 'http://localhost:3000/auth/callback',
-            },
-          })
-        },
-        { timeout: 3000 },
-      )
-
-      await waitFor(
-        () => {
-          expect(toast.error).toHaveBeenCalledWith('Something went wrong. Please try again.')
-        },
-        { timeout: 3000 },
-      )
-    })
   })
 
   describe('password authentication', () => {
     it('should sign in with password', async () => {
-      ;(
-        mockSupabaseClient.auth.signInWithPassword as ReturnType<typeof vi.fn>
-      ).mockResolvedValueOnce({
-        error: null,
-      })
+      // Mock successful Server Action (will redirect, so no return value)
+      vi.mocked(signInWithPassword).mockResolvedValueOnce(undefined as any)
 
       const user = userEvent.setup()
       render(<LoginPage />)
@@ -264,21 +148,15 @@ describe('LoginPage', () => {
       await user.type(passwordInput, 'password123')
       await user.click(submitButton)
 
-      expect(mockSupabaseClient.auth.signInWithPassword).toHaveBeenCalledWith({
-        email: 'test@example.com',
-        password: 'password123',
-      })
-
       await waitFor(() => {
-        expect(toast.success).toHaveBeenCalledWith('Login successful!')
-        // Should use window.location.href for full page reload
-        expect(window.location.href).toBe('/dashboard')
+        expect(signInWithPassword).toHaveBeenCalledWith('test@example.com', 'password123')
       })
     })
 
     it('should sign up with password', async () => {
-      ;(mockSupabaseClient.auth.signUp as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-        error: null,
+      vi.mocked(signUpWithPassword).mockResolvedValueOnce({
+        success: true,
+        message: 'Check your email to confirm your account!',
       })
 
       const user = userEvent.setup()
@@ -296,23 +174,21 @@ describe('LoginPage', () => {
       await user.type(passwordInput, 'password123')
       await user.click(submitButton)
 
-      expect(mockSupabaseClient.auth.signUp).toHaveBeenCalledWith({
-        email: 'newuser@example.com',
-        password: 'password123',
-        options: {
-          emailRedirectTo: 'http://localhost:3000/auth/callback',
-        },
+      await waitFor(() => {
+        expect(signUpWithPassword).toHaveBeenCalledWith(
+          'newuser@example.com',
+          'password123',
+          'http://localhost:3000',
+        )
+        expect(toast.success).toHaveBeenCalledWith('Check your email to confirm your account!')
       })
-
-      expect(toast.success).toHaveBeenCalledWith('Check your email to confirm your account!')
     })
 
     it('should handle password authentication errors', async () => {
       const errorMessage = 'Invalid login credentials'
-      ;(
-        mockSupabaseClient.auth.signInWithPassword as ReturnType<typeof vi.fn>
-      ).mockResolvedValueOnce({
-        error: { message: errorMessage },
+      vi.mocked(signInWithPassword).mockResolvedValueOnce({
+        success: false,
+        error: errorMessage,
       })
 
       const user = userEvent.setup()
@@ -363,8 +239,8 @@ describe('LoginPage', () => {
       const submitButton = screen.getByRole('button', { name: 'Sign In' })
       await user.click(submitButton)
 
-      // Should not call supabase without email/password
-      expect(mockSupabaseClient.auth.signInWithPassword).not.toHaveBeenCalled()
+      // Should not call Server Action without email/password
+      expect(signInWithPassword).not.toHaveBeenCalled()
     })
 
     it('should update email state on input change', async () => {

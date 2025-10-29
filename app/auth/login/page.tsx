@@ -4,11 +4,11 @@ import type React from 'react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
+import { signInWithOtp, signInWithPassword, signUpWithPassword } from '@/app/actions/auth'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { createClient } from '@/lib/supabase/client'
 
 type AuthMode = 'password' | 'magic-link'
 
@@ -18,7 +18,6 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [authMode, setAuthMode] = useState<AuthMode>('password')
   const [isSignUp, setIsSignUp] = useState(false)
-  const supabase = createClient()
 
   async function handlePasswordAuth(e: React.FormEvent) {
     e.preventDefault()
@@ -26,31 +25,21 @@ export default function LoginPage() {
 
     try {
       if (isSignUp) {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/auth/callback`,
-          },
-        })
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin
+        const result = await signUpWithPassword(email, password, siteUrl)
 
-        if (error) {
-          toast.error(error.message)
-        } else {
-          toast.success('Check your email to confirm your account!')
+        if (result && !result.success) {
+          toast.error(result.error)
+        } else if (result) {
+          toast.success(result.message)
         }
       } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        })
+        // Server Action handles redirect automatically on success
+        const result = await signInWithPassword(email, password)
 
-        if (error) {
-          toast.error(error.message)
-        } else {
-          toast.success('Login successful!')
-          // Use window.location for full page reload to ensure session is synced
-          window.location.href = '/dashboard'
+        // Only handle error case - success will redirect via Server Action
+        if (result && !result.success) {
+          toast.error(result.error)
         }
       }
     } catch {
@@ -66,17 +55,12 @@ export default function LoginPage() {
 
     try {
       const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          emailRedirectTo: `${siteUrl}/auth/callback`,
-        },
-      })
+      const result = await signInWithOtp(email, siteUrl)
 
-      if (error) {
-        toast.error(error.message)
-      } else {
-        toast.success('Check your email for the login link!')
+      if (result && !result.success) {
+        toast.error(result.error)
+      } else if (result) {
+        toast.success(result.message)
       }
     } catch {
       toast.error('Something went wrong. Please try again.')

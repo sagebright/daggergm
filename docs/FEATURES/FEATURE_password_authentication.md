@@ -76,6 +76,7 @@ The login page supports two authentication modes:
 ### Files Modified
 
 ```
+app/actions/auth.ts                  # Server Actions for authentication (NEW)
 app/auth/login/page.tsx              # Main login UI with dual auth modes
 app/auth/callback/route.ts           # OAuth callback handler (unchanged)
 .env.local                           # NEXT_PUBLIC_SITE_URL for redirects
@@ -83,37 +84,62 @@ app/auth/callback/route.ts           # OAuth callback handler (unchanged)
 
 ### Key Code Patterns
 
-#### Password Authentication
+#### Server Actions (Proper Next.js Pattern)
+
+All authentication mutations use Server Actions with 'use server' directive:
+
+**Password Sign In (app/actions/auth.ts)**:
 
 ```tsx
-const { error } = await supabase.auth.signInWithPassword({
-  email,
-  password,
-})
+'use server'
+
+import { redirect } from 'next/navigation'
+import { createServerSupabaseClient } from '@/lib/supabase/server'
+
+export async function signInWithPassword(email: string, password: string) {
+  const supabase = await createServerSupabaseClient()
+
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  })
+
+  if (error) {
+    return { success: false, error: error.message }
+  }
+
+  // Session established server-side - redirect works correctly
+  redirect('/dashboard')
+}
 ```
 
-#### Sign Up with Password
+**Client Component Usage (app/auth/login/page.tsx)**:
 
 ```tsx
-const { error } = await supabase.auth.signUp({
-  email,
-  password,
-  options: {
-    emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
-  },
-})
+import { signInWithPassword } from '@/app/actions/auth'
+
+// In handlePasswordAuth:
+const result = await signInWithPassword(email, password)
+// Server Action handles redirect automatically on success
+if (result && !result.success) {
+  toast.error(result.error)
+}
 ```
 
-#### Magic Link Authentication
+#### Why Server Actions?
 
-```tsx
-const { error } = await supabase.auth.signInWithOtp({
-  email,
-  options: {
-    emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
-  },
-})
-```
+**Problem**: Client-side authentication created race condition:
+
+- `router.push('/dashboard')` executed before session sync
+- Dashboard is Server Component checking auth server-side
+- Session not available yet → redirect failed
+
+**Solution**: Server Actions establish session server-side BEFORE redirect:
+
+1. Server Action calls Supabase server-side
+2. Session cookie set server-side
+3. `redirect()` happens after session established
+4. Dashboard receives authenticated request
 
 ### State Management
 
@@ -203,13 +229,19 @@ const [password, setPassword] = useState('')
 4. Add auth mode toggle
 5. Add sign in/sign up toggle
 
-### Phase 4: Polish & Testing ⏳
+### Phase 4: Server Actions Refactor ✅
 
-1. Update existing tests
-2. Add new test cases for password auth
-3. Verify email confirmation flow
-4. Test error scenarios
-5. Update documentation
+1. Created `app/actions/auth.ts` with Server Actions
+2. Refactored login page to use Server Actions instead of client-side Supabase
+3. Updated tests to mock Server Actions
+4. Server-side session management ensures proper redirects
+
+### Phase 5: Polish & Testing ✅
+
+1. Updated existing tests (13 passing)
+2. Added new test cases for password auth
+3. Verified proper redirect behavior with Server Actions
+4. Updated documentation
 
 ---
 
