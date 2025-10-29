@@ -325,7 +325,7 @@ describe('OpenAIProvider', () => {
       const { createServerSupabaseClient } = await import('@/lib/supabase/server')
       const mockSupabase = {
         from: vi.fn().mockImplementation((table: string) => {
-          if (table === 'llm_cache') {
+          if (table === 'daggerheart_llm_cache') {
             return {
               select: vi.fn().mockReturnThis(),
               eq: vi.fn().mockReturnThis(),
@@ -403,7 +403,7 @@ describe('OpenAIProvider', () => {
       const mockInsert = vi.fn().mockResolvedValue({ data: null, error: null })
       const mockSupabase = {
         from: vi.fn().mockImplementation((table: string) => {
-          if (table === 'llm_cache') {
+          if (table === 'daggerheart_llm_cache') {
             return {
               select: vi.fn().mockReturnThis(),
               eq: vi.fn().mockReturnThis(),
@@ -455,7 +455,7 @@ describe('OpenAIProvider', () => {
       let callCount = 0
       const mockSupabase = {
         from: vi.fn().mockImplementation((table: string) => {
-          if (table === 'llm_cache') {
+          if (table === 'daggerheart_llm_cache') {
             callCount++
             if (callCount === 1) {
               // First call for cache check
@@ -492,7 +492,7 @@ describe('OpenAIProvider', () => {
       await provider.generateAdventureScaffold(params)
 
       // Should update access count
-      expect(mockSupabase.from).toHaveBeenCalledWith('llm_cache')
+      expect(mockSupabase.from).toHaveBeenCalledWith('daggerheart_llm_cache')
       expect(mockUpdate).toHaveBeenCalledWith({
         accessed_at: expect.any(String),
         access_count: 6,

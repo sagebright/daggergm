@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { getCSSVariables, applyCSSVariables } from '@/lib/theme/css-variables'
+
+import { getCSSVariables, applyCSSVariables, initializeTheme } from '@/lib/theme/css-variables'
 
 // Mock window.getComputedStyle
 const mockComputedStyle = {
@@ -64,6 +65,20 @@ describe('CSS Variables', () => {
         expect(mockComputedStyle.getPropertyValue).toHaveBeenCalledWith(variable)
       })
     })
+
+    it('should return empty object in SSR (no window)', () => {
+      // Temporarily remove window
+      const originalWindow = global.window
+      // @ts-expect-error - Testing SSR behavior
+      delete global.window
+
+      const variables = getCSSVariables()
+
+      expect(variables).toEqual({})
+
+      // Restore window
+      global.window = originalWindow
+    })
   })
 
   describe('applyCSSVariables', () => {
@@ -111,6 +126,54 @@ describe('CSS Variables', () => {
         '--background',
         'oklch(0.98 0.005 285)',
       )
+    })
+
+    it('should handle SSR gracefully (no document)', () => {
+      // Temporarily remove document
+      const originalDocument = global.document
+      // @ts-expect-error - Testing SSR behavior
+      delete global.document
+
+      // Should not throw
+      expect(() => {
+        applyCSSVariables({ background: 'oklch(0.98 0.005 285)' })
+      }).not.toThrow()
+
+      // Restore document
+      global.document = originalDocument
+    })
+  })
+
+  describe('initializeTheme', () => {
+    it('should add daggerheart-theme class to document root', () => {
+      const mockElement = {
+        classList: {
+          add: vi.fn(),
+        },
+      }
+
+      global.document = {
+        documentElement: mockElement,
+      } as unknown as Document
+
+      initializeTheme()
+
+      expect(mockElement.classList.add).toHaveBeenCalledWith('daggerheart-theme')
+    })
+
+    it('should handle SSR gracefully (no document)', () => {
+      // Temporarily remove document
+      const originalDocument = global.document
+      // @ts-expect-error - Testing SSR behavior
+      delete global.document
+
+      // Should not throw
+      expect(() => {
+        initializeTheme()
+      }).not.toThrow()
+
+      // Restore document
+      global.document = originalDocument
     })
   })
 })

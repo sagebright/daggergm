@@ -295,7 +295,7 @@ describe('Adventure Actions - Full Coverage', () => {
       const result = await getUserAdventures()
 
       expect(result).toEqual(mockAdventures)
-      expect(mockSupabaseClient.from).toHaveBeenCalledWith('adventures')
+      expect(mockSupabaseClient.from).toHaveBeenCalledWith('daggerheart_adventures')
       expect(mockSelect).toHaveBeenCalledWith('*')
       expect(mockEq).toHaveBeenCalledWith('user_id', 'user-123')
     })
@@ -418,7 +418,7 @@ describe('Adventure Actions - Full Coverage', () => {
       })
 
       mockServiceRoleClient.from.mockImplementation((table) => {
-        if (table === 'adventures') {
+        if (table === 'daggerheart_adventures') {
           return {
             select: vi.fn().mockReturnValue({
               eq: vi.fn().mockReturnValue({

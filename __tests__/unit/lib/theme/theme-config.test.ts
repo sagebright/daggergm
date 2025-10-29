@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest'
+
 import {
   getDaggerheartTheme,
   validateColorContrast,
@@ -27,6 +28,23 @@ describe('Daggerheart Theme Configuration', () => {
 
       expect(colors.primary).toBe('var(--dagger-purple-800)')
       expect(colors.accent).toBe('var(--dagger-teal-400)')
+    })
+
+    it('should default to light mode when no mode specified', () => {
+      const colors = getThemeColors()
+
+      expect(colors.background).toBe('oklch(0.98 0.005 285)')
+      expect(colors.primary).toBe('var(--dagger-purple-800)')
+    })
+
+    it('should handle dark mode parameter (future implementation)', () => {
+      // Dark mode returns same as light for MVP
+      // This test ensures the function accepts the parameter without crashing
+      const colors = getThemeColors('dark')
+
+      // Should still return light mode colors for now
+      expect(colors).toHaveProperty('background')
+      expect(colors).toHaveProperty('primary')
     })
   })
 
@@ -114,6 +132,26 @@ describe('Daggerheart Theme Configuration', () => {
       )
 
       expect(result.passesAA).toBe(false)
+    })
+
+    it('should handle invalid OKLCH color format gracefully', () => {
+      const result = validateColorContrast(
+        'invalid-color', // malformed color
+        'oklch(0.98 0.005 285)', // valid background
+      )
+
+      // Should not throw and should return a contrast result
+      expect(result).toHaveProperty('ratio')
+      expect(result).toHaveProperty('passesAA')
+      expect(result).toHaveProperty('passesAAA')
+    })
+
+    it('should handle both invalid colors gracefully', () => {
+      const result = validateColorContrast('invalid-color-1', 'invalid-color-2')
+
+      // Should not throw and should return a result
+      expect(result).toHaveProperty('ratio')
+      expect(result).toHaveProperty('passesAA')
     })
   })
 })

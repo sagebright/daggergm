@@ -97,7 +97,7 @@ export async function getUserCredits() {
     }
 
     const { data, error } = await supabase
-      .from('user_profiles')
+      .from('daggerheart_user_profiles')
       .select('credits')
       .eq('id', user.id)
       .single()

@@ -50,7 +50,7 @@ export class CreditManager {
     const client = await this.supabase
 
     const { data, error } = await client
-      .from('user_profiles')
+      .from('daggerheart_user_profiles')
       .select('credits')
       .eq('user_id', userId)
       .single()

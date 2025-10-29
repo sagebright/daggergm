@@ -365,7 +365,7 @@ describe('credits actions', () => {
         expansionCredits: 0,
       })
 
-      expect(mockSupabaseClient.from).toHaveBeenCalledWith('user_profiles')
+      expect(mockSupabaseClient.from).toHaveBeenCalledWith('daggerheart_user_profiles')
       expect(mockSupabaseClient.select).toHaveBeenCalledWith('credits')
       expect(mockSupabaseClient.eq).toHaveBeenCalledWith('id', 'user-123')
     })

@@ -21,7 +21,11 @@ export async function GET() {
     const supabase = await createServerSupabaseClient()
 
     // Simple query to verify connection
-    const { error } = await supabase.from('user_profiles').select('count').limit(1).single()
+    const { error } = await supabase
+      .from('daggerheart_user_profiles')
+      .select('count')
+      .limit(1)
+      .single()
 
     health.database = error ? 'error' : 'connected'
   } catch {
