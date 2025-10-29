@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { createClient } from '@/lib/supabase/client'
+import { getTierLevel } from '@/lib/utils'
 
 type FormData = {
   motif: string
@@ -52,21 +53,6 @@ export default function NewAdventurePage() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void checkAuth()
   }, [checkAuth])
-
-  const getTierLevel = (tier: string): number => {
-    switch (tier) {
-      case 'tier1':
-        return 1
-      case 'tier2':
-        return 3 // Mid-range of 2-4
-      case 'tier3':
-        return 6 // Mid-range of 5-7
-      case 'tier4':
-        return 9 // Mid-range of 8-10
-      default:
-        return 1
-    }
-  }
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -215,7 +201,7 @@ export default function NewAdventurePage() {
                 value={formData.motif}
                 onValueChange={(value: string) => setFormData({ ...formData, motif: value })}
               >
-                <SelectTrigger id="motif">
+                <SelectTrigger id="motif" aria-required="true" aria-describedby="motif-desc">
                   <SelectValue placeholder="Select a motif" />
                 </SelectTrigger>
                 <SelectContent>
@@ -226,7 +212,7 @@ export default function NewAdventurePage() {
                   <SelectItem value="weird">Weird</SelectItem>
                 </SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground">
+              <p id="motif-desc" className="text-xs text-muted-foreground">
                 Choose the main theme for your adventure
               </p>
             </div>
@@ -238,7 +224,11 @@ export default function NewAdventurePage() {
                 value={formData.partySize}
                 onValueChange={(value: string) => setFormData({ ...formData, partySize: value })}
               >
-                <SelectTrigger id="partySize">
+                <SelectTrigger
+                  id="partySize"
+                  aria-required="true"
+                  aria-describedby="party-size-desc"
+                >
                   <SelectValue placeholder="Select party size" />
                 </SelectTrigger>
                 <SelectContent>
@@ -249,7 +239,9 @@ export default function NewAdventurePage() {
                   <SelectItem value="5">5+ Players</SelectItem>
                 </SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground">Number of players in your group</p>
+              <p id="party-size-desc" className="text-xs text-muted-foreground">
+                Number of players in your group
+              </p>
             </div>
 
             {/* Party Tier */}
@@ -259,7 +251,11 @@ export default function NewAdventurePage() {
                 value={formData.partyTier}
                 onValueChange={(value: string) => setFormData({ ...formData, partyTier: value })}
               >
-                <SelectTrigger id="partyTier">
+                <SelectTrigger
+                  id="partyTier"
+                  aria-required="true"
+                  aria-describedby="party-tier-desc"
+                >
                   <SelectValue placeholder="Select party tier" />
                 </SelectTrigger>
                 <SelectContent>
@@ -269,7 +265,9 @@ export default function NewAdventurePage() {
                   <SelectItem value="tier4">Tier 4 [Levels 8-10]</SelectItem>
                 </SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground">Experience level of your party</p>
+              <p id="party-tier-desc" className="text-xs text-muted-foreground">
+                Experience level of your party
+              </p>
             </div>
 
             {/* Number of Scenes */}
@@ -279,7 +277,11 @@ export default function NewAdventurePage() {
                 value={formData.numScenes}
                 onValueChange={(value: string) => setFormData({ ...formData, numScenes: value })}
               >
-                <SelectTrigger id="numScenes">
+                <SelectTrigger
+                  id="numScenes"
+                  aria-required="true"
+                  aria-describedby="num-scenes-desc"
+                >
                   <SelectValue placeholder="Select number of scenes" />
                 </SelectTrigger>
                 <SelectContent>
@@ -288,7 +290,9 @@ export default function NewAdventurePage() {
                   <SelectItem value="5">5 Scenes</SelectItem>
                 </SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground">Number of scenes in your adventure</p>
+              <p id="num-scenes-desc" className="text-xs text-muted-foreground">
+                Number of scenes in your adventure
+              </p>
             </div>
 
             <Button type="submit" className="w-full" disabled={generating}>
