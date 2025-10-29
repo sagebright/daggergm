@@ -69,5 +69,12 @@ export default defineConfig({
     command: 'npm run dev',
     url: 'http://localhost:3002',
     reuseExistingServer: !process.env.CI,
+    env: {
+      // Enable Next.js test mode for MSW integration
+      NEXT_PRIVATE_TEST_PROXY: 'true',
+    },
   },
+
+  /* Global setup for MSW */
+  globalSetup: './__tests__/e2e/global-setup.ts',
 })

@@ -56,6 +56,69 @@ async function createTestUserWithCredits(email: string, password: string, credit
 }
 
 test.describe('Adventure Creation Form (Single-Screen)', () => {
+  // Setup MSW to mock OpenAI API calls
+  test.beforeEach(async ({ context }) => {
+    await context.route('https://api.openai.com/v1/chat/completions', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 'chatcmpl-test-123',
+          object: 'chat.completion',
+          created: Math.floor(Date.now() / 1000),
+          model: 'gpt-4-turbo-preview',
+          choices: [
+            {
+              index: 0,
+              message: {
+                role: 'assistant',
+                content: JSON.stringify({
+                  title: 'The Shadowfen Conspiracy',
+                  frame: 'witherwild',
+                  focus: 'High Fantasy',
+                  movements: [
+                    {
+                      id: 'scene-1',
+                      title: 'The Whispering Woods',
+                      description:
+                        'Your party discovers an ancient grove where the trees seem to whisper secrets.',
+                      location: 'The Witherwild - Ancient Grove',
+                      npcs: [
+                        {
+                          name: 'Elder Thornweave',
+                          role: 'Guardian',
+                          motivation: 'Protect the forest',
+                        },
+                      ],
+                    },
+                    {
+                      id: 'scene-2',
+                      title: 'The Shadowfen Swamp',
+                      description: 'Following corruption trail, the party enters a murky swamp.',
+                      location: 'The Witherwild - Shadowfen',
+                      npcs: [{ name: 'Murk', role: 'Guide', motivation: 'Escape corruption' }],
+                    },
+                    {
+                      id: 'scene-3',
+                      title: 'Heart of Darkness',
+                      description: 'Final confrontation at the ritual site.',
+                      location: 'The Witherwild - Ritual Circle',
+                      npcs: [
+                        { name: 'Cultist Vex', role: 'Antagonist', motivation: 'Complete ritual' },
+                      ],
+                    },
+                  ],
+                }),
+              },
+              finish_reason: 'stop',
+            },
+          ],
+          usage: { prompt_tokens: 150, completion_tokens: 250, total_tokens: 400 },
+        }),
+      })
+    })
+  })
+
   test('form renders with all 4 dropdowns and submit button', async ({ page }) => {
     const testEmail = `test-form-${Date.now()}@example.com`
     const testPassword = 'TestPassword123!'
@@ -75,7 +138,7 @@ test.describe('Adventure Creation Form (Single-Screen)', () => {
       ])
 
       // Step 2: Navigate to adventure creation page
-      await page.click('a[href="/adventures/new"]:has-text("Generate New Adventure")')
+      await page.getByRole('link', { name: 'Generate New Adventure' }).click()
       await expect(page).toHaveURL('/adventures/new')
 
       // Step 3: Verify page title and credit balance
@@ -129,7 +192,7 @@ test.describe('Adventure Creation Form (Single-Screen)', () => {
         page.click('button:has-text("Sign In")'),
       ])
 
-      await page.click('a[href="/adventures/new"]:has-text("Generate New Adventure")')
+      await page.getByRole('link', { name: 'Generate New Adventure' }).click()
       await expect(page).toHaveURL('/adventures/new')
 
       // Try to submit without selecting motif (other fields have defaults)
@@ -166,7 +229,7 @@ test.describe('Adventure Creation Form (Single-Screen)', () => {
       // Verify starting credit balance (aria-label contains "5 credits available")
       await expect(page.locator('[aria-label*="5 credit"]')).toBeVisible()
 
-      await page.click('a[href="/adventures/new"]:has-text("Generate New Adventure")')
+      await page.getByRole('link', { name: 'Generate New Adventure' }).click()
       await expect(page).toHaveURL('/adventures/new')
 
       // Fill out form
@@ -188,8 +251,10 @@ test.describe('Adventure Creation Form (Single-Screen)', () => {
       // Submit form
       await page.click('button:has-text("Generate Adventure")')
 
-      // Should show loading state
-      await expect(page.locator('text=Generating Your Adventure')).toBeVisible({ timeout: 5000 })
+      // Should show loading state (use specific heading selector to avoid strict mode violation)
+      await expect(page.getByRole('heading', { name: 'Generating Your Adventure' })).toBeVisible({
+        timeout: 5000,
+      })
 
       // Should redirect to adventure detail page (pattern: /adventures/[uuid])
       await expect(page).toHaveURL(/\/adventures\/[a-f0-9-]{36}/, { timeout: 30000 })
@@ -226,7 +291,7 @@ test.describe('Adventure Creation Form (Single-Screen)', () => {
         page.click('button:has-text("Sign In")'),
       ])
 
-      await page.click('a[href="/adventures/new"]:has-text("Generate New Adventure")')
+      await page.getByRole('link', { name: 'Generate New Adventure' }).click()
       await expect(page).toHaveURL('/adventures/new')
 
       // Fill out form quickly (Radix Select uses role="option")
@@ -237,8 +302,10 @@ test.describe('Adventure Creation Form (Single-Screen)', () => {
       const submitButton = page.locator('button:has-text("Generate Adventure")')
       await submitButton.click()
 
-      // Verify loading state appears
-      await expect(page.locator('text=Generating Your Adventure')).toBeVisible({ timeout: 5000 })
+      // Verify loading state appears (use specific heading selector to avoid strict mode violation)
+      await expect(page.getByRole('heading', { name: 'Generating Your Adventure' })).toBeVisible({
+        timeout: 5000,
+      })
       await expect(page.locator('.animate-spin')).toBeVisible() // Spinner should be visible
 
       // Wait for completion (redirect)
@@ -266,7 +333,7 @@ test.describe('Adventure Creation Form (Single-Screen)', () => {
         page.click('button:has-text("Sign In")'),
       ])
 
-      await page.click('a[href="/adventures/new"]:has-text("Generate New Adventure")')
+      await page.getByRole('link', { name: 'Generate New Adventure' }).click()
       await expect(page).toHaveURL('/adventures/new')
 
       // Verify default values are shown in the Select triggers
@@ -287,6 +354,112 @@ test.describe('Adventure Creation Form (Single-Screen)', () => {
       await expect(motifValue).toContainText('Select a motif')
     } finally {
       await deleteTestUser(testEmail)
+    }
+  })
+
+  test('user cannot create adventure with insufficient credits', async ({ page }) => {
+    const testEmail = `test-nocredits-${Date.now()}@example.com`
+    const testPassword = 'TestPassword123!'
+
+    // Create user with 0 credits
+    await createTestUserWithCredits(testEmail, testPassword, 0)
+
+    try {
+      // Log in
+      await page.goto('/auth/login')
+      await page.fill('input[type="email"]', testEmail)
+      await page.fill('input[type="password"]', testPassword)
+
+      await Promise.all([
+        page.waitForURL('/dashboard', { timeout: 15000 }),
+        page.click('button:has-text("Sign In")'),
+      ])
+
+      // Verify 0 credits in dashboard
+      await expect(page.locator('[aria-label*="0 credit"]')).toBeVisible()
+
+      // Navigate to adventure creation
+      await page.getByRole('link', { name: 'Generate New Adventure' }).click()
+      await expect(page).toHaveURL('/adventures/new')
+
+      // Fill out form
+      await page.click('[id="motif"]')
+      await page.locator('[role="option"]:has-text("High Fantasy")').click()
+
+      // Try to submit
+      await page.click('button:has-text("Generate Adventure")')
+
+      // Should show error message about insufficient credits
+      await expect(
+        page.locator("text=/Insufficient credits|You don't have enough credits/i"),
+      ).toBeVisible({ timeout: 5000 })
+
+      // Should NOT navigate away from the form
+      await expect(page).toHaveURL('/adventures/new')
+    } finally {
+      await deleteTestUser(testEmail)
+    }
+  })
+
+  test('user can only view their own adventures (RLS verification)', async ({ page }) => {
+    const user1Email = `test-rls-user1-${Date.now()}@example.com`
+    const user2Email = `test-rls-user2-${Date.now()}@example.com`
+    const testPassword = 'TestPassword123!'
+
+    // Create two users with credits
+    await createTestUserWithCredits(user1Email, testPassword, 5)
+    await createTestUserWithCredits(user2Email, testPassword, 5)
+
+    try {
+      // User 1: Log in and create adventure
+      await page.goto('/auth/login')
+      await page.fill('input[type="email"]', user1Email)
+      await page.fill('input[type="password"]', testPassword)
+      await Promise.all([
+        page.waitForURL('/dashboard', { timeout: 15000 }),
+        page.click('button:has-text("Sign In")'),
+      ])
+
+      await page.getByRole('link', { name: 'Generate New Adventure' }).click()
+      await page.click('[id="motif"]')
+      await page.locator('[role="option"]:has-text("High Fantasy")').click()
+      await page.click('button:has-text("Generate Adventure")')
+
+      // Wait for redirect and capture adventure ID
+      await expect(page).toHaveURL(/\/adventures\/[a-f0-9-]{36}/, { timeout: 30000 })
+      const user1AdventureUrl = page.url()
+      const adventureId = user1AdventureUrl.split('/adventures/')[1]
+
+      // User 1 logs out
+      await page.goto('/auth/logout')
+
+      // User 2: Log in
+      await page.goto('/auth/login')
+      await page.fill('input[type="email"]', user2Email)
+      await page.fill('input[type="password"]', testPassword)
+      await Promise.all([
+        page.waitForURL('/dashboard', { timeout: 15000 }),
+        page.click('button:has-text("Sign In")'),
+      ])
+
+      // User 2 tries to access User 1's adventure (should be blocked by RLS)
+      await page.goto(`/adventures/${adventureId}`)
+
+      // Should either redirect to dashboard or show error (not the adventure)
+      // Wait a moment for any redirect
+      await page.waitForTimeout(2000)
+
+      // Verify User 2 cannot see User 1's adventure content
+      const currentUrl = page.url()
+      const isBlocked =
+        currentUrl.includes('/dashboard') ||
+        currentUrl.includes('/auth') ||
+        (await page.locator('text=/not found|unauthorized|access denied/i').isVisible())
+
+      expect(isBlocked).toBe(true)
+    } finally {
+      await deleteTestUser(user1Email)
+      await deleteTestUser(user2Email)
     }
   })
 })
