@@ -35,6 +35,7 @@ export default function LoginPage() {
         }
       } else {
         // Server Action handles redirect automatically on success
+        // redirect() throws NEXT_REDIRECT which is caught here - this is normal behavior
         const result = await signInWithPassword(email, password)
 
         // Only handle error case - success will redirect via Server Action
@@ -42,7 +43,13 @@ export default function LoginPage() {
           toast.error(result.error)
         }
       }
-    } catch {
+    } catch (error) {
+      // Check if this is a Next.js redirect (expected behavior for successful login)
+      if (error && typeof error === 'object' && 'digest' in error) {
+        // This is a Next.js redirect - let it propagate
+        throw error
+      }
+      // Otherwise, this is a real error
       toast.error('Something went wrong. Please try again.')
     } finally {
       setIsLoading(false)
