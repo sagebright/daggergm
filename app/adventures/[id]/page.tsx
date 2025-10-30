@@ -28,6 +28,8 @@ interface Adventure {
     content?: string
     description?: string
     estimatedTime?: string
+    confirmed?: boolean
+    confirmTimestamp?: string
   }>
 }
 
@@ -120,6 +122,11 @@ export default function AdventureDetailPage({ params }: { params: Promise<{ id: 
     )
   }
 
+  // Calculate confirmation progress
+  const confirmedCount = adventure.movements?.filter((m) => m.confirmed).length ?? 0
+  const totalCount = adventure.movements?.length ?? 0
+  const allConfirmed = confirmedCount === totalCount && totalCount > 0
+
   return (
     <div className="container max-w-4xl mx-auto py-8">
       <div className="mb-8">
@@ -130,7 +137,7 @@ export default function AdventureDetailPage({ params }: { params: Promise<{ id: 
               <>
                 <Button
                   variant="default"
-                  disabled={isUpdating}
+                  disabled={isUpdating || !allConfirmed}
                   onClick={() => {
                     setIsUpdating(true)
                     // Use immediate async function
@@ -158,6 +165,11 @@ export default function AdventureDetailPage({ params }: { params: Promise<{ id: 
                       }
                     })()
                   }}
+                  title={
+                    !allConfirmed
+                      ? `Confirm all scenes before marking as ready (${confirmedCount}/${totalCount} confirmed)`
+                      : undefined
+                  }
                 >
                   {isUpdating ? 'Updating...' : 'Mark as Ready'}
                 </Button>
@@ -174,6 +186,41 @@ export default function AdventureDetailPage({ params }: { params: Promise<{ id: 
             )}
           </div>
         </div>
+
+        {/* Per-Scene Confirmation Progress Indicator (Issue #9) */}
+        {adventure.state === 'draft' &&
+          adventure.movements !== undefined &&
+          adventure.movements.length > 0 && (
+            <div className="mb-4">
+              <Card className={allConfirmed ? 'border-green-500 bg-green-50' : 'border-yellow-500'}>
+                <CardContent className="py-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium">
+                        {allConfirmed ? (
+                          <span className="text-green-700">
+                            ✓ All scenes confirmed! Ready to mark as ready.
+                          </span>
+                        ) : (
+                          <span className="text-yellow-700">
+                            {confirmedCount}/{totalCount} scenes confirmed
+                          </span>
+                        )}
+                      </p>
+                      {!allConfirmed && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Confirm all scenes in Edit Details mode before marking as ready
+                        </p>
+                      )}
+                    </div>
+                    <Badge variant={allConfirmed ? 'default' : 'secondary'}>
+                      {confirmedCount}/{totalCount}
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
 
         {adventure.description ? (
           <p className="text-lg text-muted-foreground">{adventure.description}</p>
