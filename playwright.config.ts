@@ -72,6 +72,8 @@ export default defineConfig({
     env: {
       // Enable Next.js test mode for MSW integration
       NEXT_PRIVATE_TEST_PROXY: 'true',
+      // Enable LLM mocking for fast, deterministic E2E tests
+      E2E_MOCK_LLM: 'true',
       // Pass through required environment variables for E2E tests
       OPENAI_API_KEY: process.env.OPENAI_API_KEY || '',
       NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL || '',

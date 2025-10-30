@@ -167,6 +167,7 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
           PLAYWRIGHT_TEST_BASE_URL: http://localhost:3000
+          E2E_MOCK_LLM: 'true'
         run: npm run test:e2e
 
       - name: Upload Playwright Report

@@ -7,6 +7,7 @@ import { revalidatePath } from 'next/cache'
 import { analytics, ANALYTICS_EVENTS } from '@/lib/analytics/analytics'
 import { CreditManager } from '@/lib/credits/credit-manager'
 import { InsufficientCreditsError } from '@/lib/credits/errors'
+import { createMockAdventureScaffold } from '@/lib/llm/mock-adventure-scaffold'
 import { getLLMProvider } from '@/lib/llm/provider'
 import { withRateLimit, getRateLimitContext } from '@/lib/rate-limiting/middleware'
 import { RateLimitError } from '@/lib/rate-limiting/rate-limiter'
@@ -111,17 +112,32 @@ export async function generateAdventure(config: AdventureConfig) {
       stakes: validatedConfig.stakes,
     })
 
-    // Generate adventure using LLM provider
-    const llmProvider = getLLMProvider()
+    // Generate adventure using LLM provider (or mock for E2E tests)
     const startTime = Date.now()
-    const scaffoldData = await llmProvider.generateAdventureScaffold({
-      frame: validatedConfig.frame || 'witherwild',
-      focus: validatedConfig.focus || validatedConfig.primary_motif,
-      partySize: validatedConfig.party_size,
-      partyLevel: validatedConfig.party_level,
-      difficulty: validatedConfig.difficulty,
-      stakes: validatedConfig.stakes,
-    })
+    let scaffoldData
+
+    if (process.env.E2E_MOCK_LLM === 'true') {
+      // Use mock for E2E tests - fast and deterministic
+      scaffoldData = createMockAdventureScaffold({
+        frame: validatedConfig.frame || 'witherwild',
+        focus: validatedConfig.focus || validatedConfig.primary_motif,
+        partySize: validatedConfig.party_size,
+        partyLevel: validatedConfig.party_level,
+        difficulty: validatedConfig.difficulty,
+        stakes: validatedConfig.stakes,
+      })
+    } else {
+      // Use real LLM for production
+      const llmProvider = getLLMProvider()
+      scaffoldData = await llmProvider.generateAdventureScaffold({
+        frame: validatedConfig.frame || 'witherwild',
+        focus: validatedConfig.focus || validatedConfig.primary_motif,
+        partySize: validatedConfig.party_size,
+        partyLevel: validatedConfig.party_level,
+        difficulty: validatedConfig.difficulty,
+        stakes: validatedConfig.stakes,
+      })
+    }
     const duration = (Date.now() - startTime) / 1000
 
     // Track scaffold generation completion
