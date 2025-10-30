@@ -15,7 +15,7 @@ import type { Movement } from './focus-mode'
 interface AIChatProps {
   movement: Movement
   adventureId: string
-  adventureState: 'draft' | 'ready' | 'archived'
+  adventureState: 'draft' | 'finalized' | 'exported'
   expansionRegenerationsUsed?: number
   onSuggestionApply: (_suggestion: string) => void
   onRefreshAdventure?: (() => void) | undefined

@@ -259,7 +259,7 @@ export async function getUserAdventures() {
 
 export async function updateAdventureState(
   adventureId: string,
-  newState: 'draft' | 'ready' | 'archived',
+  newState: 'draft' | 'finalized' | 'exported',
 ) {
   // Update adventure state (guest system removed - requires authentication)
 
@@ -271,6 +271,39 @@ export async function updateAdventureState(
 
     if (!user) {
       return { success: false, error: 'Unauthorized - authentication required' }
+    }
+
+    // NEW: Verify all movements confirmed before allowing 'finalized' state (Issue #9)
+    if (newState === 'finalized') {
+      const { data: adventure } = await supabase
+        .from('daggerheart_adventures')
+        .select('movements')
+        .eq('id', adventureId)
+        .eq('user_id', user.id)
+        .single()
+
+      if (!adventure) {
+        return { success: false, error: 'Adventure not found' }
+      }
+
+      const movements = (adventure.movements as Array<{ confirmed?: boolean }>) || []
+
+      if (movements.length === 0) {
+        return {
+          success: false,
+          error: 'No scenes to confirm. Generate an adventure first.',
+        }
+      }
+
+      const confirmedCount = movements.filter((m) => m.confirmed).length
+      const allConfirmed = confirmedCount === movements.length
+
+      if (!allConfirmed) {
+        return {
+          success: false,
+          error: `Cannot mark as ready: Only ${confirmedCount}/${movements.length} scenes confirmed`,
+        }
+      }
     }
 
     // Verify ownership and update state

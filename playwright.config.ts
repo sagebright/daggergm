@@ -69,6 +69,7 @@ export default defineConfig({
     command: 'npm run dev',
     url: 'http://localhost:3002',
     reuseExistingServer: !process.env.CI,
+    timeout: 180000, // 3 minutes for server startup (CI can be slow on cold start)
     env: {
       // Enable Next.js test mode for MSW integration
       NEXT_PRIVATE_TEST_PROXY: 'true',

@@ -166,7 +166,7 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
-          PLAYWRIGHT_TEST_BASE_URL: http://localhost:3000
+          PLAYWRIGHT_TEST_BASE_URL: http://localhost:3002
           E2E_MOCK_LLM: 'true'
         # TEMPORARY: WebKit skipped due to Supabase auth redirect issues in CI
         # See documentation/fixes/FIX_004_WEBKIT_AUTH_ISSUE.md for details

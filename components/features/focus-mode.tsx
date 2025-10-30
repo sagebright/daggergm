@@ -3,10 +3,12 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { X } from 'lucide-react'
 import { useState, useCallback } from 'react'
+import { toast } from 'sonner'
 
 import { AIChat } from '@/components/features/ai-chat'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { MovementConfirmationBadge } from '@/features/focus-mode/components/MovementConfirmationBadge'
 import { RegenerationBudget } from '@/features/focus-mode/components/RegenerationBudget'
 // import { MarkdownEditor } from '@/components/features/markdown-editor' // TODO: Implement when ready
 import { useDebounce } from '@/lib/hooks/use-debounce'
@@ -19,12 +21,14 @@ export interface Movement {
   type: string
   content: string
   estimatedTime: string
+  confirmed?: boolean
+  confirmTimestamp?: string
 }
 
 interface FocusModeProps {
   movements: Movement[]
   adventureId: string
-  adventureState: 'draft' | 'ready' | 'archived'
+  adventureState: 'draft' | 'finalized' | 'exported'
   scaffoldRegenerationsUsed?: number
   expansionRegenerationsUsed?: number
   onUpdate: (_movementId: string, _updates: Partial<Movement>) => void
@@ -44,6 +48,7 @@ export function FocusMode({
 }: FocusModeProps) {
   const [focusedId, setFocusedId] = useState<string | null>(null)
   const [isPanelOpen, setIsPanelOpen] = useState(true)
+  const [confirmingMovementId, setConfirmingMovementId] = useState<string | null>(null)
 
   // Keyboard shortcuts
   useHotkeys('escape', () => {
@@ -72,6 +77,59 @@ export function FocusMode({
       debouncedUpdate(movementId, content)
     },
     [debouncedUpdate],
+  )
+
+  // Confirmation handlers (Issue #9)
+  const handleConfirm = useCallback(
+    async (movementId: string) => {
+      setConfirmingMovementId(movementId)
+
+      try {
+        const { confirmMovement } = await import('@/app/actions/movements')
+        const result = await confirmMovement(adventureId, movementId)
+
+        if (result.success) {
+          toast.success(
+            result.allConfirmed
+              ? `All ${result.totalCount} scenes confirmed! You can now mark as ready.`
+              : `Scene confirmed! ${result.confirmedCount}/${result.totalCount} scenes confirmed`,
+          )
+
+          onRefreshAdventure?.()
+        } else {
+          toast.error(result.error || 'Failed to confirm scene')
+        }
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : 'Failed to confirm scene')
+      } finally {
+        setConfirmingMovementId(null)
+      }
+    },
+    [adventureId, onRefreshAdventure],
+  )
+
+  const handleUnconfirm = useCallback(
+    async (movementId: string) => {
+      setConfirmingMovementId(movementId)
+
+      try {
+        const { unconfirmMovement } = await import('@/app/actions/movements')
+        const result = await unconfirmMovement(adventureId, movementId)
+
+        if (result.success) {
+          toast.success('Scene unconfirmed - you can now regenerate it')
+
+          onRefreshAdventure?.()
+        } else {
+          toast.error(result.error || 'Failed to unconfirm scene')
+        }
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : 'Failed to unconfirm scene')
+      } finally {
+        setConfirmingMovementId(null)
+      }
+    },
+    [adventureId, onRefreshAdventure],
   )
 
   const focusedMovement = movements.find((m) => m.id === focusedId)
@@ -115,16 +173,38 @@ export function FocusMode({
               <Card className="p-6">
                 {focusedId !== movement.id ? (
                   // Collapsed view
-                  <div>
-                    <h3 className="text-lg font-semibold">{movement.title}</h3>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {movement.type} • {movement.estimatedTime}
-                    </p>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-lg font-semibold">{movement.title}</h3>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {movement.type} • {movement.estimatedTime}
+                      </p>
+                    </div>
+                    {adventureState === 'draft' && (
+                      <MovementConfirmationBadge
+                        confirmed={movement.confirmed ?? false}
+                        onConfirm={() => handleConfirm(movement.id)}
+                        onUnconfirm={() => handleUnconfirm(movement.id)}
+                        disabled={confirmingMovementId === movement.id}
+                        isLoading={confirmingMovementId === movement.id}
+                      />
+                    )}
                   </div>
                 ) : (
                   // Expanded view
                   <div onClick={(e) => e.stopPropagation()}>
-                    <h3 className="text-lg font-semibold mb-4">{movement.title}</h3>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold">{movement.title}</h3>
+                      {adventureState === 'draft' && (
+                        <MovementConfirmationBadge
+                          confirmed={movement.confirmed ?? false}
+                          onConfirm={() => handleConfirm(movement.id)}
+                          onUnconfirm={() => handleUnconfirm(movement.id)}
+                          disabled={confirmingMovementId === movement.id}
+                          isLoading={confirmingMovementId === movement.id}
+                        />
+                      )}
+                    </div>
                     <textarea
                       className="w-full min-h-[200px] p-4 border rounded-md resize-none"
                       value={localContent[movement.id] || movement.content}

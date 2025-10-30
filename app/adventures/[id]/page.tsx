@@ -28,6 +28,8 @@ interface Adventure {
     content?: string
     description?: string
     estimatedTime?: string
+    confirmed?: boolean
+    confirmTimestamp?: string
   }>
 }
 
@@ -97,20 +99,30 @@ export default function AdventureDetailPage({ params }: { params: Promise<{ id: 
 
   if (focusMode && adventure.movements) {
     // Entering focus mode with movements
-    const formattedMovements = adventure.movements.map((m, index) => ({
-      id: m.id || String(index),
-      title: m.title,
-      type: m.type,
-      content: m.content || m.description || '', // Use description if content is missing
-      estimatedTime: m.estimatedTime || '30 minutes',
-    }))
+    const formattedMovements = adventure.movements.map((m, index) => {
+      const movement: Movement = {
+        id: m.id || String(index),
+        title: m.title,
+        type: m.type,
+        content: m.content || m.description || '', // Use description if content is missing
+        estimatedTime: m.estimatedTime || '30 minutes',
+      }
+      // Only add optional fields if they're defined (exactOptionalPropertyTypes: true)
+      if (m.confirmed !== undefined) {
+        movement.confirmed = m.confirmed
+      }
+      if (m.confirmTimestamp !== undefined) {
+        movement.confirmTimestamp = m.confirmTimestamp
+      }
+      return movement
+    })
     // Formatted movements
 
     return (
       <FocusMode
         movements={formattedMovements}
         adventureId={adventure.id}
-        adventureState={adventure.state as 'draft' | 'ready' | 'archived'}
+        adventureState={adventure.state as 'draft' | 'finalized' | 'exported'}
         scaffoldRegenerationsUsed={adventure.scaffold_regenerations_used ?? 0}
         expansionRegenerationsUsed={adventure.expansion_regenerations_used ?? 0}
         onUpdate={handleMovementUpdate}
@@ -119,6 +131,11 @@ export default function AdventureDetailPage({ params }: { params: Promise<{ id: 
       />
     )
   }
+
+  // Calculate confirmation progress
+  const confirmedCount = adventure.movements?.filter((m) => m.confirmed).length ?? 0
+  const totalCount = adventure.movements?.length ?? 0
+  const allConfirmed = confirmedCount === totalCount && totalCount > 0
 
   return (
     <div className="container max-w-4xl mx-auto py-8">
@@ -130,7 +147,7 @@ export default function AdventureDetailPage({ params }: { params: Promise<{ id: 
               <>
                 <Button
                   variant="default"
-                  disabled={isUpdating}
+                  disabled={isUpdating || !allConfirmed}
                   onClick={() => {
                     setIsUpdating(true)
                     // Use immediate async function
@@ -138,10 +155,10 @@ export default function AdventureDetailPage({ params }: { params: Promise<{ id: 
                       try {
                         const { updateAdventureState } = await import('@/app/actions/adventures')
 
-                        const result = await updateAdventureState(adventure.id, 'ready')
+                        const result = await updateAdventureState(adventure.id, 'finalized')
 
                         if (result.success) {
-                          setAdventure((prev) => (prev ? { ...prev, state: 'ready' } : prev))
+                          setAdventure((prev) => (prev ? { ...prev, state: 'finalized' } : prev))
                           const { toast } = await import('sonner')
                           toast.success('Adventure marked as ready!')
                         } else {
@@ -158,6 +175,11 @@ export default function AdventureDetailPage({ params }: { params: Promise<{ id: 
                       }
                     })()
                   }}
+                  title={
+                    !allConfirmed
+                      ? `Confirm all scenes before marking as ready (${confirmedCount}/${totalCount} confirmed)`
+                      : undefined
+                  }
                 >
                   {isUpdating ? 'Updating...' : 'Mark as Ready'}
                 </Button>
@@ -166,7 +188,7 @@ export default function AdventureDetailPage({ params }: { params: Promise<{ id: 
                 </Button>
               </>
             )}
-            {adventure.state === 'ready' && (
+            {adventure.state === 'finalized' && (
               <Button variant="outline" onClick={() => setExportDialogOpen(true)}>
                 <Download className="h-4 w-4 mr-2" />
                 Export
@@ -174,6 +196,41 @@ export default function AdventureDetailPage({ params }: { params: Promise<{ id: 
             )}
           </div>
         </div>
+
+        {/* Per-Scene Confirmation Progress Indicator (Issue #9) */}
+        {adventure.state === 'draft' &&
+          adventure.movements !== undefined &&
+          adventure.movements.length > 0 && (
+            <div className="mb-4">
+              <Card className={allConfirmed ? 'border-green-500 bg-green-50' : 'border-yellow-500'}>
+                <CardContent className="py-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium">
+                        {allConfirmed ? (
+                          <span className="text-green-700">
+                            ✓ All scenes confirmed! Ready to mark as ready.
+                          </span>
+                        ) : (
+                          <span className="text-yellow-700">
+                            {confirmedCount}/{totalCount} scenes confirmed
+                          </span>
+                        )}
+                      </p>
+                      {!allConfirmed && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Confirm all scenes in Edit Details mode before marking as ready
+                        </p>
+                      )}
+                    </div>
+                    <Badge variant={allConfirmed ? 'default' : 'secondary'}>
+                      {confirmedCount}/{totalCount}
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
 
         {adventure.description ? (
           <p className="text-lg text-muted-foreground">{adventure.description}</p>

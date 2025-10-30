@@ -13,6 +13,8 @@ export const ANALYTICS_EVENTS = {
   ADVENTURE_EXPORTED: 'adventure_exported',
   CREDIT_PURCHASED: 'credit_purchased',
   FOCUS_MODE_ENTERED: 'focus_mode_entered',
+  MOVEMENT_CONFIRMED: 'movement_confirmed', // NEW: Per-scene confirmation (Issue #9)
+  MOVEMENT_UNCONFIRMED: 'movement_unconfirmed', // NEW: Per-scene unconfirmation (Issue #9)
 } as const
 
 export type AnalyticsEvent = keyof typeof ANALYTICS_EVENTS

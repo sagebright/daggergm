@@ -417,10 +417,21 @@ export async function regenerateScaffoldMovement(adventureId: string, movementId
       return { success: false, error: 'Movement not found' }
     }
 
-    // Get locked movements for context
+    // Get locked movements for context (expansion phase)
     const lockedMovements =
       movements
         ?.filter((m) => 'locked' in m && m.locked && m.id !== movementId)
+        .map((m) => ({
+          id: m.id,
+          title: m.title,
+          type: m.type,
+          description: ('description' in m ? (m.description as string) : '') || '',
+        })) || []
+
+    // Get confirmed movements for context (scaffold phase - Issue #9)
+    const confirmedMovements =
+      movements
+        ?.filter((m) => m.confirmed && m.id !== movementId)
         .map((m) => ({
           id: m.id,
           title: m.title,
@@ -449,6 +460,7 @@ export async function regenerateScaffoldMovement(adventureId: string, movementId
         stakes: config?.stakes || 'personal',
       },
       lockedMovements,
+      confirmedMovements, // NEW: Pass confirmed movements for context (Issue #9)
     })
     const duration = (Date.now() - startTime) / 1000
 
@@ -461,6 +473,7 @@ export async function regenerateScaffoldMovement(adventureId: string, movementId
       duration,
       regenerationCount: scaffoldRegensUsed + 1,
       lockedCount: lockedMovements.length,
+      confirmedCount: confirmedMovements.length, // NEW: Track confirmed movements (Issue #9)
     })
 
     // Update movement with regenerated content
@@ -583,6 +596,187 @@ export async function updateMovement(
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to update movement',
+    }
+  }
+}
+
+/**
+ * Confirm a movement/scene for per-scene confirmation workflow
+ * Marks a movement as confirmed, preventing regeneration until unconfirmed
+ * Related Issue: #9
+ */
+export async function confirmMovement(adventureId: string, movementId: string) {
+  try {
+    const supabase = await createServerSupabaseClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) {
+      return { success: false, error: 'Unauthorized' }
+    }
+
+    // Get adventure
+    const { data: adventure } = await supabase
+      .from('daggerheart_adventures')
+      .select('*')
+      .eq('id', adventureId)
+      .eq('user_id', user.id)
+      .single()
+
+    if (!adventure) {
+      return { success: false, error: 'Adventure not found' }
+    }
+
+    // Find and confirm movement
+    const movements = (adventure.movements as unknown as Movement[]) || []
+    const movementIndex = movements.findIndex((m) => m.id === movementId)
+
+    if (movementIndex === -1) {
+      return { success: false, error: 'Movement not found' }
+    }
+
+    // Update movement with confirmation
+    const updatedMovements = movements.map((m) =>
+      m.id === movementId
+        ? {
+            ...m,
+            confirmed: true,
+            confirmTimestamp: new Date().toISOString(),
+          }
+        : m,
+    )
+
+    // Save to database
+    const { error } = await supabase
+      .from('daggerheart_adventures')
+      .update({
+        movements: updatedMovements as unknown as Json[] | null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', adventureId)
+
+    if (error) {
+      throw error
+    }
+
+    revalidatePath(`/adventures/${adventureId}`)
+
+    // Calculate confirmation stats
+    const confirmedCount = updatedMovements.filter((m) => m.confirmed).length
+    const totalCount = updatedMovements.length
+    const allConfirmed = confirmedCount === totalCount
+
+    // Track analytics
+    await analytics.track(ANALYTICS_EVENTS.MOVEMENT_CONFIRMED, {
+      userId: user.id,
+      adventureId,
+      movementId,
+      confirmedCount,
+      totalCount,
+      allConfirmed,
+    })
+
+    return {
+      success: true,
+      allConfirmed,
+      confirmedCount,
+      totalCount,
+    }
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to confirm movement',
+    }
+  }
+}
+
+/**
+ * Unconfirm a movement/scene
+ * Allows user to unlock a confirmed scene for regeneration
+ * Related Issue: #9
+ */
+export async function unconfirmMovement(adventureId: string, movementId: string) {
+  try {
+    const supabase = await createServerSupabaseClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) {
+      return { success: false, error: 'Unauthorized' }
+    }
+
+    // Get adventure
+    const { data: adventure } = await supabase
+      .from('daggerheart_adventures')
+      .select('*')
+      .eq('id', adventureId)
+      .eq('user_id', user.id)
+      .single()
+
+    if (!adventure) {
+      return { success: false, error: 'Adventure not found' }
+    }
+
+    // Find and unconfirm movement
+    const movements = (adventure.movements as unknown as Movement[]) || []
+    const movementIndex = movements.findIndex((m) => m.id === movementId)
+
+    if (movementIndex === -1) {
+      return { success: false, error: 'Movement not found' }
+    }
+
+    // Update movement to remove confirmation
+    const updatedMovements = movements.map((m) =>
+      m.id === movementId
+        ? {
+            ...m,
+            confirmed: false,
+            confirmTimestamp: undefined,
+          }
+        : m,
+    )
+
+    // Save to database
+    const { error } = await supabase
+      .from('daggerheart_adventures')
+      .update({
+        movements: updatedMovements as unknown as Json[] | null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', adventureId)
+
+    if (error) {
+      throw error
+    }
+
+    revalidatePath(`/adventures/${adventureId}`)
+
+    // Calculate confirmation stats
+    const confirmedCount = updatedMovements.filter((m) => m.confirmed).length
+    const totalCount = updatedMovements.length
+    const allConfirmed = confirmedCount === totalCount
+
+    // Track analytics
+    await analytics.track(ANALYTICS_EVENTS.MOVEMENT_UNCONFIRMED, {
+      userId: user.id,
+      adventureId,
+      movementId,
+      confirmedCount,
+      totalCount,
+    })
+
+    return {
+      success: true,
+      allConfirmed,
+      confirmedCount,
+      totalCount,
+    }
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to unconfirm movement',
     }
   }
 }
