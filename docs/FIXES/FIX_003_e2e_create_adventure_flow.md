@@ -564,8 +564,9 @@ If this test causes issues:
 
 **Environment Variables Required**:
 
-- GitHub Actions workflow configured with OPENAI_API_KEY
-- Playwright config passes environment variables to Next.js dev server
+- ✅ GitHub Actions workflow configured with OPENAI_API_KEY secret
+- ✅ Playwright config passes environment variables to Next.js dev server
+- ✅ Repository secret added: 2025-10-30 (required for E2E tests in CI)
 - E2E tests make real OpenAI API calls (no mocking due to Server Action limitation)
 
 ---
