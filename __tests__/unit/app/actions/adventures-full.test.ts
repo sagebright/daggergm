@@ -371,14 +371,39 @@ describe('Adventure Actions - Full Coverage', () => {
         data: { user: { id: 'user-123' } },
       })
 
+      // Mock for confirmation check (Issue #9)
+      const mockSelectEq = {
+        single: vi.fn().mockResolvedValue({
+          data: {
+            movements: [
+              { id: 'mov-1', confirmed: true },
+              { id: 'mov-2', confirmed: true },
+            ],
+          },
+          error: null,
+        }),
+        eq: vi.fn(),
+      }
+      mockSelectEq.eq.mockReturnValue(mockSelectEq)
+
+      const mockSelect = vi.fn().mockReturnValue({
+        eq: vi.fn().mockReturnValue(mockSelectEq),
+      })
+
       const mockUpdate = vi.fn().mockReturnValue({
         eq: vi.fn().mockReturnValue({
           eq: vi.fn().mockResolvedValue({ error: null }),
         }),
       })
 
-      mockSupabaseClient.from.mockReturnValue({
-        update: mockUpdate,
+      // Mock both select and update calls
+      let callCount = 0
+      mockSupabaseClient.from.mockImplementation(() => {
+        callCount++
+        if (callCount === 1) {
+          return { select: mockSelect }
+        }
+        return { update: mockUpdate }
       })
 
       const result = await updateAdventureState('adv-1', 'ready')
@@ -404,6 +429,25 @@ describe('Adventure Actions - Full Coverage', () => {
         data: { user: { id: 'user-123' } },
       })
 
+      // Mock for confirmation check (Issue #9)
+      const mockSelectEq = {
+        single: vi.fn().mockResolvedValue({
+          data: {
+            movements: [
+              { id: 'mov-1', confirmed: true },
+              { id: 'mov-2', confirmed: true },
+            ],
+          },
+          error: null,
+        }),
+        eq: vi.fn(),
+      }
+      mockSelectEq.eq.mockReturnValue(mockSelectEq)
+
+      const mockSelect = vi.fn().mockReturnValue({
+        eq: vi.fn().mockReturnValue(mockSelectEq),
+      })
+
       const updateError = new Error('Database error')
       const mockUpdate = vi.fn().mockReturnValue({
         eq: vi.fn().mockReturnValue({
@@ -411,8 +455,14 @@ describe('Adventure Actions - Full Coverage', () => {
         }),
       })
 
-      mockSupabaseClient.from.mockReturnValue({
-        update: mockUpdate,
+      // Mock both select and update calls
+      let callCount = 0
+      mockSupabaseClient.from.mockImplementation(() => {
+        callCount++
+        if (callCount === 1) {
+          return { select: mockSelect }
+        }
+        return { update: mockUpdate }
       })
 
       const result = await updateAdventureState('adv-1', 'ready')
