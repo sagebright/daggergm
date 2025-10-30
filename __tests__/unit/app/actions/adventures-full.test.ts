@@ -371,30 +371,13 @@ describe('Adventure Actions - Full Coverage', () => {
         data: { user: { id: 'user-123' } },
       })
 
-      const mockSingle = vi.fn().mockResolvedValue({
-        data: { id: 'adv-1', title: 'Test', user_id: 'user-123' },
-        error: null,
-      })
-
-      const mockEq = vi.fn().mockReturnValue({
-        single: mockSingle,
-      })
-
-      const mockSelect = vi.fn().mockReturnValue({
+      const mockUpdate = vi.fn().mockReturnValue({
         eq: vi.fn().mockReturnValue({
-          eq: mockEq,
+          eq: vi.fn().mockResolvedValue({ error: null }),
         }),
       })
 
       mockSupabaseClient.from.mockReturnValue({
-        select: mockSelect,
-      })
-
-      const mockUpdate = vi.fn().mockReturnValue({
-        eq: vi.fn().mockResolvedValue({ error: null }),
-      })
-
-      mockServiceRoleClient.from.mockReturnValue({
         update: mockUpdate,
       })
 
@@ -403,42 +386,7 @@ describe('Adventure Actions - Full Coverage', () => {
       expect(result.success).toBe(true)
     })
 
-    it('should update state for guest user with valid token', async () => {
-      mockSupabaseClient.auth.getUser.mockResolvedValue({
-        data: { user: null },
-      })
-
-      const mockSingle = vi.fn().mockResolvedValue({
-        data: { id: 'adv-1', title: 'Test', guest_token: 'token-123' },
-        error: null,
-      })
-
-      const mockEq = vi.fn().mockReturnValue({
-        single: mockSingle,
-      })
-
-      mockServiceRoleClient.from.mockImplementation((table) => {
-        if (table === 'daggerheart_adventures') {
-          return {
-            select: vi.fn().mockReturnValue({
-              eq: vi.fn().mockReturnValue({
-                eq: mockEq,
-              }),
-            }),
-            update: vi.fn().mockReturnValue({
-              eq: vi.fn().mockResolvedValue({ error: null }),
-            }),
-          }
-        }
-        return {} as unknown
-      })
-
-      const result = await updateAdventureState('adv-1', 'ready', 'token-123')
-
-      expect(result.success).toBe(true)
-    })
-
-    it('should reject when no user and no guest token', async () => {
+    it('should reject unauthenticated requests (guest system removed)', async () => {
       mockSupabaseClient.auth.getUser.mockResolvedValue({
         data: { user: null },
       })
@@ -447,72 +395,23 @@ describe('Adventure Actions - Full Coverage', () => {
 
       expect(result.success).toBe(false)
       if (!result.success) {
-        expect(result.error).toBe('Unauthorized')
+        expect(result.error).toBe('Unauthorized - authentication required')
       }
     })
 
-    it('should reject when adventure not found', async () => {
+    it('should handle database errors gracefully', async () => {
       mockSupabaseClient.auth.getUser.mockResolvedValue({
         data: { user: { id: 'user-123' } },
       })
 
-      const mockSingle = vi.fn().mockResolvedValue({
-        data: null,
-        error: null,
-      })
-
-      const mockEq = vi.fn().mockReturnValue({
-        single: mockSingle,
-      })
-
-      const mockSelect = vi.fn().mockReturnValue({
-        eq: vi.fn().mockReturnValue({
-          eq: mockEq,
-        }),
-      })
-
-      mockSupabaseClient.from.mockReturnValue({
-        select: mockSelect,
-      })
-
-      const result = await updateAdventureState('adv-1', 'ready')
-
-      expect(result.success).toBe(false)
-      if (!result.success) {
-        expect(result.error).toBe('Adventure not found or unauthorized')
-      }
-    })
-
-    it('should handle database update errors', async () => {
-      mockSupabaseClient.auth.getUser.mockResolvedValue({
-        data: { user: { id: 'user-123' } },
-      })
-
-      const mockSingle = vi.fn().mockResolvedValue({
-        data: { id: 'adv-1', title: 'Test', user_id: 'user-123' },
-        error: null,
-      })
-
-      const mockEq = vi.fn().mockReturnValue({
-        single: mockSingle,
-      })
-
-      const mockSelect = vi.fn().mockReturnValue({
-        eq: vi.fn().mockReturnValue({
-          eq: mockEq,
-        }),
-      })
-
-      mockSupabaseClient.from.mockReturnValue({
-        select: mockSelect,
-      })
-
-      const updateError = new Error('Update failed')
+      const updateError = new Error('Database error')
       const mockUpdate = vi.fn().mockReturnValue({
-        eq: vi.fn().mockResolvedValue({ error: updateError }),
+        eq: vi.fn().mockReturnValue({
+          eq: vi.fn().mockResolvedValue({ error: updateError }),
+        }),
       })
 
-      mockServiceRoleClient.from.mockReturnValue({
+      mockSupabaseClient.from.mockReturnValue({
         update: mockUpdate,
       })
 
@@ -520,7 +419,7 @@ describe('Adventure Actions - Full Coverage', () => {
 
       expect(result.success).toBe(false)
       if (!result.success) {
-        expect(result.error).toBe('Update failed')
+        expect(result.error).toBe('Database error')
       }
     })
 

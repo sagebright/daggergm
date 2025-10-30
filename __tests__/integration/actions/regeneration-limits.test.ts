@@ -393,6 +393,176 @@ describe('Regeneration Limits - Expansion and Refinement', () => {
       // Success should not depend on credits
       expect(result.success).toBe(true)
     })
+
+    describe('State-Aware Refinement (Issue #6)', () => {
+      it('should use scaffold limit when adventure is in draft state', async () => {
+        const mockAdventure = {
+          id: adventureId,
+          user_id: testUserId,
+          frame: 'witherwild',
+          focus: 'mystery',
+          state: 'draft', // Draft state
+          config: { party_size: 4, party_level: 2 },
+          movements: [
+            {
+              id: movementId,
+              type: 'combat',
+              title: 'Forest Ambush',
+              content: 'Brief description',
+              mechanics: {},
+              gmNotes: '',
+            },
+          ],
+          expansion_regenerations_used: 0,
+          scaffold_regenerations_used: 9, // 9/10 scaffold used
+        }
+
+        mockSupabase.from.mockReturnValue({
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              single: vi.fn().mockResolvedValue({
+                data: mockAdventure,
+                error: null,
+              }),
+            }),
+          }),
+          update: vi.fn().mockReturnValue({
+            eq: vi.fn().mockResolvedValue({
+              data: null,
+              error: null,
+            }),
+          }),
+        })
+
+        const result = await refineMovementContent(adventureId, movementId, 'Make it more dramatic')
+
+        expect(result.success).toBe(true)
+      })
+
+      it('should block refinement when scaffold limit reached in draft state', async () => {
+        const mockAdventure = {
+          id: adventureId,
+          user_id: testUserId,
+          frame: 'witherwild',
+          focus: 'mystery',
+          state: 'draft', // Draft state
+          config: { party_size: 4, party_level: 2 },
+          movements: [
+            {
+              id: movementId,
+              type: 'combat',
+              title: 'Forest Ambush',
+              content: 'Brief description',
+              mechanics: {},
+              gmNotes: '',
+            },
+          ],
+          expansion_regenerations_used: 0,
+          scaffold_regenerations_used: 10, // 10/10 scaffold limit reached
+        }
+
+        mockSupabase.from.mockReturnValue({
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              single: vi.fn().mockResolvedValue({
+                data: mockAdventure,
+                error: null,
+              }),
+            }),
+          }),
+        })
+
+        const result = await refineMovementContent(adventureId, movementId, 'Make it more dramatic')
+
+        expect(result.success).toBe(false)
+        expect(result.error).toContain('limit reached')
+        expect(result.error).toContain('10') // Scaffold limit
+      })
+
+      it('should use expansion limit when adventure is in ready state', async () => {
+        const mockAdventure = {
+          id: adventureId,
+          user_id: testUserId,
+          frame: 'witherwild',
+          focus: 'mystery',
+          state: 'ready', // Ready state
+          config: { party_size: 4, party_level: 2 },
+          movements: [
+            {
+              id: movementId,
+              type: 'combat',
+              title: 'Forest Ambush',
+              content: 'Brief description',
+              mechanics: {},
+              gmNotes: '',
+            },
+          ],
+          expansion_regenerations_used: 19, // 19/20 expansion used
+          scaffold_regenerations_used: 10, // Scaffold limit already reached (shouldn't matter)
+        }
+
+        mockSupabase.from.mockReturnValue({
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              single: vi.fn().mockResolvedValue({
+                data: mockAdventure,
+                error: null,
+              }),
+            }),
+          }),
+          update: vi.fn().mockReturnValue({
+            eq: vi.fn().mockResolvedValue({
+              data: null,
+              error: null,
+            }),
+          }),
+        })
+
+        const result = await refineMovementContent(adventureId, movementId, 'Make it more dramatic')
+
+        expect(result.success).toBe(true) // Should succeed because we're checking expansion limit
+      })
+
+      it('should block refinement when expansion limit reached in ready state', async () => {
+        const mockAdventure = {
+          id: adventureId,
+          user_id: testUserId,
+          frame: 'witherwild',
+          focus: 'mystery',
+          state: 'ready', // Ready state
+          config: { party_size: 4, party_level: 2 },
+          movements: [
+            {
+              id: movementId,
+              type: 'combat',
+              title: 'Forest Ambush',
+              content: 'Brief description',
+              mechanics: {},
+              gmNotes: '',
+            },
+          ],
+          expansion_regenerations_used: 20, // 20/20 expansion limit reached
+          scaffold_regenerations_used: 5,
+        }
+
+        mockSupabase.from.mockReturnValue({
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              single: vi.fn().mockResolvedValue({
+                data: mockAdventure,
+                error: null,
+              }),
+            }),
+          }),
+        })
+
+        const result = await refineMovementContent(adventureId, movementId, 'Make it more dramatic')
+
+        expect(result.success).toBe(false)
+        expect(result.error).toContain('limit reached')
+        expect(result.error).toContain('20') // Expansion limit
+      })
+    })
   })
 
   describe('Edge Cases', () => {

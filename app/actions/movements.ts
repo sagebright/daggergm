@@ -233,13 +233,27 @@ export async function refineMovementContent(
       return { success: false, error: 'Unauthorized' }
     }
 
-    // Check expansion regeneration limit (20 max)
-    // Refinement counts toward expansion limit
-    const expansionRegensUsed = adventure.expansion_regenerations_used ?? 0
-    if (expansionRegensUsed >= REGENERATION_LIMITS.EXPANSION) {
-      return {
-        success: false,
-        error: REGENERATION_LIMIT_ERRORS.REFINEMENT,
+    // Check regeneration limit based on adventure state
+    // Draft state → scaffold limit, Ready/Archived → expansion limit
+    const isDraft = adventure.state === 'draft'
+
+    if (isDraft) {
+      // Scaffold refinement counts toward scaffold limit (10 max)
+      const scaffoldRegensUsed = adventure.scaffold_regenerations_used ?? 0
+      if (scaffoldRegensUsed >= REGENERATION_LIMITS.SCAFFOLD) {
+        return {
+          success: false,
+          error: REGENERATION_LIMIT_ERRORS.SCAFFOLD,
+        }
+      }
+    } else {
+      // Expansion refinement counts toward expansion limit (20 max)
+      const expansionRegensUsed = adventure.expansion_regenerations_used ?? 0
+      if (expansionRegensUsed >= REGENERATION_LIMITS.EXPANSION) {
+        return {
+          success: false,
+          error: REGENERATION_LIMIT_ERRORS.REFINEMENT,
+        }
       }
     }
 
@@ -278,9 +292,38 @@ export async function refineMovementContent(
       frame: adventure.frame,
     })
 
-    // Increment expansion regeneration counter atomically after successful refinement
+    // Update movement with refined content
+    const updatedMovements = movements?.map((m) =>
+      m.id === movementId
+        ? {
+            ...m,
+            content: refinement.refinedContent,
+          }
+        : m,
+    )
+
+    // Save refined content to database
+    const { error } = await supabase
+      .from('daggerheart_adventures')
+      .update({
+        movements: updatedMovements as unknown as Json[],
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', adventureId)
+
+    if (error) {
+      throw error
+    }
+
+    // Increment appropriate regeneration counter based on adventure state
     const limitChecker = new RegenerationLimitChecker()
-    await limitChecker.incrementExpansionCount(adventureId)
+    if (isDraft) {
+      await limitChecker.incrementScaffoldCount(adventureId)
+    } else {
+      await limitChecker.incrementExpansionCount(adventureId)
+    }
+
+    revalidatePath(`/adventures/${adventureId}`)
 
     return {
       success: true,

@@ -10,7 +10,6 @@ import { CreditBalance } from '@/components/features/credits/CreditBalance'
 import { CreditCost } from '@/components/features/credits/CreditCost'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
   Select,
@@ -32,8 +31,7 @@ type FormData = {
 export default function NewAdventurePage() {
   const router = useRouter()
   const [generating, setGenerating] = useState(false)
-  const [isGuest, setIsGuest] = useState(true)
-  const [guestEmail, setGuestEmail] = useState('')
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [loading, setLoading] = useState(true)
   const [formData, setFormData] = useState<FormData>({
     motif: '',
@@ -45,7 +43,7 @@ export default function NewAdventurePage() {
   const checkAuth = useCallback(async () => {
     const supabase = createClient()
     const { data } = await supabase.auth.getUser()
-    setIsGuest(!data.user)
+    setIsAuthenticated(!!data.user)
     setLoading(false)
   }, [])
 
@@ -63,9 +61,10 @@ export default function NewAdventurePage() {
       return
     }
 
-    // For guest users, validate email first
-    if (isGuest && !guestEmail) {
-      toast.error('Please enter your email to continue')
+    // Require authentication (guest system removed)
+    if (!isAuthenticated) {
+      toast.error('Please sign in to create an adventure')
+      router.push('/login')
       return
     }
 
@@ -88,8 +87,6 @@ export default function NewAdventurePage() {
         difficulty: 'standard',
         stakes: 'personal',
         num_scenes: parseInt(formData.numScenes),
-        // Add guest email if guest
-        ...(isGuest && { guestEmail }),
       }
 
       const result = await generateAdventure(adventureConfig)
@@ -136,10 +133,10 @@ export default function NewAdventurePage() {
     <div className="container max-w-2xl mx-auto py-8">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold">Create Your Adventure</h1>
-        {!isGuest ? <CreditBalance variant="compact" /> : null}
+        {isAuthenticated ? <CreditBalance variant="compact" /> : null}
       </div>
 
-      {!isGuest ? (
+      {isAuthenticated ? (
         <Card className="mb-6">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
@@ -153,39 +150,22 @@ export default function NewAdventurePage() {
             </div>
           </CardContent>
         </Card>
-      ) : null}
-
-      {isGuest ? (
-        <Card className="mb-6 border-dagger-gold-400/20 bg-dagger-gold-400/5">
-          <CardContent className="pt-6 space-y-4">
+      ) : (
+        <Card className="mb-6 border-amber-400/20 bg-amber-400/5">
+          <CardContent className="pt-6">
             <div className="flex items-start gap-3">
               <div className="flex-1">
-                <p className="text-sm font-medium text-dagger-gold-700 dark:text-dagger-gold-300">
-                  🎁 Free Adventure Trial
+                <p className="text-sm font-medium text-amber-700 dark:text-amber-300">
+                  🔒 Authentication Required
                 </p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  You&apos;re creating as a guest. Try one free adventure! Sign up to save your
-                  adventures and get more credits.
+                  Please sign in to create an adventure. All adventures require an account.
                 </p>
               </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email (required for guest access)</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="your@email.com"
-                value={guestEmail}
-                onChange={(e) => setGuestEmail(e.target.value)}
-                required
-              />
-              <p className="text-xs text-muted-foreground">
-                We&apos;ll use this to save your adventure. You can claim it later by signing up.
-              </p>
-            </div>
           </CardContent>
         </Card>
-      ) : null}
+      )}
 
       <Card>
         <CardHeader>

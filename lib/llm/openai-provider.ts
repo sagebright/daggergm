@@ -508,13 +508,14 @@ JSON: {"title":"","description":"","type":"combat|exploration|social|puzzle","es
     const customFrame = params.customFrameDescription
       ? `\nCustom Frame: ${params.customFrameDescription}`
       : ''
+    const numScenes = params.numScenes || 3
     return `Create a Daggerheart adventure:
 Frame: ${params.frame}${customFrame}
 Focus: ${params.focus}
 Party: ${params.partySize} level ${params.partyLevel}
 Difficulty: ${params.difficulty}, Stakes: ${params.stakes}
 
-Generate: title, description, 3-5 movements, 3-4hr duration
+Generate: title, description, exactly ${numScenes} movements, 3-4hr duration
 JSON: {"title":"","description":"","estimatedDuration":"","movements":[{"id":"","title":"","type":"combat|exploration|social|puzzle","description":"","estimatedTime":"","orderIndex":0}]}`
   }
 

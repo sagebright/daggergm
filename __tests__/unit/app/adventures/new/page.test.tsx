@@ -82,16 +82,15 @@ describe('NewAdventurePage', () => {
       expect(screen.getByText(/Adventure Details/i)).toBeInTheDocument()
     })
 
-    it('should show guest user limitations message and email input', async () => {
+    it('should show authentication required message for unauthenticated users', async () => {
       render(<NewAdventurePage />)
 
       await waitFor(() => {
         expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
       })
 
-      expect(screen.getByText(/You're creating as a guest/i)).toBeInTheDocument()
-      expect(screen.getByText(/Sign up to save your adventures/i)).toBeInTheDocument()
-      expect(screen.getByLabelText(/Email \(required for guest access\)/i)).toBeInTheDocument()
+      expect(screen.getByText(/Authentication Required/i)).toBeInTheDocument()
+      expect(screen.getByText(/Please sign in to create an adventure/i)).toBeInTheDocument()
     })
 
     it('should have all required form fields', async () => {
@@ -117,12 +116,11 @@ describe('NewAdventurePage', () => {
         expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
       })
 
-      // All form fields should be visible
+      // All form fields should be visible (guest system removed, no email field)
       expect(screen.getByLabelText(/Primary Motif/i)).toBeInTheDocument()
       expect(screen.getByLabelText(/Party Size/i)).toBeInTheDocument()
       expect(screen.getByLabelText(/Party Tier/i)).toBeInTheDocument()
       expect(screen.getByLabelText(/Number of Scenes/i)).toBeInTheDocument()
-      expect(screen.getByLabelText(/Email \(required for guest access\)/i)).toBeInTheDocument()
     })
 
     it('should have submit button enabled', async () => {
@@ -194,7 +192,7 @@ describe('NewAdventurePage', () => {
       })
 
       // Should not show guest message
-      expect(screen.queryByText(/You're creating as a guest/i)).not.toBeInTheDocument()
+      expect(screen.queryByText(/Authentication Required/i)).not.toBeInTheDocument()
     })
   })
 })
