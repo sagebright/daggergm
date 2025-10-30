@@ -6,6 +6,8 @@ import { createConfirmedTestUser, deleteTestUser } from './fixtures/auth-helpers
 /**
  * E2E Test: Adventure Creation Form (Single-Screen Refactor)
  *
+ * Tests make real OpenAI API calls (OPENAI_API_KEY required in CI secrets).
+ *
  * This test suite verifies the refactored single-screen adventure creation form:
  * 1. Form renders with all 4 dropdowns (motif, party size, party tier, scenes)
  * 2. Form validation prevents empty submissions
