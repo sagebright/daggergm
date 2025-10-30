@@ -125,6 +125,7 @@ export async function generateAdventure(config: AdventureConfig) {
         partyLevel: validatedConfig.party_level,
         difficulty: validatedConfig.difficulty,
         stakes: validatedConfig.stakes,
+        numScenes: config.num_scenes,
       })
     } else {
       // Use real LLM for production
@@ -136,6 +137,7 @@ export async function generateAdventure(config: AdventureConfig) {
         partyLevel: validatedConfig.party_level,
         difficulty: validatedConfig.difficulty,
         stakes: validatedConfig.stakes,
+        numScenes: config.num_scenes,
       })
     }
     const duration = (Date.now() - startTime) / 1000
@@ -206,7 +208,7 @@ export async function generateAdventure(config: AdventureConfig) {
   }
 }
 
-export async function getAdventure(id: string, guestToken?: string) {
+export async function getAdventure(id: string) {
   // Validate adventure ID format
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
   if (!uuidRegex.test(id)) {
@@ -216,34 +218,19 @@ export async function getAdventure(id: string, guestToken?: string) {
 
   const supabase = await createServerSupabaseClient()
 
-  // First try to get as authenticated user
-  const { data: authData, error: authError } = await supabase
+  // Get adventure for authenticated user (guest system removed)
+  const { data, error } = await supabase
     .from('daggerheart_adventures')
     .select('*')
     .eq('id', id)
     .single()
 
-  if (!authError && authData) {
-    return authData
+  if (error) {
+    console.error('Error fetching adventure:', error)
+    return null
   }
 
-  // If not found or error, try with guest token using service role
-  if (guestToken) {
-    const serviceClient = await createServiceRoleClient()
-    const { data: guestData, error: guestError } = await serviceClient
-      .from('daggerheart_adventures')
-      .select('*')
-      .eq('id', id)
-      .eq('guest_token', guestToken)
-      .single()
-
-    if (!guestError && guestData) {
-      return guestData
-    }
-  }
-
-  console.error('Error fetching adventure:', authError || 'Not found')
-  return null
+  return data
 }
 
 export async function getUserAdventures() {
@@ -273,9 +260,8 @@ export async function getUserAdventures() {
 export async function updateAdventureState(
   adventureId: string,
   newState: 'draft' | 'ready' | 'archived',
-  guestToken?: string,
 ) {
-  // Update adventure state
+  // Update adventure state (guest system removed - requires authentication)
 
   try {
     const supabase = await createServerSupabaseClient()
@@ -283,48 +269,22 @@ export async function updateAdventureState(
       data: { user },
     } = await supabase.auth.getUser()
 
-    // Get adventure - use service role for guest access
-    let adventure
-    if (!user && guestToken) {
-      // Guest user with token
-      const serviceClient = await createServiceRoleClient()
-      const { data } = await serviceClient
-        .from('daggerheart_adventures')
-        .select('*')
-        .eq('id', adventureId)
-        .eq('guest_token', guestToken)
-        .single()
-
-      adventure = data
-    } else if (user) {
-      // Authenticated user
-      const { data } = await supabase
-        .from('daggerheart_adventures')
-        .select('*')
-        .eq('id', adventureId)
-        .eq('user_id', user.id)
-        .single()
-
-      adventure = data
-    } else {
-      return { success: false, error: 'Unauthorized' }
+    if (!user) {
+      return { success: false, error: 'Unauthorized - authentication required' }
     }
 
-    if (!adventure) {
-      return { success: false, error: 'Adventure not found or unauthorized' }
-    }
-
-    // Update state using service role
-    const serviceClient = await createServiceRoleClient()
-    const { error } = await serviceClient
+    // Verify ownership and update state
+    const { error } = await supabase
       .from('daggerheart_adventures')
       .update({
         state: newState,
         updated_at: new Date().toISOString(),
       })
       .eq('id', adventureId)
+      .eq('user_id', user.id)
 
     if (error) {
+      console.error('Error updating adventure state:', error)
       throw error
     }
 
@@ -332,6 +292,7 @@ export async function updateAdventureState(
 
     return { success: true }
   } catch (error) {
+    console.error('Exception in updateAdventureState:', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to update adventure state',

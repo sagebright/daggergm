@@ -41,10 +41,7 @@ export default function AdventureDetailPage({ params }: { params: Promise<{ id: 
   const loadAdventure = async () => {
     const { id } = await params
 
-    // Check for guest token in localStorage
-    const guestToken = localStorage.getItem(`guest_token_${id}`)
-
-    const data = await getAdventure(id, guestToken || undefined)
+    const data = await getAdventure(id)
 
     if (!data) {
       notFound()
@@ -139,13 +136,8 @@ export default function AdventureDetailPage({ params }: { params: Promise<{ id: 
                     void (async () => {
                       try {
                         const { updateAdventureState } = await import('@/app/actions/adventures')
-                        const guestToken = localStorage.getItem(`guest_token_${adventure.id}`)
 
-                        const result = await updateAdventureState(
-                          adventure.id,
-                          'ready',
-                          guestToken || undefined,
-                        )
+                        const result = await updateAdventureState(adventure.id, 'ready')
 
                         if (result.success) {
                           setAdventure((prev) => (prev ? { ...prev, state: 'ready' } : prev))
@@ -173,10 +165,12 @@ export default function AdventureDetailPage({ params }: { params: Promise<{ id: 
                 </Button>
               </>
             )}
-            <Button variant="outline" onClick={() => setExportDialogOpen(true)}>
-              <Download className="h-4 w-4 mr-2" />
-              Export
-            </Button>
+            {adventure.state === 'ready' && (
+              <Button variant="outline" onClick={() => setExportDialogOpen(true)}>
+                <Download className="h-4 w-4 mr-2" />
+                Export
+              </Button>
+            )}
           </div>
         </div>
 

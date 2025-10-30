@@ -278,9 +278,34 @@ export async function refineMovementContent(
       frame: adventure.frame,
     })
 
+    // Update movement with refined content
+    const updatedMovements = movements?.map((m) =>
+      m.id === movementId
+        ? {
+            ...m,
+            content: refinement.refinedContent,
+          }
+        : m,
+    )
+
+    // Save refined content to database
+    const { error } = await supabase
+      .from('daggerheart_adventures')
+      .update({
+        movements: updatedMovements as unknown as Json[],
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', adventureId)
+
+    if (error) {
+      throw error
+    }
+
     // Increment expansion regeneration counter atomically after successful refinement
     const limitChecker = new RegenerationLimitChecker()
     await limitChecker.incrementExpansionCount(adventureId)
+
+    revalidatePath(`/adventures/${adventureId}`)
 
     return {
       success: true,
