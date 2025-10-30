@@ -115,11 +115,7 @@ describe('Stripe Webhook Handler', () => {
       const response = await POST(request)
       const data = await response.json()
 
-      expect(mockCreditManager.addCredits).toHaveBeenCalledWith('user-123', 10, {
-        source: 'stripe_purchase',
-        stripe_session_id: 'cs_123',
-        amount_paid: 10,
-      })
+      expect(mockCreditManager.addCredits).toHaveBeenCalledWith('user-123', 10, 'stripe_purchase')
       expect(response.status).toBe(200)
       expect(data).toEqual({ received: true })
     })
@@ -153,11 +149,7 @@ describe('Stripe Webhook Handler', () => {
 
       const response = await POST(request)
 
-      expect(mockCreditManager.addCredits).toHaveBeenCalledWith('user-456', 50, {
-        source: 'stripe_purchase',
-        stripe_payment_intent_id: 'pi_123',
-        amount_paid: 50,
-      })
+      expect(mockCreditManager.addCredits).toHaveBeenCalledWith('user-456', 50, 'stripe_purchase')
       expect(response.status).toBe(200)
     })
 

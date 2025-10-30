@@ -58,11 +58,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Add credits to user account
-        await creditManager.addCredits(userId, parseInt(creditAmount, 10), {
-          source: 'stripe_purchase',
-          stripe_session_id: session.id,
-          amount_paid: session.amount_total ? session.amount_total / 100 : 0,
-        })
+        await creditManager.addCredits(userId, parseInt(creditAmount, 10), 'stripe_purchase')
 
         // Track credit purchase
         await analytics.track(ANALYTICS_EVENTS.CREDIT_PURCHASED, {
@@ -87,11 +83,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Add credits to user account
-        await creditManager.addCredits(userId, parseInt(creditAmount, 10), {
-          source: 'stripe_purchase',
-          stripe_payment_intent_id: paymentIntent.id,
-          amount_paid: paymentIntent.amount / 100,
-        })
+        await creditManager.addCredits(userId, parseInt(creditAmount, 10), 'stripe_purchase')
 
         break
       }
