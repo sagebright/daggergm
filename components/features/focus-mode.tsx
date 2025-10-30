@@ -82,7 +82,12 @@ export function FocusMode({
       data-testid="focus-mode-container"
     >
       {/* Movement List */}
-      <div className="h-full overflow-y-auto p-4 pb-20">
+      <div
+        className={cn(
+          'h-full overflow-y-auto p-4 pb-20 transition-all duration-300',
+          isPanelOpen && focusedId ? 'pr-[25rem]' : 'pr-4',
+        )}
+      >
         <AnimatePresence>
           {movements.map((movement) => (
             <motion.div

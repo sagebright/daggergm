@@ -6,7 +6,7 @@ export interface ScaffoldParams {
   partyLevel: number
   difficulty: 'easier' | 'standard' | 'harder'
   stakes: 'low' | 'personal' | 'high' | 'world'
-  numScenes?: number // Number of scenes/movements to generate (default: 3)
+  numScenes?: number | undefined // Number of scenes/movements to generate (default: 3)
 }
 
 export interface ScaffoldResult {

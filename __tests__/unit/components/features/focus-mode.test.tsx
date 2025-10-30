@@ -103,6 +103,7 @@ describe('FocusMode', () => {
         <FocusMode
           movements={mockMovements}
           adventureId="test-adventure-id"
+          adventureState="draft"
           onUpdate={mockOnUpdate}
           onExit={mockOnExit}
         />,
@@ -126,6 +127,7 @@ describe('FocusMode', () => {
       const user = userEvent.setup()
       render(
         <FocusMode
+          adventureState="draft"
           movements={mockMovements}
           adventureId="test-adventure-id"
           onUpdate={mockOnUpdate}
@@ -151,6 +153,7 @@ describe('FocusMode', () => {
       const user = userEvent.setup()
       render(
         <FocusMode
+          adventureState="draft"
           movements={mockMovements}
           adventureId="test-adventure-id"
           onUpdate={mockOnUpdate}
@@ -178,6 +181,7 @@ describe('FocusMode', () => {
       const user = userEvent.setup()
       render(
         <FocusMode
+          adventureState="draft"
           movements={mockMovements}
           adventureId="test-adventure-id"
           onUpdate={mockOnUpdate}
@@ -215,6 +219,7 @@ describe('FocusMode', () => {
 
       render(
         <FocusMode
+          adventureState="draft"
           movements={mockMovements}
           adventureId="test-adventure-id"
           onUpdate={mockOnUpdate}
@@ -265,6 +270,7 @@ describe('FocusMode', () => {
     it('should register hotkeys on mount', () => {
       render(
         <FocusMode
+          adventureState="draft"
           movements={mockMovements}
           adventureId="test-adventure-id"
           onUpdate={mockOnUpdate}
@@ -287,6 +293,7 @@ describe('FocusMode', () => {
       const user = userEvent.setup()
       const { rerender } = render(
         <FocusMode
+          adventureState="draft"
           movements={mockMovements}
           adventureId="test-adventure-id"
           onUpdate={mockOnUpdate}
@@ -306,6 +313,7 @@ describe('FocusMode', () => {
       // Force re-render to see state change
       rerender(
         <FocusMode
+          adventureState="draft"
           movements={mockMovements}
           adventureId="test-adventure-id"
           onUpdate={mockOnUpdate}
@@ -329,6 +337,7 @@ describe('FocusMode', () => {
 
       render(
         <FocusMode
+          adventureState="draft"
           movements={mockMovements}
           adventureId="test-adventure-id"
           onUpdate={mockOnUpdate}
@@ -350,6 +359,7 @@ describe('FocusMode', () => {
       const user = userEvent.setup()
       render(
         <FocusMode
+          adventureState="draft"
           movements={mockMovements}
           adventureId="test-adventure-id"
           onUpdate={mockOnUpdate}
@@ -380,6 +390,7 @@ describe('FocusMode', () => {
       const user = userEvent.setup()
       const { rerender } = render(
         <FocusMode
+          adventureState="draft"
           movements={mockMovements}
           adventureId="test-adventure-id"
           onUpdate={mockOnUpdate}
@@ -398,6 +409,7 @@ describe('FocusMode', () => {
 
       rerender(
         <FocusMode
+          adventureState="draft"
           movements={mockMovements}
           adventureId="test-adventure-id"
           onUpdate={mockOnUpdate}
@@ -410,12 +422,97 @@ describe('FocusMode', () => {
         expect(screen.queryByTestId('ai-chat-panel')).not.toBeInTheDocument()
       })
     })
+
+    it('should add right padding to content when AI panel is open (Issue #4)', async () => {
+      const user = userEvent.setup()
+      render(
+        <FocusMode
+          movements={mockMovements}
+          adventureId="test-adventure-id"
+          adventureState="draft"
+          onUpdate={mockOnUpdate}
+          onExit={mockOnExit}
+        />,
+      )
+
+      // Get the movement list container
+      const container = screen.getByTestId('focus-mode-container')
+      const movementList = container.querySelector('.h-full.overflow-y-auto')
+      expect(movementList).toBeInTheDocument()
+
+      // Initially should have default padding
+      expect(movementList).toHaveClass('pr-4')
+      expect(movementList).not.toHaveClass('pr-[25rem]')
+
+      // Focus movement to show panel
+      await user.click(screen.getByText('The Journey Begins'))
+
+      await waitFor(() => {
+        expect(screen.getByTestId('ai-chat-panel')).toBeInTheDocument()
+      })
+
+      // Should have extra padding to prevent content from being covered
+      expect(movementList).toHaveClass('pr-[25rem]')
+      expect(movementList).not.toHaveClass('pr-4')
+    })
+
+    it('should remove extra padding when AI panel is closed', async () => {
+      const cmdKHandler = vi.fn()
+      vi.mocked(useHotkeys).mockImplementation((key, handler) => {
+        if (key === 'cmd+k') {
+          cmdKHandler.mockImplementation(handler)
+        }
+      })
+
+      const user = userEvent.setup()
+      const { rerender } = render(
+        <FocusMode
+          movements={mockMovements}
+          adventureId="test-adventure-id"
+          adventureState="draft"
+          onUpdate={mockOnUpdate}
+          onExit={mockOnExit}
+        />,
+      )
+
+      const container = screen.getByTestId('focus-mode-container')
+      const movementList = container.querySelector('.h-full.overflow-y-auto')
+
+      // Focus movement to show panel
+      await user.click(screen.getByText('The Journey Begins'))
+
+      await waitFor(() => {
+        expect(movementList).toHaveClass('pr-[25rem]')
+      })
+
+      // Toggle panel off
+      act(() => {
+        cmdKHandler()
+      })
+
+      rerender(
+        <FocusMode
+          movements={mockMovements}
+          adventureId="test-adventure-id"
+          adventureState="draft"
+          onUpdate={mockOnUpdate}
+          onExit={mockOnExit}
+        />,
+      )
+
+      // Should revert to default padding
+      await waitFor(() => {
+        expect(movementList).toHaveClass('pr-4')
+        expect(movementList).not.toHaveClass('pr-[25rem]')
+      })
+    })
   })
 
   describe('exit functionality', () => {
     it('should show exit button', () => {
       render(
         <FocusMode
+          adventureState="draft"
           movements={mockMovements}
           adventureId="test-adventure-id"
           onUpdate={mockOnUpdate}
@@ -430,6 +527,7 @@ describe('FocusMode', () => {
       const user = userEvent.setup()
       render(
         <FocusMode
+          adventureState="draft"
           movements={mockMovements}
           adventureId="test-adventure-id"
           onUpdate={mockOnUpdate}
@@ -451,6 +549,7 @@ describe('FocusMode', () => {
 
       render(
         <FocusMode
+          adventureState="draft"
           movements={mockMovements}
           adventureId="test-adventure-id"
           onUpdate={mockOnUpdate}
