@@ -133,10 +133,10 @@ test.describe('Adventure Creation Form (Single-Screen)', () => {
       await page.fill('input[type="email"]', testEmail)
       await page.fill('input[type="password"]', testPassword)
 
-      // Click sign in and wait for auth redirect (WebKit-safe pattern)
+      // Click sign in and wait for auth redirect (WebKit needs extra time in CI)
       await page.click('button:has-text("Sign In")')
-      await page.waitForLoadState('networkidle', { timeout: 20000 })
-      await page.waitForURL('/dashboard', { timeout: 5000 })
+      // Wait for Supabase auth redirect to complete (WebKit/Safari can be slow in CI)
+      await page.waitForURL('/dashboard', { timeout: 30000 })
 
       // Step 2: Navigate to adventure creation page
       await page.getByRole('link', { name: 'Generate New Adventure' }).click()
@@ -187,10 +187,10 @@ test.describe('Adventure Creation Form (Single-Screen)', () => {
       await page.fill('input[type="email"]', testEmail)
       await page.fill('input[type="password"]', testPassword)
 
-      // Click sign in and wait for auth redirect (WebKit-safe pattern)
+      // Click sign in and wait for auth redirect (WebKit needs extra time in CI)
       await page.click('button:has-text("Sign In")')
-      await page.waitForLoadState('networkidle', { timeout: 20000 })
-      await page.waitForURL('/dashboard', { timeout: 5000 })
+      // Wait for Supabase auth redirect to complete (WebKit/Safari can be slow in CI)
+      await page.waitForURL('/dashboard', { timeout: 30000 })
 
       await page.getByRole('link', { name: 'Generate New Adventure' }).click()
       await expect(page).toHaveURL('/adventures/new')
@@ -222,10 +222,10 @@ test.describe('Adventure Creation Form (Single-Screen)', () => {
       await page.fill('input[type="email"]', testEmail)
       await page.fill('input[type="password"]', testPassword)
 
-      // Click sign in and wait for auth redirect (WebKit-safe pattern)
+      // Click sign in and wait for auth redirect (WebKit needs extra time in CI)
       await page.click('button:has-text("Sign In")')
-      await page.waitForLoadState('networkidle', { timeout: 20000 })
-      await page.waitForURL('/dashboard', { timeout: 5000 })
+      // Wait for Supabase auth redirect to complete (WebKit/Safari can be slow in CI)
+      await page.waitForURL('/dashboard', { timeout: 30000 })
 
       // Verify starting credit balance (aria-label contains "5 credits available")
       await expect(page.locator('[aria-label*="5 credit"]')).toBeVisible()
@@ -288,10 +288,10 @@ test.describe('Adventure Creation Form (Single-Screen)', () => {
       await page.fill('input[type="email"]', testEmail)
       await page.fill('input[type="password"]', testPassword)
 
-      // Click sign in and wait for auth redirect (WebKit-safe pattern)
+      // Click sign in and wait for auth redirect (WebKit needs extra time in CI)
       await page.click('button:has-text("Sign In")')
-      await page.waitForLoadState('networkidle', { timeout: 20000 })
-      await page.waitForURL('/dashboard', { timeout: 5000 })
+      // Wait for Supabase auth redirect to complete (WebKit/Safari can be slow in CI)
+      await page.waitForURL('/dashboard', { timeout: 30000 })
 
       await page.getByRole('link', { name: 'Generate New Adventure' }).click()
       await expect(page).toHaveURL('/adventures/new')
@@ -329,10 +329,10 @@ test.describe('Adventure Creation Form (Single-Screen)', () => {
       await page.fill('input[type="email"]', testEmail)
       await page.fill('input[type="password"]', testPassword)
 
-      // Click sign in and wait for auth redirect (WebKit-safe pattern)
+      // Click sign in and wait for auth redirect (WebKit needs extra time in CI)
       await page.click('button:has-text("Sign In")')
-      await page.waitForLoadState('networkidle', { timeout: 20000 })
-      await page.waitForURL('/dashboard', { timeout: 5000 })
+      // Wait for Supabase auth redirect to complete (WebKit/Safari can be slow in CI)
+      await page.waitForURL('/dashboard', { timeout: 30000 })
 
       await page.getByRole('link', { name: 'Generate New Adventure' }).click()
       await expect(page).toHaveURL('/adventures/new')
