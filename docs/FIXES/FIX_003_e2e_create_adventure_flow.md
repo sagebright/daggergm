@@ -560,4 +560,14 @@ If this test causes issues:
 
 ---
 
+### CI/CD Configuration
+
+**Environment Variables Required**:
+
+- GitHub Actions workflow configured with OPENAI_API_KEY
+- Playwright config passes environment variables to Next.js dev server
+- E2E tests make real OpenAI API calls (no mocking due to Server Action limitation)
+
+---
+
 **Status**: ✅ COMPLETE | **Ready for PR**: Yes | **Blockers**: None
