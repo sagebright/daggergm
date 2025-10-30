@@ -145,7 +145,10 @@ test.describe('Per-Scene Confirmation Workflow', () => {
 
       // Step 4: Open Focus Mode
       await page.click('button:has-text("Edit Details")')
-      await expect(page.locator('text=Focus Mode')).toBeVisible({ timeout: 5000 })
+      // Wait for Focus Mode to load (look for exit button)
+      await expect(page.locator('button[aria-label="Exit focus mode"]')).toBeVisible({
+        timeout: 5000,
+      })
 
       // Step 5: Verify all scenes are unconfirmed (show "Confirm Scene" buttons)
       const confirmButtons = page.locator('button:has-text("Confirm Scene")')
@@ -161,7 +164,7 @@ test.describe('Per-Scene Confirmation Workflow', () => {
       expect(await confirmButtons.count()).toBe(2) // Now only 2 "Confirm Scene" buttons
 
       // Step 7: Attempt to mark as ready (should be blocked)
-      await page.click('button[aria-label="Close Focus Mode"]') // Exit Focus Mode
+      await page.click('button[aria-label="Exit focus mode"]') // Exit Focus Mode
       await page.click('button:has-text("Mark as Ready")')
 
       // Should show error toast
@@ -171,7 +174,9 @@ test.describe('Per-Scene Confirmation Workflow', () => {
 
       // Step 8: Re-open Focus Mode and confirm remaining scenes
       await page.click('button:has-text("Edit Details")')
-      await expect(page.locator('text=Focus Mode')).toBeVisible()
+      await expect(page.locator('button[aria-label="Exit focus mode"]')).toBeVisible({
+        timeout: 5000,
+      })
 
       // Confirm second scene
       await page.locator('button:has-text("Confirm Scene")').first().click()
@@ -185,7 +190,7 @@ test.describe('Per-Scene Confirmation Workflow', () => {
       ).toBeVisible({ timeout: 5000 })
 
       // Step 9: Exit Focus Mode and mark as ready (should succeed)
-      await page.click('button[aria-label="Close Focus Mode"]')
+      await page.click('button[aria-label="Exit focus mode"]')
       await page.click('button:has-text("Mark as Ready")')
 
       // Should show success message
@@ -230,6 +235,9 @@ test.describe('Per-Scene Confirmation Workflow', () => {
 
       // Open Focus Mode and confirm first scene
       await page.click('button:has-text("Edit Details")')
+      await expect(page.locator('button[aria-label="Exit focus mode"]')).toBeVisible({
+        timeout: 5000,
+      })
       await page.locator('button:has-text("Confirm Scene")').first().click()
       await expect(page.locator('text=/1/3 scenes confirmed/i')).toBeVisible()
 
@@ -280,6 +288,9 @@ test.describe('Per-Scene Confirmation Workflow', () => {
 
       // Open Focus Mode and confirm first scene
       await page.click('button:has-text("Edit Details")')
+      await expect(page.locator('button[aria-label="Exit focus mode"]')).toBeVisible({
+        timeout: 5000,
+      })
       await page.locator('button:has-text("Confirm Scene")').first().click()
       await expect(page.locator('text=/1/3 scenes confirmed/i')).toBeVisible()
       await expect(page.locator('text=Confirmed').first()).toBeVisible()
@@ -368,7 +379,9 @@ test.describe('Per-Scene Confirmation Workflow', () => {
       await page.click('button:has-text("Edit Details")')
 
       // Wait for Focus Mode to load
-      await expect(page.locator('text=Focus Mode')).toBeVisible({ timeout: 5000 })
+      await expect(page.locator('button[aria-label="Exit focus mode"]')).toBeVisible({
+        timeout: 5000,
+      })
 
       // Find first scene and confirm it
       const confirmButton = page.locator('button:has-text("Confirm Scene")').first()
