@@ -105,6 +105,8 @@ export default function AdventureDetailPage({ params }: { params: Promise<{ id: 
       type: m.type,
       content: m.content || m.description || '', // Use description if content is missing
       estimatedTime: m.estimatedTime || '30 minutes',
+      confirmed: m.confirmed,
+      confirmTimestamp: m.confirmTimestamp,
     }))
     // Formatted movements
 
