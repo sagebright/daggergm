@@ -34,6 +34,8 @@ export interface Movement {
   type: 'combat' | 'exploration' | 'social' | 'puzzle'
   content: string
   estimatedTime?: string
+  confirmed?: boolean // User-approved, locked for regeneration
+  confirmTimestamp?: string // ISO timestamp when confirmed
 }
 
 export interface ExpansionParams {
@@ -154,7 +156,9 @@ export interface Scene {
   description: string // Scaffold summary
   estimatedTime?: string
   orderIndex?: number
-  locked?: boolean
+  locked?: boolean // LEGACY: Used during expansion phase to prevent modification
+  confirmed?: boolean // NEW: User-approved during scaffold phase
+  confirmTimestamp?: string // NEW: ISO timestamp when confirmed
 
   // Expansion data (populated after expansion)
   expansion?: SceneExpansion
@@ -217,6 +221,12 @@ export interface RegenerateMovementParams {
     stakes: string
   }
   lockedMovements?: Array<{
+    id: string
+    title: string
+    type: string
+    description: string
+  }>
+  confirmedMovements?: Array<{
     id: string
     title: string
     type: string

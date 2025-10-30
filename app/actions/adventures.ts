@@ -273,6 +273,39 @@ export async function updateAdventureState(
       return { success: false, error: 'Unauthorized - authentication required' }
     }
 
+    // NEW: Verify all movements confirmed before allowing 'ready' state (Issue #9)
+    if (newState === 'ready') {
+      const { data: adventure } = await supabase
+        .from('daggerheart_adventures')
+        .select('movements')
+        .eq('id', adventureId)
+        .eq('user_id', user.id)
+        .single()
+
+      if (!adventure) {
+        return { success: false, error: 'Adventure not found' }
+      }
+
+      const movements = (adventure.movements as Array<{ confirmed?: boolean }>) || []
+
+      if (movements.length === 0) {
+        return {
+          success: false,
+          error: 'No scenes to confirm. Generate an adventure first.',
+        }
+      }
+
+      const confirmedCount = movements.filter((m) => m.confirmed).length
+      const allConfirmed = confirmedCount === movements.length
+
+      if (!allConfirmed) {
+        return {
+          success: false,
+          error: `Cannot mark as ready: Only ${confirmedCount}/${movements.length} scenes confirmed`,
+        }
+      }
+    }
+
     // Verify ownership and update state
     const { error } = await supabase
       .from('daggerheart_adventures')
