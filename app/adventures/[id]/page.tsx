@@ -99,15 +99,23 @@ export default function AdventureDetailPage({ params }: { params: Promise<{ id: 
 
   if (focusMode && adventure.movements) {
     // Entering focus mode with movements
-    const formattedMovements = adventure.movements.map((m, index) => ({
-      id: m.id || String(index),
-      title: m.title,
-      type: m.type,
-      content: m.content || m.description || '', // Use description if content is missing
-      estimatedTime: m.estimatedTime || '30 minutes',
-      confirmed: m.confirmed,
-      confirmTimestamp: m.confirmTimestamp,
-    }))
+    const formattedMovements = adventure.movements.map((m, index) => {
+      const movement: Movement = {
+        id: m.id || String(index),
+        title: m.title,
+        type: m.type,
+        content: m.content || m.description || '', // Use description if content is missing
+        estimatedTime: m.estimatedTime || '30 minutes',
+      }
+      // Only add optional fields if they're defined (exactOptionalPropertyTypes: true)
+      if (m.confirmed !== undefined) {
+        movement.confirmed = m.confirmed
+      }
+      if (m.confirmTimestamp !== undefined) {
+        movement.confirmTimestamp = m.confirmTimestamp
+      }
+      return movement
+    })
     // Formatted movements
 
     return (
