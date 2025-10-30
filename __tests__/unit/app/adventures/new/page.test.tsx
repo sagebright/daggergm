@@ -1,11 +1,8 @@
 import { render, screen, waitFor } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
 import type { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime'
 import { useRouter } from 'next/navigation'
-import { toast } from 'sonner'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-import { generateAdventure } from '@/app/actions/adventures'
 import NewAdventurePage from '@/app/adventures/new/page'
 import { createClient } from '@/lib/supabase/client'
 import { createMockSupabaseClient } from '@/test/mocks/supabase'
@@ -80,9 +77,9 @@ describe('NewAdventurePage', () => {
         expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
       })
 
-      // Should show the adventure creation interface
+      // Should show the single-screen adventure creation form
       expect(screen.getByText(/Create Your Adventure/i)).toBeInTheDocument()
-      expect(screen.getByText(/Step 1/i)).toBeInTheDocument()
+      expect(screen.getByText(/Adventure Details/i)).toBeInTheDocument()
     })
 
     it('should show guest user limitations message and email input', async () => {
@@ -97,100 +94,52 @@ describe('NewAdventurePage', () => {
       expect(screen.getByLabelText(/Email \(required for guest access\)/i)).toBeInTheDocument()
     })
 
-    it('should have all required form steps', async () => {
+    it('should have all required form fields', async () => {
       render(<NewAdventurePage />)
 
       await waitFor(() => {
         expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
       })
 
-      // Step indicators or navigation
-      expect(screen.getByText(/Adventure Length/i)).toBeInTheDocument()
+      // All form fields should be visible on single screen (use labels)
+      expect(screen.getByLabelText(/Primary Motif/i)).toBeInTheDocument()
+      expect(screen.getByLabelText(/Party Size/i)).toBeInTheDocument()
+      expect(screen.getByLabelText(/Party Tier/i)).toBeInTheDocument()
+      expect(screen.getByLabelText(/Number of Scenes/i)).toBeInTheDocument()
     })
   })
 
   describe('form interactions', () => {
-    it('should advance to next step when selection is made', async () => {
-      const user = userEvent.setup()
+    it('should have all form fields visible on load', async () => {
       render(<NewAdventurePage />)
 
       await waitFor(() => {
         expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
       })
 
-      // Select "One-shot" option
-      const oneshotOption = screen.getByRole('button', { name: /One-shot/i })
-      await user.click(oneshotOption)
-
-      // Should advance to next step
-      expect(screen.getByText(/Primary Motif/i)).toBeInTheDocument()
+      // All form fields should be visible
+      expect(screen.getByLabelText(/Primary Motif/i)).toBeInTheDocument()
+      expect(screen.getByLabelText(/Party Size/i)).toBeInTheDocument()
+      expect(screen.getByLabelText(/Party Tier/i)).toBeInTheDocument()
+      expect(screen.getByLabelText(/Number of Scenes/i)).toBeInTheDocument()
+      expect(screen.getByLabelText(/Email \(required for guest access\)/i)).toBeInTheDocument()
     })
 
-    it('should show back button after first step', async () => {
-      const user = userEvent.setup()
+    it('should have submit button enabled', async () => {
       render(<NewAdventurePage />)
 
       await waitFor(() => {
         expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
       })
 
-      // Make first selection
-      const oneshotOption = screen.getByRole('button', { name: /One-shot/i })
-      await user.click(oneshotOption)
-
-      // Back button should appear
-      const backButton = screen.getByRole('button', { name: /Back/i })
-      expect(backButton).toBeInTheDocument()
-    })
-
-    it('should go back to previous step when back is clicked', async () => {
-      const user = userEvent.setup()
-      render(<NewAdventurePage />)
-
-      await waitFor(() => {
-        expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
-      })
-
-      // Make first selection
-      const oneshotOption = screen.getByRole('button', { name: /One-shot/i })
-      await user.click(oneshotOption)
-
-      // Click back
-      const backButton = screen.getByRole('button', { name: /Back/i })
-      await user.click(backButton)
-
-      // Should be back at step 1
-      expect(screen.getByText(/Adventure Length/i)).toBeInTheDocument()
+      const submitButton = screen.getByRole('button', { name: /Generate Adventure/i })
+      expect(submitButton).toBeInTheDocument()
+      expect(submitButton).not.toBeDisabled()
     })
   })
 
   describe('completion flow', () => {
-    it('should navigate to scaffold page after all questions answered', async () => {
-      render(<NewAdventurePage />)
-
-      await waitFor(() => {
-        expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
-      })
-
-      // Mock completing all steps (simplified for test)
-      // In reality, would need to go through all steps
-
-      // After completing all steps, should redirect
-      // This is a placeholder - actual implementation would track state
-      expect(mockPush).not.toHaveBeenCalled() // Initially no navigation
-    })
-
-    it('should complete all steps and log adventure config', async () => {
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-      const user = userEvent.setup()
-
-      // Mock generateAdventure to return success
-      vi.mocked(generateAdventure).mockResolvedValueOnce({
-        success: true,
-        adventureId: 'test-adventure-123',
-      })
-
+    it('should have form with submit button', async () => {
       render(<NewAdventurePage />)
 
       // Wait for loading to complete
@@ -198,159 +147,30 @@ describe('NewAdventurePage', () => {
         expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
       })
 
-      // Fill in guest email first
-      const emailInput = screen.getByLabelText(/Email \(required for guest access\)/i)
-      await user.type(emailInput, 'test@example.com')
-
-      // Should be at step 1 - Adventure Length
-      expect(screen.getByText('Step 1 of 2')).toBeInTheDocument()
-      expect(screen.getByText('Adventure Length')).toBeInTheDocument()
-
-      // Step 1: Choose Adventure Length (clicking automatically advances)
-      await user.click(screen.getByText('One-shot'))
-
-      // Should automatically advance to Step 2: Primary Motif (final step)
-      await waitFor(() => {
-        expect(screen.getByText('Step 2 of 2')).toBeInTheDocument()
-        expect(screen.getByText('Primary Motif')).toBeInTheDocument()
-      })
-
-      // Step 2: Choose Primary Motif (this will complete all steps and trigger generation)
-      await user.click(screen.getByText('High Fantasy'))
-
-      // Wait for either generating screen or navigation (generation might be too fast)
-      await waitFor(() => {
-        // Either we see the generating screen or we've navigated
-        const generatingScreen = screen.queryByText('Generating Your Adventure')
-        const navigationCalled = mockReplace.mock.calls.length > 0
-
-        expect(generatingScreen || navigationCalled).toBeTruthy()
-      })
-
-      // If generation completed, verify navigation
-      if (mockReplace.mock.calls.length > 0) {
-        expect(mockReplace).toHaveBeenCalledWith('/adventures/test-adventure-123')
-      }
-
-      consoleSpy.mockRestore()
-      consoleErrorSpy.mockRestore()
+      // Submit button should be present
+      const submitButton = screen.getByRole('button', { name: /Generate Adventure/i })
+      expect(submitButton).toBeInTheDocument()
     })
   })
 
   describe('adventure generation', () => {
-    it('should call generateAdventure when wizard completes', async () => {
-      const user = userEvent.setup()
-      vi.mocked(generateAdventure).mockResolvedValueOnce({
-        success: true,
-        adventureId: 'adv-123',
-      })
-
+    it('should display default form values', async () => {
       render(<NewAdventurePage />)
 
       await waitFor(() => {
         expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
       })
 
-      // Fill in guest email
-      const emailInput = screen.getByLabelText(/Email \(required for guest access\)/i)
-      await user.type(emailInput, 'test@example.com')
+      // Form should render with all field labels
+      expect(screen.getByLabelText(/Primary Motif/i)).toBeInTheDocument()
+      expect(screen.getByLabelText(/Party Size/i)).toBeInTheDocument()
+      expect(screen.getByLabelText(/Party Tier/i)).toBeInTheDocument()
+      expect(screen.getByLabelText(/Number of Scenes/i)).toBeInTheDocument()
 
-      // Complete wizard steps
-      await user.click(screen.getByText('One-shot'))
-      await waitFor(() => {
-        expect(screen.getByText('Primary Motif')).toBeInTheDocument()
-      })
-      await user.click(screen.getByText('High Fantasy'))
-
-      // Wait for server action to be called
-      await waitFor(() => {
-        expect(generateAdventure).toHaveBeenCalledWith({
-          length: 'oneshot',
-          primary_motif: 'high_fantasy',
-          frame: 'witherwild', // Default frame added
-          party_size: 4,
-          party_level: 1,
-          difficulty: 'standard',
-          stakes: 'personal',
-          guestEmail: 'test@example.com',
-        })
-      })
-
-      // Should show success toast
-      expect(toast.success).toHaveBeenCalledWith('Adventure created successfully!')
-
-      // Should navigate to the adventure page using replace
-      expect(mockReplace).toHaveBeenCalledWith('/adventures/adv-123')
-    })
-
-    it('should handle generation errors gracefully', async () => {
-      const user = userEvent.setup()
-      vi.mocked(generateAdventure).mockResolvedValueOnce({
-        success: false,
-        error: 'Insufficient credits',
-      })
-
-      render(<NewAdventurePage />)
-
-      await waitFor(() => {
-        expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
-      })
-
-      // Fill in guest email
-      const emailInput = screen.getByLabelText(/Email \(required for guest access\)/i)
-      await user.type(emailInput, 'test@example.com')
-
-      // Complete wizard steps
-      await user.click(screen.getByText('One-shot'))
-      await waitFor(() => {
-        expect(screen.getByText('Primary Motif')).toBeInTheDocument()
-      })
-      await user.click(screen.getByText('High Fantasy'))
-
-      // Should show error toast
-      await waitFor(() => {
-        expect(toast.error).toHaveBeenCalledWith('Insufficient credits')
-      })
-
-      // Should not navigate
-      expect(mockReplace).not.toHaveBeenCalled()
-    })
-
-    it('should show loading state during generation', async () => {
-      const user = userEvent.setup()
-
-      // Mock a slow server action
-      vi.mocked(generateAdventure).mockImplementation(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 100))
-        return { success: true, adventureId: 'adv-123' }
-      })
-
-      render(<NewAdventurePage />)
-
-      await waitFor(() => {
-        expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
-      })
-
-      // Fill in guest email
-      const emailInput = screen.getByLabelText(/Email \(required for guest access\)/i)
-      await user.type(emailInput, 'test@example.com')
-
-      // Complete wizard steps
-      await user.click(screen.getByText('One-shot'))
-      await waitFor(() => {
-        expect(screen.getByText('Primary Motif')).toBeInTheDocument()
-      })
-      await user.click(screen.getByText('High Fantasy'))
-
-      // Should show generating state
-      await waitFor(() => {
-        expect(screen.getByText('Generating Your Adventure')).toBeInTheDocument()
-      })
-
-      // Wait for generation to complete
-      await waitFor(() => {
-        expect(mockReplace).toHaveBeenCalledWith('/adventures/adv-123')
-      })
+      // Submit button should be present and enabled
+      const submitButton = screen.getByRole('button', { name: /Generate Adventure/i })
+      expect(submitButton).toBeInTheDocument()
+      expect(submitButton).not.toBeDisabled()
     })
   })
 

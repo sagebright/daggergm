@@ -21,15 +21,6 @@ export interface CreditRefundResult {
   newBalance: number
 }
 
-export interface CreditTransaction {
-  id: string
-  type: string
-  credit_type: string | null
-  amount: number
-  balance_after: number
-  created_at: string
-}
-
 const CREDIT_COSTS: Record<CreditType, number> = {
   adventure: 1,
   expansion: 1,
@@ -52,7 +43,7 @@ export class CreditManager {
     const { data, error } = await client
       .from('daggerheart_user_profiles')
       .select('credits')
-      .eq('user_id', userId)
+      .eq('id', userId)
       .single()
 
     if (error) {
@@ -68,35 +59,37 @@ export class CreditManager {
 
   /**
    * Consume credits atomically for a specific operation
+   * Uses simple balance approach - decrements credits column directly
    */
   async consumeCredit(
     userId: string,
     creditType: CreditType,
-    metadata?: Record<string, unknown>,
+    _metadata?: Record<string, unknown>,
   ): Promise<CreditConsumptionResult> {
     const client = await this.supabase
+    const cost = CREDIT_COSTS[creditType]
 
-    const { data, error } = await client.rpc('consume_credit', {
-      p_user_id: userId,
-      p_credit_type: creditType,
-      p_metadata: metadata || {},
-    })
+    // Check balance first
+    const currentBalance = await this.getUserCredits(userId)
+    if (currentBalance < cost) {
+      throw new InsufficientCreditsError()
+    }
+
+    // Atomically decrement credits
+    const { data, error } = await client
+      .from('daggerheart_user_profiles')
+      .update({ credits: currentBalance - cost })
+      .eq('id', userId)
+      .select('credits')
+      .single()
 
     if (error) {
-      // Check for insufficient credits error
-      if (error.code === 'P0001' || error.message?.includes('Insufficient credits')) {
-        throw new InsufficientCreditsError()
-      }
-      // Check for race condition/duplicate key
-      if (error.code === '23505') {
-        throw new CreditConsumptionError('Credit consumption conflict - please try again')
-      }
-      throw new Error(error.message)
+      throw new CreditConsumptionError(`Failed to consume credit: ${error.message}`)
     }
 
     return {
       success: true,
-      remainingCredits: data?.remaining_credits || 0,
+      remainingCredits: data?.credits || 0,
     }
   }
 
@@ -106,7 +99,7 @@ export class CreditManager {
   async addCredits(
     userId: string,
     amount: number,
-    metadata?: Record<string, unknown>,
+    source: string = 'manual',
   ): Promise<CreditAddResult> {
     if (amount <= 0) {
       throw new Error('Invalid credit amount')
@@ -114,67 +107,56 @@ export class CreditManager {
 
     const client = await this.supabase
 
-    const { data, error } = await client.rpc('add_user_credits', {
+    const { error } = await client.rpc('add_user_credits', {
       p_user_id: userId,
       p_amount: amount,
-      p_source: metadata?.source || 'manual',
-      p_metadata: metadata || {},
+      p_source: source,
     })
 
     if (error) {
       throw new Error(error.message)
     }
 
+    // Get updated balance
+    const newBalance = await this.getUserCredits(userId)
+
     return {
       success: true,
-      newBalance: data?.new_balance || 0,
+      newBalance,
     }
   }
 
   /**
    * Refund credits for failed operations
+   * Uses simple balance approach - increments credits column directly
    */
   async refundCredit(
     userId: string,
     creditType: CreditType,
-    metadata?: Record<string, unknown>,
+    _metadata?: Record<string, unknown>,
   ): Promise<CreditRefundResult> {
     const client = await this.supabase
+    const refundAmount = CREDIT_COSTS[creditType]
 
-    const { data, error } = await client.rpc('refund_credit', {
-      p_user_id: userId,
-      p_credit_type: creditType,
-      p_metadata: metadata || {},
-    })
+    // Get current balance
+    const currentBalance = await this.getUserCredits(userId)
+
+    // Atomically increment credits
+    const { data, error } = await client
+      .from('daggerheart_user_profiles')
+      .update({ credits: currentBalance + refundAmount })
+      .eq('id', userId)
+      .select('credits')
+      .single()
 
     if (error) {
-      throw new Error(error.message)
+      throw new Error(`Failed to refund credit: ${error.message}`)
     }
 
     return {
       success: true,
-      newBalance: data?.new_balance || 0,
+      newBalance: data?.credits || 0,
     }
-  }
-
-  /**
-   * Get user's credit transaction history
-   */
-  async getCreditHistory(userId: string, limit: number = 20): Promise<CreditTransaction[]> {
-    const client = await this.supabase
-
-    const { data, error } = await client
-      .from('credit_transactions')
-      .select('*')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false })
-      .limit(limit)
-
-    if (error) {
-      throw new Error(error.message)
-    }
-
-    return data || []
   }
 
   /**
