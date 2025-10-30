@@ -9,12 +9,14 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
 import { RegenerationConfirmDialog } from '@/features/focus-mode/components/RegenerationConfirmDialog'
+import { getQuickPrompts } from '@/lib/llm/quick-prompts'
 
 import type { Movement } from './focus-mode'
 
 interface AIChatProps {
   movement: Movement
   adventureId: string
+  adventureState: 'draft' | 'ready' | 'archived'
   expansionRegenerationsUsed?: number
   onSuggestionApply: (_suggestion: string) => void
   onRefreshAdventure?: (() => void) | undefined
@@ -23,6 +25,7 @@ interface AIChatProps {
 export function AIChat({
   movement,
   adventureId,
+  adventureState,
   expansionRegenerationsUsed = 0,
   onSuggestionApply,
   onRefreshAdventure,
@@ -123,13 +126,14 @@ export function AIChat({
     }
   }
 
-  const quickPrompts = [
-    'Add more sensory details',
-    'Include specific DC checks',
-    'Add dialogue examples',
-    'Describe environmental hazards',
-    'Add treasure or rewards',
-  ]
+  // Determine phase based on adventure state
+  const phase = adventureState === 'draft' ? 'scaffold' : 'expansion'
+
+  // Get context-aware quick prompts based on phase and movement type
+  const quickPrompts = getQuickPrompts(
+    phase,
+    movement.type as 'combat' | 'social' | 'exploration' | 'puzzle',
+  )
 
   return (
     <div className="p-4 h-full flex flex-col">

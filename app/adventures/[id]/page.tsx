@@ -110,6 +110,7 @@ export default function AdventureDetailPage({ params }: { params: Promise<{ id: 
       <FocusMode
         movements={formattedMovements}
         adventureId={adventure.id}
+        adventureState={adventure.state as 'draft' | 'ready' | 'archived'}
         scaffoldRegenerationsUsed={adventure.scaffold_regenerations_used ?? 0}
         expansionRegenerationsUsed={adventure.expansion_regenerations_used ?? 0}
         onUpdate={handleMovementUpdate}

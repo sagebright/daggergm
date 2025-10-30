@@ -24,6 +24,7 @@ export interface Movement {
 interface FocusModeProps {
   movements: Movement[]
   adventureId: string
+  adventureState: 'draft' | 'ready' | 'archived'
   scaffoldRegenerationsUsed?: number
   expansionRegenerationsUsed?: number
   onUpdate: (_movementId: string, _updates: Partial<Movement>) => void
@@ -34,6 +35,7 @@ interface FocusModeProps {
 export function FocusMode({
   movements,
   adventureId,
+  adventureState,
   scaffoldRegenerationsUsed = 0,
   expansionRegenerationsUsed = 0,
   onUpdate,
@@ -147,6 +149,7 @@ export function FocusMode({
             <AIChat
               movement={focusedMovement}
               adventureId={adventureId}
+              adventureState={adventureState}
               expansionRegenerationsUsed={expansionRegenerationsUsed}
               onSuggestionApply={(suggestion) => {
                 setLocalContent((prev) => ({ ...prev, [focusedId]: suggestion }))
