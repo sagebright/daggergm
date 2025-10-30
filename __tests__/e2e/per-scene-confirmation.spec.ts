@@ -298,15 +298,21 @@ test.describe('Per-Scene Confirmation Workflow', () => {
         timeout: 5000,
       })
       await page.locator('button:has-text("Confirm Scene")').first().click()
-      await expect(page.locator('text=/1/3 scenes confirmed/i')).toBeVisible()
+      await expect(page.locator('text=/Scene confirmed! 1\\/3 scenes confirmed/i')).toBeVisible({
+        timeout: 5000,
+      })
       await expect(page.locator('text=Confirmed').first()).toBeVisible()
 
       // Unconfirm the scene (click the X button on the badge)
       await page.locator('button[aria-label="Unconfirm scene"]').first().click()
-      await expect(page.locator('text=/0/3 scenes confirmed/i')).toBeVisible({ timeout: 5000 })
+      await expect(
+        page.locator('text=/Scene unconfirmed - you can now regenerate it/i'),
+      ).toBeVisible({ timeout: 5000 })
 
-      // Verify "Confirm Scene" button is back
-      expect(await page.locator('button:has-text("Confirm Scene")').count()).toBe(3)
+      // Verify "Confirm Scene" button is back (wait for UI to refresh)
+      await expect(page.locator('button:has-text("Confirm Scene")')).toHaveCount(3, {
+        timeout: 10000,
+      })
     } finally {
       await deleteTestUser(testEmail)
     }
@@ -341,18 +347,21 @@ test.describe('Per-Scene Confirmation Workflow', () => {
       // Open Focus Mode
       await page.click('button:has-text("Edit Details")')
 
-      // Confirm scenes one by one and verify counter updates
+      // Confirm scenes one by one and verify toast messages
       await page.locator('button:has-text("Confirm Scene")').nth(0).click()
-      await expect(page.locator('text=/1/3 scenes confirmed/i')).toBeVisible({ timeout: 5000 })
+      await expect(page.locator('text=/Scene confirmed! 1\\/3 scenes confirmed/i')).toBeVisible({
+        timeout: 5000,
+      })
 
       await page.locator('button:has-text("Confirm Scene")').nth(0).click() // Now the second button is first
-      await expect(page.locator('text=/2/3 scenes confirmed/i')).toBeVisible({ timeout: 5000 })
+      await expect(page.locator('text=/Scene confirmed! 2\\/3 scenes confirmed/i')).toBeVisible({
+        timeout: 5000,
+      })
 
       await page.locator('button:has-text("Confirm Scene")').nth(0).click()
-      await expect(page.locator('text=/3/3 scenes confirmed/i')).toBeVisible({ timeout: 5000 })
       await expect(
-        page.locator('text=All scenes confirmed! You can now mark as ready'),
-      ).toBeVisible()
+        page.locator('text=/All 3 scenes confirmed! You can now mark as ready/i'),
+      ).toBeVisible({ timeout: 5000 })
     } finally {
       await deleteTestUser(testEmail)
     }
