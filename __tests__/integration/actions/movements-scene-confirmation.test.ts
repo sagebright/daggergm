@@ -380,7 +380,7 @@ describe('Per-Scene Confirmation', () => {
       // Only one scene confirmed
       mockMovements[0]!.confirmed = true
 
-      const result = await updateAdventureState(adventureId, 'ready')
+      const result = await updateAdventureState(adventureId, 'finalized')
 
       expect(result.success).toBe(false)
       expect(result.error).toContain('scenes confirmed')
@@ -422,13 +422,13 @@ describe('Per-Scene Confirmation', () => {
         update: vi.fn().mockReturnValue(mockUpdateEq),
       })
 
-      const result = await updateAdventureState(adventureId, 'ready')
+      const result = await updateAdventureState(adventureId, 'finalized')
 
       expect(result.success).toBe(true)
     })
 
     it('should reject ready state when no scenes confirmed', async () => {
-      const result = await updateAdventureState(adventureId, 'ready')
+      const result = await updateAdventureState(adventureId, 'finalized')
 
       expect(result.success).toBe(false)
       expect(result.error).toContain('0/3')
@@ -446,7 +446,7 @@ describe('Per-Scene Confirmation', () => {
         update: vi.fn().mockReturnValue(mockUpdateEq),
       })
 
-      const result = await updateAdventureState(adventureId, 'archived')
+      const result = await updateAdventureState(adventureId, 'exported')
 
       // Archive should work regardless of confirmation status
       expect(result.success).toBe(true)
@@ -463,7 +463,7 @@ describe('Per-Scene Confirmation', () => {
           data: {
             id: adventureId,
             user_id: testUserId,
-            state: 'ready',
+            state: 'finalized',
             movements: mockMovements,
           },
           error: null,
@@ -512,7 +512,7 @@ describe('Per-Scene Confirmation', () => {
         }),
       })
 
-      const result = await updateAdventureState(adventureId, 'ready')
+      const result = await updateAdventureState(adventureId, 'finalized')
 
       expect(result.success).toBe(false)
       expect(result.error).toContain('No scenes')

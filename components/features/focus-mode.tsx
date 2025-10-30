@@ -28,7 +28,7 @@ export interface Movement {
 interface FocusModeProps {
   movements: Movement[]
   adventureId: string
-  adventureState: 'draft' | 'ready' | 'archived'
+  adventureState: 'draft' | 'finalized' | 'exported'
   scaffoldRegenerationsUsed?: number
   expansionRegenerationsUsed?: number
   onUpdate: (_movementId: string, _updates: Partial<Movement>) => void

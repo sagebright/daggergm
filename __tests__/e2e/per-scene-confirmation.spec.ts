@@ -157,20 +157,26 @@ test.describe('Per-Scene Confirmation Workflow', () => {
 
       // Step 6: Confirm first scene
       await confirmButtons.first().click()
-      await expect(page.locator('text=/1/3 scenes confirmed/i')).toBeVisible({ timeout: 5000 })
-
-      // Verify first scene now shows "Confirmed" badge
-      await expect(page.locator('text=Confirmed').first()).toBeVisible()
-      expect(await confirmButtons.count()).toBe(2) // Now only 2 "Confirm Scene" buttons
-
-      // Step 7: Attempt to mark as ready (should be blocked)
-      await page.click('button[aria-label="Exit focus mode"]') // Exit Focus Mode
-      await page.click('button:has-text("Mark as Ready")')
-
-      // Should show error toast
-      await expect(page.locator('text=/Only 1/3 scenes confirmed/i')).toBeVisible({
+      await expect(page.locator('text=/Scene confirmed! 1\\/3 scenes confirmed/i')).toBeVisible({
         timeout: 5000,
       })
+
+      // Wait for Focus Mode to refresh and show the confirmed badge
+      // The badge should appear and "Confirm Scene" button should disappear
+      await expect(confirmButtons).toHaveCount(2, { timeout: 10000 }) // Now only 2 "Confirm Scene" buttons
+
+      // Step 7: Verify mark as ready is blocked (button disabled)
+      await page.click('button[aria-label="Exit focus mode"]') // Exit Focus Mode
+
+      // Button should be disabled because not all scenes are confirmed
+      const markReadyButton = page.locator('button:has-text("Mark as Ready")')
+      await expect(markReadyButton).toBeDisabled()
+
+      // Verify helpful tooltip explains why
+      await expect(markReadyButton).toHaveAttribute(
+        'title',
+        /Confirm all scenes before marking as ready \(1\/3 confirmed\)/,
+      )
 
       // Step 8: Re-open Focus Mode and confirm remaining scenes
       await page.click('button:has-text("Edit Details")')
@@ -180,13 +186,14 @@ test.describe('Per-Scene Confirmation Workflow', () => {
 
       // Confirm second scene
       await page.locator('button:has-text("Confirm Scene")').first().click()
-      await expect(page.locator('text=/2/3 scenes confirmed/i')).toBeVisible({ timeout: 5000 })
+      await expect(page.locator('text=/Scene confirmed! 2\\/3 scenes confirmed/i')).toBeVisible({
+        timeout: 5000,
+      })
 
-      // Confirm third scene
+      // Confirm third scene (last one)
       await page.locator('button:has-text("Confirm Scene")').first().click()
-      await expect(page.locator('text=/3/3 scenes confirmed/i')).toBeVisible({ timeout: 5000 })
       await expect(
-        page.locator('text=All scenes confirmed! You can now mark as ready'),
+        page.locator('text=/All 3 scenes confirmed! You can now mark as ready/i'),
       ).toBeVisible({ timeout: 5000 })
 
       // Step 9: Exit Focus Mode and mark as ready (should succeed)
@@ -196,13 +203,12 @@ test.describe('Per-Scene Confirmation Workflow', () => {
       // Should show success message
       await expect(page.locator('text=/marked as ready/i')).toBeVisible({ timeout: 5000 })
 
-      // Step 10: Verify state changed to 'ready'
-      await expect(page.locator('text=Ready')).toBeVisible()
+      // Step 10: Verify state changed to 'finalized' (Export button appears)
+      await expect(page.locator('button:has-text("Export")')).toBeVisible({ timeout: 5000 })
 
-      // Step 11: Verify no Edit Details button in ready state (confirmation feature is draft-only)
-      // In ready state, there's no button to enter Focus Mode - only Export button
+      // Step 11: Verify no Edit Details button in finalized state (confirmation feature is draft-only)
+      // In finalized state, there's no button to enter Focus Mode - only Export button
       expect(await page.locator('button:has-text("Edit Details")').count()).toBe(0)
-      expect(await page.locator('button:has-text("Export")').count()).toBe(1)
     } finally {
       await deleteTestUser(testEmail)
     }

@@ -122,7 +122,7 @@ export default function AdventureDetailPage({ params }: { params: Promise<{ id: 
       <FocusMode
         movements={formattedMovements}
         adventureId={adventure.id}
-        adventureState={adventure.state as 'draft' | 'ready' | 'archived'}
+        adventureState={adventure.state as 'draft' | 'finalized' | 'exported'}
         scaffoldRegenerationsUsed={adventure.scaffold_regenerations_used ?? 0}
         expansionRegenerationsUsed={adventure.expansion_regenerations_used ?? 0}
         onUpdate={handleMovementUpdate}
@@ -155,10 +155,10 @@ export default function AdventureDetailPage({ params }: { params: Promise<{ id: 
                       try {
                         const { updateAdventureState } = await import('@/app/actions/adventures')
 
-                        const result = await updateAdventureState(adventure.id, 'ready')
+                        const result = await updateAdventureState(adventure.id, 'finalized')
 
                         if (result.success) {
-                          setAdventure((prev) => (prev ? { ...prev, state: 'ready' } : prev))
+                          setAdventure((prev) => (prev ? { ...prev, state: 'finalized' } : prev))
                           const { toast } = await import('sonner')
                           toast.success('Adventure marked as ready!')
                         } else {
@@ -188,7 +188,7 @@ export default function AdventureDetailPage({ params }: { params: Promise<{ id: 
                 </Button>
               </>
             )}
-            {adventure.state === 'ready' && (
+            {adventure.state === 'finalized' && (
               <Button variant="outline" onClick={() => setExportDialogOpen(true)}>
                 <Download className="h-4 w-4 mr-2" />
                 Export

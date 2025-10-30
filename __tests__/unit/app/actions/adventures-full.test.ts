@@ -406,7 +406,7 @@ describe('Adventure Actions - Full Coverage', () => {
         return { update: mockUpdate }
       })
 
-      const result = await updateAdventureState('adv-1', 'ready')
+      const result = await updateAdventureState('adv-1', 'finalized')
 
       expect(result.success).toBe(true)
     })
@@ -416,7 +416,7 @@ describe('Adventure Actions - Full Coverage', () => {
         data: { user: null },
       })
 
-      const result = await updateAdventureState('adv-1', 'ready')
+      const result = await updateAdventureState('adv-1', 'finalized')
 
       expect(result.success).toBe(false)
       if (!result.success) {
@@ -465,7 +465,7 @@ describe('Adventure Actions - Full Coverage', () => {
         return { update: mockUpdate }
       })
 
-      const result = await updateAdventureState('adv-1', 'ready')
+      const result = await updateAdventureState('adv-1', 'finalized')
 
       expect(result.success).toBe(false)
       if (!result.success) {
@@ -476,7 +476,7 @@ describe('Adventure Actions - Full Coverage', () => {
     it('should handle unknown errors', async () => {
       mockSupabaseClient.auth.getUser.mockRejectedValue('Unknown error')
 
-      const result = await updateAdventureState('adv-1', 'ready')
+      const result = await updateAdventureState('adv-1', 'finalized')
 
       expect(result.success).toBe(false)
       if (!result.success) {

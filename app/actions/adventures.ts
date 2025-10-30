@@ -259,7 +259,7 @@ export async function getUserAdventures() {
 
 export async function updateAdventureState(
   adventureId: string,
-  newState: 'draft' | 'ready' | 'archived',
+  newState: 'draft' | 'finalized' | 'exported',
 ) {
   // Update adventure state (guest system removed - requires authentication)
 
@@ -273,8 +273,8 @@ export async function updateAdventureState(
       return { success: false, error: 'Unauthorized - authentication required' }
     }
 
-    // NEW: Verify all movements confirmed before allowing 'ready' state (Issue #9)
-    if (newState === 'ready') {
+    // NEW: Verify all movements confirmed before allowing 'finalized' state (Issue #9)
+    if (newState === 'finalized') {
       const { data: adventure } = await supabase
         .from('daggerheart_adventures')
         .select('movements')

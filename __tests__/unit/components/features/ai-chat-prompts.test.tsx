@@ -140,7 +140,7 @@ describe('AIChat - Quick Prompts', () => {
         <AIChat
           movement={mockMovement}
           adventureId="adv-1"
-          adventureState="ready"
+          adventureState="finalized"
           expansionRegenerationsUsed={0}
           onSuggestionApply={mockOnSuggestionApply}
           onRefreshAdventure={mockOnRefresh}
@@ -172,7 +172,7 @@ describe('AIChat - Quick Prompts', () => {
         <AIChat
           movement={socialMovement}
           adventureId="adv-1"
-          adventureState="ready"
+          adventureState="finalized"
           expansionRegenerationsUsed={0}
           onSuggestionApply={mockOnSuggestionApply}
           onRefreshAdventure={mockOnRefresh}
@@ -200,7 +200,7 @@ describe('AIChat - Quick Prompts', () => {
         <AIChat
           movement={explorationMovement}
           adventureId="adv-1"
-          adventureState="ready"
+          adventureState="finalized"
           expansionRegenerationsUsed={0}
           onSuggestionApply={mockOnSuggestionApply}
           onRefreshAdventure={mockOnRefresh}
@@ -228,7 +228,7 @@ describe('AIChat - Quick Prompts', () => {
         <AIChat
           movement={puzzleMovement}
           adventureId="adv-1"
-          adventureState="ready"
+          adventureState="finalized"
           expansionRegenerationsUsed={0}
           onSuggestionApply={mockOnSuggestionApply}
           onRefreshAdventure={mockOnRefresh}
@@ -252,7 +252,7 @@ describe('AIChat - Quick Prompts', () => {
         <AIChat
           movement={mockMovement}
           adventureId="adv-1"
-          adventureState="archived"
+          adventureState="exported"
           expansionRegenerationsUsed={0}
           onSuggestionApply={mockOnSuggestionApply}
           onRefreshAdventure={mockOnRefresh}
