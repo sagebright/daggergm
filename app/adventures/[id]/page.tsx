@@ -189,10 +189,15 @@ export default function AdventureDetailPage({ params }: { params: Promise<{ id: 
               </>
             )}
             {adventure.state === 'finalized' && (
-              <Button variant="outline" onClick={() => setExportDialogOpen(true)}>
-                <Download className="h-4 w-4 mr-2" />
-                Export
-              </Button>
+              <>
+                <Button variant="default" onClick={() => setFocusMode(true)}>
+                  Expand Scenes
+                </Button>
+                <Button variant="outline" onClick={() => setExportDialogOpen(true)}>
+                  <Download className="h-4 w-4 mr-2" />
+                  Export
+                </Button>
+              </>
             )}
           </div>
         </div>
