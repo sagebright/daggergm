@@ -1,13 +1,24 @@
+/* eslint-disable max-lines */
 'use client'
 
-import { Download } from 'lucide-react'
-import { notFound } from 'next/navigation'
+import { Download, Trash2 } from 'lucide-react'
+import { notFound, useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 
-import { getAdventure } from '@/app/actions/adventures'
+import { getAdventure, deleteAdventure } from '@/app/actions/adventures'
 import { ExportDialog } from '@/components/features/export-dialog'
 import { FocusMode } from '@/components/features/focus-mode'
 import type { Movement } from '@/components/features/focus-mode'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -38,7 +49,10 @@ export default function AdventureDetailPage({ params }: { params: Promise<{ id: 
   const [loading, setLoading] = useState(true)
   const [focusMode, setFocusMode] = useState(false)
   const [exportDialogOpen, setExportDialogOpen] = useState(false)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const router = useRouter()
 
   const loadAdventure = async () => {
     const { id } = await params
@@ -94,6 +108,34 @@ export default function AdventureDetailPage({ params }: { params: Promise<{ id: 
     if (!result.success) {
       console.error('Failed to update movement:', result.error)
       // TODO: Show error toast and revert changes
+    }
+  }
+
+  const handleDeleteAdventure = async () => {
+    if (!adventure) {
+      return
+    }
+
+    setIsDeleting(true)
+
+    try {
+      const result = await deleteAdventure(adventure.id)
+
+      if (result.success) {
+        const { toast } = await import('sonner')
+        toast.success('Adventure deleted successfully')
+        setDeleteDialogOpen(false)
+        router.push('/dashboard')
+      } else {
+        const { toast } = await import('sonner')
+        toast.error(result.error || 'Failed to delete adventure')
+      }
+    } catch (error) {
+      console.error('Error deleting adventure:', error)
+      const { toast } = await import('sonner')
+      toast.error('An error occurred')
+    } finally {
+      setIsDeleting(false)
     }
   }
 
@@ -186,6 +228,14 @@ export default function AdventureDetailPage({ params }: { params: Promise<{ id: 
                 <Button variant="secondary" onClick={() => setFocusMode(true)}>
                   Edit Details
                 </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setDeleteDialogOpen(true)}
+                  className="text-destructive hover:bg-destructive/10"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete
+                </Button>
               </>
             )}
             {adventure.state === 'finalized' && (
@@ -196,6 +246,14 @@ export default function AdventureDetailPage({ params }: { params: Promise<{ id: 
                 <Button variant="outline" onClick={() => setExportDialogOpen(true)}>
                   <Download className="h-4 w-4 mr-2" />
                   Export
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setDeleteDialogOpen(true)}
+                  className="text-destructive hover:bg-destructive/10"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete
                 </Button>
               </>
             )}
@@ -271,6 +329,28 @@ export default function AdventureDetailPage({ params }: { params: Promise<{ id: 
         adventureId={adventure.id}
         onClose={() => setExportDialogOpen(false)}
       />
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Adventure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete &quot;{adventure.title}&quot;? This action cannot be
+              undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteAdventure}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? 'Deleting...' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

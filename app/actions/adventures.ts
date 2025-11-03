@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 'use server'
 
 import crypto from 'crypto'
@@ -329,6 +330,58 @@ export async function updateAdventureState(
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to update adventure state',
+    }
+  }
+}
+
+/**
+ * Delete an adventure (requires authentication and ownership)
+ */
+export async function deleteAdventure(adventureId: string) {
+  try {
+    const supabase = await createServerSupabaseClient()
+
+    // Get current user
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) {
+      return { success: false, error: 'Unauthorized - authentication required' }
+    }
+
+    // Verify ownership and delete
+    const { error } = await supabase
+      .from('daggerheart_adventures')
+      .delete()
+      .eq('id', adventureId)
+      .eq('user_id', user.id) // RLS ensures user can only delete their own
+
+    if (error) {
+      console.error('Error deleting adventure:', error)
+      return { success: false, error: 'Failed to delete adventure' }
+    }
+
+    // Track deletion in analytics
+    try {
+      await analytics.track(ANALYTICS_EVENTS.ADVENTURE_DELETED, {
+        userId: user.id,
+        adventureId,
+      })
+    } catch (analyticsError) {
+      // Non-critical - log but don't fail the operation
+      console.error('Analytics error during adventure deletion:', analyticsError)
+    }
+
+    revalidatePath('/dashboard')
+    revalidatePath(`/adventures/${adventureId}`)
+
+    return { success: true }
+  } catch (error) {
+    console.error('Exception in deleteAdventure:', error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to delete adventure',
     }
   }
 }
