@@ -11,6 +11,7 @@ export const ANALYTICS_EVENTS = {
   SCENE_EXPANDED: 'scene_expanded', // NEW: Six-component scene expansion
   AI_REFINEMENT_USED: 'ai_refinement_used',
   ADVENTURE_EXPORTED: 'adventure_exported',
+  ADVENTURE_DELETED: 'adventure_deleted', // NEW: Adventure deletion
   CREDIT_PURCHASED: 'credit_purchased',
   FOCUS_MODE_ENTERED: 'focus_mode_entered',
   MOVEMENT_CONFIRMED: 'movement_confirmed', // NEW: Per-scene confirmation (Issue #9)
