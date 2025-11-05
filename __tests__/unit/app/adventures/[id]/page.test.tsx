@@ -7,11 +7,16 @@ import AdventureDetailPage from '@/app/adventures/[id]/page'
 
 vi.mock('@/app/actions/adventures', () => ({
   getAdventure: vi.fn(),
+  deleteAdventure: vi.fn(),
 }))
 
 vi.mock('next/navigation', () => ({
   notFound: vi.fn(),
   redirect: vi.fn(),
+  useRouter: vi.fn(() => ({
+    push: vi.fn(),
+    refresh: vi.fn(),
+  })),
 }))
 
 vi.mock('@/lib/supabase/server', () => ({
@@ -39,6 +44,13 @@ vi.mock('@/components/features/focus-mode', () => ({
       <button onClick={onExit}>Exit</button>
     </div>
   )),
+}))
+
+vi.mock('sonner', () => ({
+  toast: {
+    success: vi.fn(),
+    error: vi.fn(),
+  },
 }))
 
 describe('AdventureDetailPage', () => {
