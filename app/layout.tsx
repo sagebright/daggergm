@@ -1,18 +1,11 @@
 import type { Metadata } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
 import type React from 'react'
 import { Toaster } from 'sonner'
 import './globals.css'
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
-})
-
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
-})
+// Use system fonts to avoid build-time fetch issues in CI/CD
+// Google Fonts (Geist) fetching fails in restricted network environments
+const fontVariables = '--font-geist-sans: system-ui, -apple-system, sans-serif; --font-geist-mono: ui-monospace, monospace;'
 
 export const metadata: Metadata = {
   title: 'DaggerGM - AI-Powered Daggerheart Adventures',
@@ -26,7 +19,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className="antialiased" style={{ fontFamily: 'var(--font-geist-sans, system-ui, sans-serif)' }}>
+        <style dangerouslySetInnerHTML={{ __html: `:root { ${fontVariables} }` }} />
         {children}
         <Toaster position="bottom-right" />
         {/* Pipeline test: v1.0.1 */}
