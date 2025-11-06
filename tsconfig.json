@@ -5,42 +5,61 @@
     "noUncheckedIndexedAccess": true, // array[0] is T | undefined
     "noImplicitOverride": true, // Explicit override keyword
     "exactOptionalPropertyTypes": true, // undefined !== missing
-
     // Module Resolution (Next.js specific)
     "target": "ES2022",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "module": "esnext",
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "allowJs": true, // For .js config files
     "checkJs": false, // Don't type-check .js
-
     // Next.js Requirements
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "incremental": true,
     "esModuleInterop": true,
     "isolatedModules": true,
     "skipLibCheck": true, // Faster builds, ignore node_modules types
-
     // Path Mappings (Critical for imports)
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"],
-      "@/features/*": ["./features/*"],
-      "@/lib/*": ["./lib/*"],
-      "@/components/*": ["./components/*"],
-      "@/types/*": ["./types/*"],
-      "@/stores/*": ["./stores/*"],
-      "@/tests/*": ["./tests/*"],
-      "@/app/*": ["./app/*"],
-      "@/hooks/*": ["./hooks/*"],
-      "@/test/*": ["./test/*"]
+      "@/*": [
+        "./*"
+      ],
+      "@/features/*": [
+        "./features/*"
+      ],
+      "@/lib/*": [
+        "./lib/*"
+      ],
+      "@/components/*": [
+        "./components/*"
+      ],
+      "@/types/*": [
+        "./types/*"
+      ],
+      "@/stores/*": [
+        "./stores/*"
+      ],
+      "@/tests/*": [
+        "./tests/*"
+      ],
+      "@/app/*": [
+        "./app/*"
+      ],
+      "@/hooks/*": [
+        "./hooks/*"
+      ],
+      "@/test/*": [
+        "./test/*"
+      ]
     },
-
     // Output Control
     "noEmit": true, // Next.js handles compilation
     "forceConsistentCasingInFileNames": true,
-
     // Plugin Support
     "plugins": [
       {
@@ -48,8 +67,18 @@
       }
     ]
   },
-
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-
-  "exclude": ["node_modules", ".next", "out", "dist", "documentation/DaggerGM"]
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    ".next",
+    "out",
+    "dist",
+    "documentation/DaggerGM"
+  ]
 }
