@@ -10,6 +10,10 @@ import { createMockSupabaseClient } from '@/test/mocks/supabase'
 // Mock dependencies
 vi.mock('next/navigation', () => ({
   redirect: vi.fn(),
+  useRouter: vi.fn(() => ({
+    push: vi.fn(),
+    refresh: vi.fn(),
+  })),
 }))
 
 vi.mock('@/lib/supabase/server', () => ({
