@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { PerformanceMonitor, performanceMonitor } from '@/lib/performance/performance-monitor'
+
 import { analytics } from '@/lib/analytics/analytics'
+import { PerformanceMonitor, performanceMonitor } from '@/lib/performance/performance-monitor'
 
 vi.mock('@/lib/analytics/analytics', () => ({
   analytics: {

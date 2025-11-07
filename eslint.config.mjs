@@ -1,20 +1,14 @@
-import { FlatCompat } from '@eslint/eslintrc'
 import js from '@eslint/js'
 import typescriptEslint from '@typescript-eslint/eslint-plugin'
 import typescriptParser from '@typescript-eslint/parser'
+import eslintPluginImport from 'eslint-plugin-import'
 import react from 'eslint-plugin-react'
 import reactHooks from 'eslint-plugin-react-hooks'
 import next from '@next/eslint-plugin-next'
 
-const compat = new FlatCompat({
-  baseDirectory: import.meta.dirname,
-  recommendedConfig: js.configs.recommended,
-})
-
 export default [
   // Base configurations
   js.configs.recommended,
-  ...compat.extends('next/core-web-vitals'),
 
   // Global ignores
   {
@@ -28,6 +22,7 @@ export default [
       '*.config.mjs',
       'documentation/**', // Reference documentation
       '.backups/**', // Timestamped backups
+      'test-login.js', // Temporary test file
     ],
   },
 
@@ -36,6 +31,31 @@ export default [
     files: ['**/*.ts', '**/*.tsx'],
     languageOptions: {
       parser: typescriptParser,
+      globals: {
+        // Node.js globals
+        process: 'readonly',
+        Buffer: 'readonly',
+        __dirname: 'readonly',
+        __filename: 'readonly',
+        global: 'readonly',
+        require: 'readonly',
+        module: 'readonly',
+        exports: 'writable',
+        // Browser globals
+        window: 'readonly',
+        document: 'readonly',
+        navigator: 'readonly',
+        localStorage: 'readonly',
+        sessionStorage: 'readonly',
+        console: 'readonly',
+        setTimeout: 'readonly',
+        setInterval: 'readonly',
+        clearTimeout: 'readonly',
+        clearInterval: 'readonly',
+        fetch: 'readonly',
+        crypto: 'readonly',
+        performance: 'readonly',
+      },
       parserOptions: {
         ecmaVersion: 'latest',
         sourceType: 'module',
@@ -50,6 +70,7 @@ export default [
       react: react,
       'react-hooks': reactHooks,
       '@next/next': next,
+      import: eslintPluginImport,
     },
     rules: {
       // 🎯 DaggerGM-Specific Rules
@@ -144,6 +165,15 @@ export default [
     rules: {
       'max-lines': 'off', // Tests can be longer
       '@typescript-eslint/no-explicit-any': 'off', // Allow any in test mocks
+    },
+  },
+
+  // Type files with Zod schemas (allow const/type same name pattern)
+  {
+    files: ['types/**/*.ts'],
+    rules: {
+      'no-redeclare': 'off', // Zod enum pattern uses const and type with same name
+      '@typescript-eslint/no-redeclare': 'off',
     },
   },
 

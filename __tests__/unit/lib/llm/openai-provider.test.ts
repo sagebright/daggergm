@@ -14,6 +14,7 @@ vi.mock('openai', () => ({
             {
               message: {
                 role: 'assistant' as const,
+                refusal: null,
                 content: JSON.stringify({
                   title: 'Test Adventure',
                   description: 'Test description',
@@ -76,6 +77,7 @@ describe('OpenAIProvider', () => {
               {
                 message: {
                   role: 'assistant' as const,
+                  refusal: null,
                   content: JSON.stringify({
                     title: 'Test Adventure',
                     description: 'Test description',
@@ -118,6 +120,7 @@ describe('OpenAIProvider', () => {
           {
             message: {
               role: 'assistant' as const,
+              refusal: null,
               content: JSON.stringify({
                 title: 'The Corrupted Grove',
                 description: 'A dark adventure',
@@ -167,6 +170,7 @@ describe('OpenAIProvider', () => {
           {
             message: {
               role: 'assistant' as const,
+              refusal: null,
               content: 'Expanded combat encounter...',
             },
             finish_reason: 'stop' as const,
@@ -210,6 +214,7 @@ describe('OpenAIProvider', () => {
           {
             message: {
               role: 'assistant' as const,
+              refusal: null,
               content: 'Colorful NPC dialogue...',
             },
             finish_reason: 'stop' as const,
@@ -249,6 +254,7 @@ describe('OpenAIProvider', () => {
           {
             message: {
               role: 'assistant' as const,
+              refusal: null,
               content: JSON.stringify({
                 title: 'Test Adventure',
                 movements: [],
@@ -290,6 +296,7 @@ describe('OpenAIProvider', () => {
           {
             message: {
               role: 'assistant' as const,
+              refusal: null,
               content: JSON.stringify({
                 title: 'Island Hopping',
                 movements: [],
@@ -382,6 +389,7 @@ describe('OpenAIProvider', () => {
           {
             message: {
               role: 'assistant' as const,
+              refusal: null,
               content: JSON.stringify({
                 title: 'New Adventure',
                 movements: [],
@@ -550,6 +558,7 @@ describe('OpenAIProvider', () => {
           {
             message: {
               role: 'assistant' as const,
+              refusal: null,
               content: 'Not valid JSON',
             },
             finish_reason: 'stop' as const,
@@ -657,6 +666,7 @@ describe('OpenAIProvider', () => {
           {
             message: {
               role: 'assistant' as const,
+              refusal: null,
               content: undefined as any,
             },
             finish_reason: 'stop' as const,
@@ -688,6 +698,7 @@ describe('OpenAIProvider', () => {
           {
             message: {
               role: 'assistant' as const,
+              refusal: null,
               content: JSON.stringify({
                 title: 'Test',
                 description: 'Test',
@@ -725,6 +736,7 @@ describe('OpenAIProvider', () => {
           {
             message: {
               role: 'assistant' as const,
+              refusal: null,
               content: JSON.stringify({
                 title: 'Test Adventure',
                 description: 'Test description',
@@ -765,6 +777,7 @@ describe('OpenAIProvider', () => {
           {
             message: {
               role: 'assistant' as const,
+              refusal: null,
               content: JSON.stringify({
                 title: 'Test Adventure',
                 description: 'Test description',
@@ -813,6 +826,7 @@ describe('OpenAIProvider', () => {
           {
             message: {
               role: 'assistant' as const,
+              refusal: null,
               content: '{invalid json structure',
             },
             finish_reason: 'stop' as const,
@@ -852,6 +866,7 @@ describe('OpenAIProvider', () => {
           {
             message: {
               role: 'assistant' as const,
+              refusal: null,
               content: 'The party enters the tavern.',
             },
             finish_reason: 'stop' as const,
@@ -892,6 +907,7 @@ describe('OpenAIProvider', () => {
           {
             message: {
               role: 'assistant' as const,
+              refusal: null,
               content: 'The party pushes through the heavy oak door...',
             },
             finish_reason: 'stop' as const,

@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+
 import { analytics } from '@/lib/analytics/analytics'
 
 vi.mock('@/lib/analytics/analytics', () => ({

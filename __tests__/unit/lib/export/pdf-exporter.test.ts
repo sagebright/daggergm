@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+
 import { PDFExporter } from '@/lib/export/pdf-exporter'
 import type { Adventure, Movement } from '@/types/adventure'
 

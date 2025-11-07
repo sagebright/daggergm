@@ -3,11 +3,11 @@
 import { Coins } from 'lucide-react'
 import { useState } from 'react'
 
+import { useCreditBalance } from './useCreditBalance'
+
 import { CreditPurchaseDialog } from '@/components/features/credit-purchase-dialog'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-
-import { useCreditBalance } from './useCreditBalance'
 
 export interface CreditBalanceProps {
   variant?: 'default' | 'compact' | 'detailed'

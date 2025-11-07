@@ -1,6 +1,6 @@
-import type { Adventure, Movement } from '@/types/adventure'
-
 import type { ExportFile } from './markdown-exporter'
+
+import type { Adventure, Movement } from '@/types/adventure'
 
 export class Roll20Exporter {
   export(adventure: Adventure, movements: Movement[]): string {

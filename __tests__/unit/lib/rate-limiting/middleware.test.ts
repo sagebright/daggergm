@@ -1,5 +1,6 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { headers } from 'next/headers'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+
 import {
   withRateLimit,
   getRateLimitContext,

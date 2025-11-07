@@ -51,6 +51,7 @@ vi.mock('next/headers', () => ({
 
 // Global test lifecycle
 beforeAll(() => {
+  // eslint-disable-next-line no-console
   console.log('🧪 Starting test suite...')
 })
 
@@ -60,6 +61,7 @@ afterEach(() => {
 })
 
 afterAll(() => {
+  // eslint-disable-next-line no-console
   console.log('✅ Test suite complete')
 })
 

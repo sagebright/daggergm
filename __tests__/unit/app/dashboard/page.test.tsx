@@ -8,8 +8,13 @@ import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { createMockSupabaseClient } from '@/test/mocks/supabase'
 
 // Mock dependencies
+// Note: useRouter mock added to fix Next.js 16 upgrade compatibility
 vi.mock('next/navigation', () => ({
   redirect: vi.fn(),
+  useRouter: vi.fn(() => ({
+    push: vi.fn(),
+    refresh: vi.fn(),
+  })),
 }))
 
 vi.mock('@/lib/supabase/server', () => ({
