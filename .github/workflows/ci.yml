@@ -52,7 +52,7 @@ jobs:
         run: rm -rf .next
 
       - name: Run ESLint
-        run: npx eslint .
+        run: npm run lint
 
       - name: Run TypeScript Type Check
         run: npm run typecheck
