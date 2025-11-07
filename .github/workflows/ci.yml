@@ -52,7 +52,9 @@ jobs:
         run: rm -rf .next
 
       - name: Run ESLint
-        run: npm run lint
+        run: npx eslint . --max-warnings=0
+        env:
+          ESLINT_USE_FLAT_CONFIG: true
 
       - name: Run TypeScript Type Check
         run: npm run typecheck
