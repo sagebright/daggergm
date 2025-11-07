@@ -1,6 +1,6 @@
 # DaggerGM - AI-Powered Daggerheart Adventure Generator
 
-DaggerGM is a SaaS platform that revolutionizes TTRPG adventure preparation through AI-guided generation with Frame-aware content creation and semantic search capabilities. Built on Next.js 14 with Server Actions, Supabase, and GPT-4, the platform enables Game Masters to generate, refine, and export complete one-shot adventures in under 10 minutes.
+DaggerGM is a SaaS platform that revolutionizes TTRPG adventure preparation through AI-guided generation with Frame-aware content creation and semantic search capabilities. Built on Next.js 16 with Server Actions, Supabase, and GPT-4, the platform enables Game Masters to generate, refine, and export complete one-shot adventures in under 10 minutes.
 
 ## 🚀 Getting Started
 
