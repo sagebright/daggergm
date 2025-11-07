@@ -1,8 +1,9 @@
 'use client'
 
 import { useCallback } from 'react'
-import { clientAnalytics } from '@/lib/analytics/client-analytics'
+
 import type { EventData, UserProperties } from '@/lib/analytics/analytics'
+import { clientAnalytics } from '@/lib/analytics/client-analytics'
 
 export function useAnalytics() {
   const track = useCallback(async (event: string, data?: EventData) => {

@@ -1,6 +1,7 @@
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { vi } from 'vitest'
-import { SupabaseClient } from '@supabase/supabase-js'
-import { Database } from '@/types/database.generated'
+
+import type { Database } from '@/types/database.generated'
 
 /**
  * Creates a mock Supabase client for testing

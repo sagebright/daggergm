@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+
 import { RateLimiter, RateLimitError } from '@/lib/rate-limiting/rate-limiter'
 
 describe('RateLimiter', () => {

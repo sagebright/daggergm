@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
+import { LogoutButton } from '@/components/features/auth/LogoutButton'
 import { CreditBalance } from '@/components/features/credits/CreditBalance'
 import { Button } from '@/components/ui/button'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
@@ -26,12 +27,18 @@ export default async function DashboardPage() {
 
   return (
     <div className="container mx-auto py-8">
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Your Adventures</h1>
-          <div className="mt-2">
-            <CreditBalance variant="detailed" />
-          </div>
+          <p className="text-sm text-muted-foreground mt-1">Logged in as: {user.email}</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <LogoutButton />
+        </div>
+      </div>
+      <div className="flex items-center justify-between mb-8">
+        <div className="mt-2">
+          <CreditBalance variant="detailed" />
         </div>
         <Link href="/adventures/new">
           <Button>Generate New Adventure</Button>

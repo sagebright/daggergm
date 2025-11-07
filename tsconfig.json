@@ -7,18 +7,14 @@
     "exactOptionalPropertyTypes": true, // undefined !== missing
     // Module Resolution (Next.js specific)
     "target": "ES2022",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "module": "esnext",
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "allowJs": true, // For .js config files
     "checkJs": false, // Don't type-check .js
     // Next.js Requirements
-    "jsx": "react-jsx",
+    "jsx": "preserve",
     "incremental": true,
     "esModuleInterop": true,
     "isolatedModules": true,
@@ -26,36 +22,16 @@
     // Path Mappings (Critical for imports)
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "./*"
-      ],
-      "@/features/*": [
-        "./features/*"
-      ],
-      "@/lib/*": [
-        "./lib/*"
-      ],
-      "@/components/*": [
-        "./components/*"
-      ],
-      "@/types/*": [
-        "./types/*"
-      ],
-      "@/stores/*": [
-        "./stores/*"
-      ],
-      "@/tests/*": [
-        "./tests/*"
-      ],
-      "@/app/*": [
-        "./app/*"
-      ],
-      "@/hooks/*": [
-        "./hooks/*"
-      ],
-      "@/test/*": [
-        "./test/*"
-      ]
+      "@/*": ["./*"],
+      "@/features/*": ["./features/*"],
+      "@/lib/*": ["./lib/*"],
+      "@/components/*": ["./components/*"],
+      "@/types/*": ["./types/*"],
+      "@/stores/*": ["./stores/*"],
+      "@/tests/*": ["./tests/*"],
+      "@/app/*": ["./app/*"],
+      "@/hooks/*": ["./hooks/*"],
+      "@/test/*": ["./test/*"]
     },
     // Output Control
     "noEmit": true, // Next.js handles compilation
@@ -74,11 +50,5 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
-  "exclude": [
-    "node_modules",
-    ".next",
-    "out",
-    "dist",
-    "documentation/DaggerGM"
-  ]
+  "exclude": ["node_modules", ".next", "out", "dist", "documentation/DaggerGM"]
 }
