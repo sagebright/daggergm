@@ -5,7 +5,8 @@ import './globals.css'
 
 // Use system fonts to avoid build-time fetch issues in CI/CD
 // Google Fonts (Geist) fetching fails in restricted network environments
-const fontVariables = '--font-geist-sans: system-ui, -apple-system, sans-serif; --font-geist-mono: ui-monospace, monospace;'
+const fontVariables =
+  '--font-geist-sans: system-ui, -apple-system, sans-serif; --font-geist-mono: ui-monospace, monospace;'
 
 export const metadata: Metadata = {
   title: 'DaggerGM - AI-Powered Daggerheart Adventures',
@@ -19,7 +20,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="antialiased" style={{ fontFamily: 'var(--font-geist-sans, system-ui, sans-serif)' }}>
+      <body
+        className="antialiased"
+        style={{ fontFamily: 'var(--font-geist-sans, system-ui, sans-serif)' }}
+      >
         <style dangerouslySetInnerHTML={{ __html: `:root { ${fontVariables} }` }} />
         {children}
         <Toaster position="bottom-right" />
