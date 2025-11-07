@@ -6,10 +6,6 @@ import crypto from 'crypto'
 
 import { OpenAI } from 'openai'
 
-import { performanceMonitor } from '@/lib/performance/performance-monitor'
-import { createServerSupabaseClient } from '@/lib/supabase/server'
-import type { Json } from '@/types/database.generated'
-
 import { FRAME_PROMPTS } from './prompts/frame-prompts'
 import type {
   LLMProvider,
@@ -26,6 +22,10 @@ import type {
   MovementScaffoldResult,
   TemperatureStrategy,
 } from './types'
+
+import { performanceMonitor } from '@/lib/performance/performance-monitor'
+import { createServerSupabaseClient } from '@/lib/supabase/server'
+import type { Json } from '@/types/database.generated'
 
 export class OpenAIProvider implements LLMProvider {
   private client: OpenAI | null = null

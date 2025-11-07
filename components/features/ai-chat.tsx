@@ -4,13 +4,13 @@ import { Loader2, Sparkles, FileText, Swords, Users, AlertCircle } from 'lucide-
 import { useState } from 'react'
 import { toast } from 'sonner'
 
+import type { Movement } from './focus-mode'
+
 import { expandMovement, refineMovementContent } from '@/app/actions/movements'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
 import { getQuickPrompts } from '@/lib/llm/quick-prompts'
-
-import type { Movement } from './focus-mode'
 
 interface AIChatProps {
   movement: Movement
