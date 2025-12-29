@@ -30,16 +30,15 @@ See [tasks/README.md](tasks/README.md) for full task index.
 
 ## 📚 Reference Documentation
 
-### Product Requirements
+### Product Requirements (Archived)
 
-- [PRPs/daggergm_mvp_implementation.md](PRPs/daggergm_mvp_implementation.md) - MVP implementation plan
-- [PRPs/INITIAL_daggergm_REVISED.md](PRPs/INITIAL_daggergm_REVISED.md) - Initial feature overview
+- [archive/PRPs/daggergm_mvp_implementation.md](archive/PRPs/daggergm_mvp_implementation.md) - MVP implementation plan
+- [archive/PRPs/INITIAL_daggergm_REVISED.md](archive/PRPs/INITIAL_daggergm_REVISED.md) - Initial feature overview
 
 ### Architecture & Design
 
 - [architecture/STATE_MANAGEMENT_DECISION.md](architecture/STATE_MANAGEMENT_DECISION.md) - Zustand for Focus Mode
 - [architecture/TESTING_STRATEGY.md](architecture/TESTING_STRATEGY.md) - 80/15/5 test distribution
-- [architecture/GUEST_SYSTEM.md](architecture/GUEST_SYSTEM.md) - Guest token system (deprecated)
 - [architecture/SERVER_STATE.md](architecture/SERVER_STATE.md) - React Query patterns
 
 ### Operations
