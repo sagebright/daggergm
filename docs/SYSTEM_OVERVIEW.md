@@ -1,7 +1,7 @@
 # DaggerGM System Overview
 
-**Version**: 2.1 (Current Implementation)
-**Date**: 2025-10-28
+**Version**: 2.2 (Current Implementation)
+**Date**: 2025-12-28
 **Status**: Active Development
 **Last Major Change**: Removed guest free adventures (PR #68)
 
@@ -80,10 +80,9 @@ User → Next.js App (React 19)
 1. **Server-First Design**: Leverage React Server Components for performance
 2. **No Separate API**: Server Actions replace traditional REST/GraphQL API
 3. **Credit-Based, Not Subscription**: One-time purchases (simpler than recurring billing)
-4. **Guest Access**: Limited landing page + sample download in MVP (must purchase credits to generate)
-5. **Frame-Aware Generation**: LLM context includes Daggerheart frames (Witherwild, etc.)
-6. **Focus Mode**: Core UX for refining individual adventure sections
-7. **Multi-Tenant via RLS**: All queries filtered by `user_id` (tenant = user in DaggerGM)
+4. **Frame-Aware Generation**: LLM context includes Daggerheart frames (Witherwild, etc.)
+5. **Focus Mode**: Core UX for refining individual adventure sections
+6. **Multi-Tenant via RLS**: All queries filtered by `user_id` (tenant = user in DaggerGM)
 
 ---
 
@@ -314,17 +313,13 @@ FOR SELECT USING (
 
 ### Authentication Flow
 
-1. **Guest Access (MVP):**
-   - Landing page: No authentication required (read-only, sample download)
-   - Purchase flow: Stripe Checkout → Account creation required
-   - Account creation: Supabase Auth (email/password)
-   - Post-purchase: Full authenticated access with credits
+**All Users:**
 
-2. **Registered Users:**
-   - Supabase Auth (email/password or OAuth)
-   - Session token managed by `@supabase/ssr`
-   - `auth.uid()` used in RLS policies
-   - All adventure generation requires authenticated user with credits
+- Supabase Auth (email/password or OAuth)
+- Session token managed by `@supabase/ssr`
+- `auth.uid()` used in RLS policies
+- All adventure generation requires authenticated user with credits
+- Landing page is public (read-only, sample download available)
 
 ### API Key Security
 
@@ -830,16 +825,16 @@ NEXT_PUBLIC_POSTHOG_HOST=https://app.posthog.com
 
 ### B. Related Documents
 
-- **[PRPs/daggergm_mvp_implementation.md](./PRPs/daggergm_mvp_implementation.md)**: Original implementation plan (39KB, detailed)
-- **[PRPs/INITIAL_daggergm_REVISED.md](./PRPs/INITIAL_daggergm_REVISED.md)**: Initial feature overview
-- **[FEATURES/](./FEATURES/)**: Individual feature specs (credit display, dark mode, etc.)
+- **[archive/PRPs/daggergm_mvp_implementation.md](./archive/PRPs/daggergm_mvp_implementation.md)**: Original implementation plan (archived)
+- **[archive/PRPs/INITIAL_daggergm_REVISED.md](./archive/PRPs/INITIAL_daggergm_REVISED.md)**: Initial feature overview (archived)
+- **[tasks/](./tasks/)**: Active feature and fix tasks
 - **[architecture/TESTING_STRATEGY.md](./architecture/TESTING_STRATEGY.md)**: Testing philosophy
 - **[architecture/STATE_MANAGEMENT_DECISION.md](./architecture/STATE_MANAGEMENT_DECISION.md)**: Zustand rationale
 - **[ops/GITHUB_ACTIONS.md](./ops/GITHUB_ACTIONS.md)**: CI/CD pipeline docs
 
 ---
 
-**Version**: 2.0
-**Last Updated**: 2025-10-24
+**Version**: 2.2
+**Last Updated**: 2025-12-28
 **Author**: Claude Code
 **Status**: Living document (update as system evolves)

@@ -1,0 +1,850 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DaggerGM Color Scheme Comparison</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              // Direction 1: Light cream cards (current)
+              d1: {
+                bg: '#0f0d14',
+                frame: '#1a1625',
+                card: '#f5f3f0',
+                surface: '#ebe8e4',
+                border: '#d4d0ca',
+              },
+              'd1-text': {
+                primary: '#1a1625',
+                secondary: '#4a4260',
+                muted: '#6b6580',
+              },
+              // Direction 2: Warm parchment cards
+              d2: {
+                bg: '#0f0d14',
+                frame: '#1a1625',
+                card: '#f4efe6',
+                surface: '#e8e0d4',
+                border: '#d4c9b8',
+              },
+              'd2-text': {
+                primary: '#2d2418',
+                secondary: '#5c4d3d',
+                muted: '#8a7a66',
+              },
+              // Direction 3: Cool blue-gray cards
+              d3: {
+                bg: '#0f0d14',
+                frame: '#1a1625',
+                card: '#f0f2f5',
+                surface: '#e4e7ec',
+                border: '#c8cdd6',
+              },
+              'd3-text': {
+                primary: '#1a1d24',
+                secondary: '#4a5060',
+                muted: '#6b7280',
+              },
+              // Shared accent colors
+              'dagger-purple': {
+                900: '#1a1625',
+                800: '#2a1f4e',
+                700: '#3d2d6b',
+                600: '#5040a0',
+                500: '#6b5bb5',
+              },
+              'dagger-teal': {
+                600: '#3ba89f',
+                500: '#4ecdc4',
+                400: '#6ed7d0',
+              },
+              'dagger-gold': {
+                600: '#a68520',
+                500: '#c9a227',
+                400: '#d4b84a',
+              },
+            },
+          },
+        },
+      }
+    </script>
+    <style>
+      /* Read-aloud boxes */
+      .read-aloud-box {
+        background: linear-gradient(to right, rgba(61, 45, 107, 0.4), rgba(36, 31, 48, 1));
+      }
+
+      .comparison-panel {
+        min-height: 100vh;
+        position: relative;
+      }
+
+      .tab-button {
+        transition: all 0.2s;
+      }
+      .tab-button.active {
+        border-bottom: 3px solid #4ecdc4;
+      }
+
+      /* ========================================
+       LAYERED BACKGROUND SYSTEM
+       Pattern + Gradient Overlay for depth
+       ======================================== */
+
+      /* SVG pattern as data URI - subtle topographic/organic lines */
+      .bg-pattern-1 {
+        background-color: #0f0d14;
+        background-image:
+        /* Gradient overlay - purple fade from left */
+          linear-gradient(
+            105deg,
+            rgba(26, 22, 37, 0.75) 0%,
+            rgba(15, 13, 20, 0.65) 50%,
+            rgba(26, 22, 37, 0.7) 100%
+          ),
+          /* Subtle radial glow */
+          radial-gradient(ellipse at 30% 20%, rgba(78, 205, 196, 0.08) 0%, transparent 50%),
+          radial-gradient(ellipse at 80% 80%, rgba(107, 91, 181, 0.1) 0%, transparent 40%),
+          /* Topographic/organic pattern */
+          url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%233d2d6b' fill-opacity='0.35' fill-rule='evenodd'/%3E%3C/svg%3E");
+      }
+
+      /* Warm fantasy pattern - for Direction 2 */
+      .bg-pattern-2 {
+        background-color: #0f0d14;
+        background-image:
+        /* Gradient overlay - warm amber glow */
+          linear-gradient(
+            105deg,
+            rgba(26, 22, 37, 0.72) 0%,
+            rgba(15, 13, 20, 0.6) 50%,
+            rgba(26, 22, 37, 0.68) 100%
+          ),
+          /* Warm radial glows */
+          radial-gradient(ellipse at 25% 30%, rgba(201, 162, 39, 0.1) 0%, transparent 45%),
+          radial-gradient(ellipse at 75% 70%, rgba(166, 133, 32, 0.08) 0%, transparent 40%),
+          /* Celtic knot inspired pattern */
+          url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d4b84a' fill-opacity='0.30'%3E%3Cpath d='M50 50c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c0 5.523-4.477 10-10 10s-10-4.477-10-10 4.477-10 10-10zM10 10c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c0 5.523-4.477 10-10 10S0 25.523 0 20s4.477-10 10-10zm10 8c4.418 0 8-3.582 8-8s-3.582-8-8-8-8 3.582-8 8 3.582 8 8 8zm40 40c4.418 0 8-3.582 8-8s-3.582-8-8-8-8 3.582-8 8 3.582 8 8 8z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      }
+
+      /* Cool modern pattern - for Direction 3 */
+      .bg-pattern-3 {
+        background-color: #0f0d14;
+        background-image:
+        /* Gradient overlay - cool blue tint */
+          linear-gradient(
+            105deg,
+            rgba(26, 29, 36, 0.75) 0%,
+            rgba(15, 13, 20, 0.65) 50%,
+            rgba(26, 29, 36, 0.72) 100%
+          ),
+          /* Cool radial glows */
+          radial-gradient(ellipse at 20% 20%, rgba(78, 205, 196, 0.1) 0%, transparent 50%),
+          radial-gradient(ellipse at 85% 75%, rgba(59, 130, 246, 0.08) 0%, transparent 45%),
+          /* Geometric grid pattern */
+          url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%234a5060' fill-opacity='0.35'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      }
+
+      /* Animated subtle shimmer effect */
+      .bg-shimmer::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(
+          125deg,
+          transparent 0%,
+          transparent 40%,
+          rgba(107, 91, 181, 0.03) 50%,
+          transparent 60%,
+          transparent 100%
+        );
+        background-size: 200% 200%;
+        animation: shimmer 15s ease-in-out infinite;
+        pointer-events: none;
+      }
+
+      @keyframes shimmer {
+        0%,
+        100% {
+          background-position: 200% 0;
+        }
+        50% {
+          background-position: -200% 0;
+        }
+      }
+
+      /* Vignette effect for depth */
+      .vignette::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(
+          ellipse at center,
+          transparent 0%,
+          transparent 50%,
+          rgba(0, 0, 0, 0.3) 100%
+        );
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-900 text-gray-100">
+    <!-- Navigation -->
+    <div
+      class="fixed top-0 left-0 right-0 bg-gray-800/95 backdrop-blur border-b border-gray-700 z-50"
+    >
+      <div class="max-w-7xl mx-auto px-4 py-3">
+        <h1 class="text-xl font-bold mb-3">Color Scheme Comparison - With Background Depth</h1>
+        <div class="flex gap-4">
+          <button onclick="showPanel(1)" class="tab-button active px-4 py-2 rounded-t" id="tab1">
+            <span class="font-bold">Direction 1</span>
+            <span class="text-sm text-gray-400 block">Light Cream + Purple Glow</span>
+          </button>
+          <button onclick="showPanel(2)" class="tab-button px-4 py-2 rounded-t" id="tab2">
+            <span class="font-bold">Direction 2</span>
+            <span class="text-sm text-gray-400 block">Warm Parchment + Amber Glow</span>
+          </button>
+          <button onclick="showPanel(3)" class="tab-button px-4 py-2 rounded-t" id="tab3">
+            <span class="font-bold">Direction 3</span>
+            <span class="text-sm text-gray-400 block">Cool Gray + Blue Glow</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="pt-28">
+      <!-- ============================================ -->
+      <!-- DIRECTION 1: Light Cream Cards + Purple Depth -->
+      <!-- ============================================ -->
+      <div id="panel1" class="comparison-panel bg-pattern-1 bg-shimmer vignette p-6">
+        <div class="max-w-4xl mx-auto relative z-10">
+          <!-- Header badge -->
+          <div
+            class="mb-4 p-3 bg-dagger-teal-500/20 border border-dagger-teal-500 rounded-lg inline-block backdrop-blur-sm"
+          >
+            <span class="text-dagger-teal-400 font-bold"
+              >Direction 1: Light Cream + Purple Depth</span
+            >
+            <span class="text-gray-400 text-sm ml-2">(Currently Applied)</span>
+          </div>
+
+          <!-- Progress indicator -->
+          <div
+            class="bg-d1-card rounded-xl p-4 mb-6 text-d1-text-primary border border-d1-border shadow-lg shadow-black/20"
+          >
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="font-bold text-d1-text-primary">Expansion Progress</h3>
+              <span class="text-dagger-gold-600 font-medium">Scene 2 of 3</span>
+            </div>
+            <div class="flex gap-2">
+              <div class="flex-1 h-2 bg-green-500 rounded-full"></div>
+              <div class="flex-1 h-2 bg-dagger-teal-600 rounded-full"></div>
+              <div class="flex-1 h-2 bg-d1-border rounded-full"></div>
+            </div>
+          </div>
+
+          <!-- Page header -->
+          <div class="flex justify-between items-start mb-4">
+            <div>
+              <span class="text-sm text-gray-400">The Witherwild Expedition</span>
+              <h2 class="text-2xl font-bold text-gray-100">
+                Expanding: Scene 2 - Into the Withering Woods
+              </h2>
+              <div class="flex gap-2 mt-2">
+                <span
+                  class="px-3 py-1 bg-red-500/20 text-red-400 rounded-full text-sm backdrop-blur-sm"
+                  >⚔️ Combat</span
+                >
+                <span
+                  class="px-3 py-1 bg-black/30 text-gray-300 rounded-full text-sm backdrop-blur-sm"
+                  >~30 min</span
+                >
+              </div>
+            </div>
+          </div>
+
+          <!-- Main content card -->
+          <div
+            class="bg-d1-card rounded-xl p-6 mb-6 space-y-6 text-d1-text-primary border border-d1-border shadow-xl shadow-black/30"
+          >
+            <!-- Setting Section -->
+            <section>
+              <h3 class="text-lg font-bold text-dagger-purple-700 mb-3 flex items-center gap-2">
+                <span>🌲</span> Setting: The Witherwild Forest
+              </h3>
+              <p class="text-d1-text-secondary leading-relaxed mb-4">
+                The forest path grows darker with each step. Trees lean at unnatural angles, their
+                bark blackened and weeping a dark sap that smells of rot. The air grows heavy,
+                pressing against your lungs.
+              </p>
+
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="bg-d1-surface p-3 rounded-lg border border-d1-border">
+                  <h4 class="font-medium text-d1-text-primary mb-2">👁️ Sights</h4>
+                  <ul class="text-d1-text-muted text-sm space-y-1">
+                    <li>• Black veins spreading up tree trunks</li>
+                    <li>• Dead animals twisted into unnatural poses</li>
+                    <li>• Shadows that seem to move against the light</li>
+                  </ul>
+                </div>
+                <div class="bg-d1-surface p-3 rounded-lg border border-d1-border">
+                  <h4 class="font-medium text-d1-text-primary mb-2">👂 Sounds</h4>
+                  <ul class="text-d1-text-muted text-sm space-y-1">
+                    <li>• Branches cracking without wind</li>
+                    <li>• Low, guttural growls from multiple directions</li>
+                    <li>• Finn's ragged breathing</li>
+                  </ul>
+                </div>
+                <div class="bg-d1-surface p-3 rounded-lg border border-d1-border">
+                  <h4 class="font-medium text-d1-text-primary mb-2">👃 Smells</h4>
+                  <ul class="text-d1-text-muted text-sm space-y-1">
+                    <li>• Decay, thick and cloying</li>
+                    <li>• Copper tang of old blood</li>
+                    <li>• Something acrid, chemical</li>
+                  </ul>
+                </div>
+              </div>
+            </section>
+
+            <!-- Context Section -->
+            <section class="border-l-4 border-dagger-teal-600 pl-4">
+              <h3 class="text-lg font-bold text-dagger-purple-700 mb-3 flex items-center gap-2">
+                <span>📍</span> Context
+              </h3>
+              <ul class="text-d1-text-secondary space-y-2">
+                <li>
+                  <strong class="text-d1-text-primary">Why they're here:</strong> Following Finn
+                  deeper into the Witherwild.
+                </li>
+                <li>
+                  <strong class="text-d1-text-primary">What they know:</strong> Seven hunters
+                  missing, corruption spreads.
+                </li>
+                <li>
+                  <strong class="text-d1-text-primary">Finn's state:</strong> Increasingly agitated,
+                  recognizing landmarks.
+                </li>
+              </ul>
+            </section>
+
+            <!-- Stat Block -->
+            <section>
+              <h3 class="text-lg font-bold text-dagger-purple-700 mb-3 flex items-center gap-2">
+                <span>⚔️</span> Combat Encounter: Blighted Beasts
+              </h3>
+              <p class="text-d1-text-muted text-sm mb-4">
+                Tier 2 encounter balanced for 4 players.
+              </p>
+
+              <div class="bg-red-900/20 border border-red-500/30 p-4 rounded-lg max-w-md">
+                <div class="flex justify-between items-start mb-3">
+                  <div>
+                    <h4 class="font-bold text-red-400">Corrupted Wolf</h4>
+                    <span class="text-xs text-gray-400">Minion (×2-3)</span>
+                  </div>
+                  <span class="px-2 py-1 bg-red-500/20 text-red-300 text-xs rounded">MINION</span>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2 mb-3 text-center">
+                  <div class="bg-d1-card p-2 rounded">
+                    <p class="text-xs text-d1-text-muted">HP</p>
+                    <p class="font-bold text-lg text-d1-text-primary">8</p>
+                  </div>
+                  <div class="bg-d1-card p-2 rounded">
+                    <p class="text-xs text-d1-text-muted">Armor</p>
+                    <p class="font-bold text-lg text-d1-text-primary">1</p>
+                  </div>
+                  <div class="bg-d1-card p-2 rounded">
+                    <p class="text-xs text-d1-text-muted">Evasion</p>
+                    <p class="font-bold text-lg text-d1-text-primary">12</p>
+                  </div>
+                </div>
+
+                <div class="space-y-2 text-sm">
+                  <div class="bg-d1-card p-2 rounded">
+                    <p class="text-d1-text-secondary">
+                      <strong class="text-red-400">Bite:</strong> 1d8+2 damage
+                    </p>
+                  </div>
+                  <div class="bg-d1-card p-2 rounded">
+                    <p class="text-d1-text-secondary">
+                      <strong class="text-dagger-purple-600">Pack Tactics:</strong> +2 to attack if
+                      ally within 5ft
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Read-Aloud -->
+            <section>
+              <h3 class="text-lg font-bold text-dagger-purple-700 mb-3 flex items-center gap-2">
+                <span>📖</span> Read-Aloud Narrative
+              </h3>
+              <div class="read-aloud-box border-l-4 border-dagger-purple-700 p-4 rounded-r">
+                <p class="text-xs text-dagger-purple-700 uppercase tracking-wide mb-2">
+                  When Combat Begins
+                </p>
+                <p class="text-gray-200 italic leading-relaxed">
+                  "Finn freezes, their eyes wide. 'They're here,' they whisper. The undergrowth
+                  explodes with movement—gaunt shapes with milky eyes and black veins..."
+                </p>
+              </div>
+            </section>
+          </div>
+
+          <!-- Action Buttons -->
+          <div
+            class="bg-d1-card rounded-xl p-6 text-d1-text-primary border border-d1-border shadow-xl shadow-black/30"
+          >
+            <h4 class="font-bold mb-4">What would you like to do with this expanded scene?</h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <button
+                class="p-4 bg-green-600 hover:bg-green-500 rounded-lg text-center transition-all text-white shadow-lg shadow-green-900/30"
+              >
+                <div class="text-3xl mb-2">✅</div>
+                <p class="font-bold">Confirm Expansion</p>
+                <p class="text-sm text-green-100">Lock this & expand Scene 3</p>
+              </button>
+              <button
+                class="p-4 bg-dagger-gold-600 hover:bg-dagger-gold-500 rounded-lg text-center transition-all text-white shadow-lg shadow-amber-900/30"
+              >
+                <div class="text-3xl mb-2">✨</div>
+                <p class="font-bold">Refine with AI</p>
+                <p class="text-sm text-dagger-gold-300">Give instructions to improve</p>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================ -->
+      <!-- DIRECTION 2: Warm Parchment + Amber Depth -->
+      <!-- ============================================ -->
+      <div id="panel2" class="comparison-panel bg-pattern-2 bg-shimmer vignette p-6 hidden">
+        <div class="max-w-4xl mx-auto relative z-10">
+          <!-- Header badge -->
+          <div
+            class="mb-4 p-3 bg-dagger-gold-500/20 border border-dagger-gold-500 rounded-lg inline-block backdrop-blur-sm"
+          >
+            <span class="text-dagger-gold-400 font-bold"
+              >Direction 2: Warm Parchment + Amber Depth</span
+            >
+            <span class="text-gray-400 text-sm ml-2">(Fantasy/Medieval feel)</span>
+          </div>
+
+          <!-- Progress indicator -->
+          <div
+            class="bg-d2-card rounded-xl p-4 mb-6 text-d2-text-primary border border-d2-border shadow-lg shadow-black/20"
+          >
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="font-bold text-d2-text-primary">Expansion Progress</h3>
+              <span class="text-amber-700 font-medium">Scene 2 of 3</span>
+            </div>
+            <div class="flex gap-2">
+              <div class="flex-1 h-2 bg-green-600 rounded-full"></div>
+              <div class="flex-1 h-2 bg-amber-600 rounded-full"></div>
+              <div class="flex-1 h-2 bg-d2-border rounded-full"></div>
+            </div>
+          </div>
+
+          <!-- Page header -->
+          <div class="flex justify-between items-start mb-4">
+            <div>
+              <span class="text-sm text-gray-400">The Witherwild Expedition</span>
+              <h2 class="text-2xl font-bold text-gray-100">
+                Expanding: Scene 2 - Into the Withering Woods
+              </h2>
+              <div class="flex gap-2 mt-2">
+                <span
+                  class="px-3 py-1 bg-red-500/20 text-red-400 rounded-full text-sm backdrop-blur-sm"
+                  >⚔️ Combat</span
+                >
+                <span
+                  class="px-3 py-1 bg-black/30 text-gray-300 rounded-full text-sm backdrop-blur-sm"
+                  >~30 min</span
+                >
+              </div>
+            </div>
+          </div>
+
+          <!-- Main content card -->
+          <div
+            class="bg-d2-card rounded-xl p-6 mb-6 space-y-6 text-d2-text-primary border border-d2-border shadow-xl shadow-black/30"
+          >
+            <!-- Setting Section -->
+            <section>
+              <h3 class="text-lg font-bold text-amber-800 mb-3 flex items-center gap-2">
+                <span>🌲</span> Setting: The Witherwild Forest
+              </h3>
+              <p class="text-d2-text-secondary leading-relaxed mb-4">
+                The forest path grows darker with each step. Trees lean at unnatural angles, their
+                bark blackened and weeping a dark sap that smells of rot. The air grows heavy,
+                pressing against your lungs.
+              </p>
+
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="bg-d2-surface p-3 rounded-lg border border-d2-border">
+                  <h4 class="font-medium text-d2-text-primary mb-2">👁️ Sights</h4>
+                  <ul class="text-d2-text-muted text-sm space-y-1">
+                    <li>• Black veins spreading up tree trunks</li>
+                    <li>• Dead animals twisted into unnatural poses</li>
+                    <li>• Shadows that seem to move against the light</li>
+                  </ul>
+                </div>
+                <div class="bg-d2-surface p-3 rounded-lg border border-d2-border">
+                  <h4 class="font-medium text-d2-text-primary mb-2">👂 Sounds</h4>
+                  <ul class="text-d2-text-muted text-sm space-y-1">
+                    <li>• Branches cracking without wind</li>
+                    <li>• Low, guttural growls from multiple directions</li>
+                    <li>• Finn's ragged breathing</li>
+                  </ul>
+                </div>
+                <div class="bg-d2-surface p-3 rounded-lg border border-d2-border">
+                  <h4 class="font-medium text-d2-text-primary mb-2">👃 Smells</h4>
+                  <ul class="text-d2-text-muted text-sm space-y-1">
+                    <li>• Decay, thick and cloying</li>
+                    <li>• Copper tang of old blood</li>
+                    <li>• Something acrid, chemical</li>
+                  </ul>
+                </div>
+              </div>
+            </section>
+
+            <!-- Context Section -->
+            <section class="border-l-4 border-amber-600 pl-4">
+              <h3 class="text-lg font-bold text-amber-800 mb-3 flex items-center gap-2">
+                <span>📍</span> Context
+              </h3>
+              <ul class="text-d2-text-secondary space-y-2">
+                <li>
+                  <strong class="text-d2-text-primary">Why they're here:</strong> Following Finn
+                  deeper into the Witherwild.
+                </li>
+                <li>
+                  <strong class="text-d2-text-primary">What they know:</strong> Seven hunters
+                  missing, corruption spreads.
+                </li>
+                <li>
+                  <strong class="text-d2-text-primary">Finn's state:</strong> Increasingly agitated,
+                  recognizing landmarks.
+                </li>
+              </ul>
+            </section>
+
+            <!-- Stat Block -->
+            <section>
+              <h3 class="text-lg font-bold text-amber-800 mb-3 flex items-center gap-2">
+                <span>⚔️</span> Combat Encounter: Blighted Beasts
+              </h3>
+              <p class="text-d2-text-muted text-sm mb-4">
+                Tier 2 encounter balanced for 4 players.
+              </p>
+
+              <div class="bg-red-900/20 border border-red-500/30 p-4 rounded-lg max-w-md">
+                <div class="flex justify-between items-start mb-3">
+                  <div>
+                    <h4 class="font-bold text-red-400">Corrupted Wolf</h4>
+                    <span class="text-xs text-gray-400">Minion (×2-3)</span>
+                  </div>
+                  <span class="px-2 py-1 bg-red-500/20 text-red-300 text-xs rounded">MINION</span>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2 mb-3 text-center">
+                  <div class="bg-d2-card p-2 rounded">
+                    <p class="text-xs text-d2-text-muted">HP</p>
+                    <p class="font-bold text-lg text-d2-text-primary">8</p>
+                  </div>
+                  <div class="bg-d2-card p-2 rounded">
+                    <p class="text-xs text-d2-text-muted">Armor</p>
+                    <p class="font-bold text-lg text-d2-text-primary">1</p>
+                  </div>
+                  <div class="bg-d2-card p-2 rounded">
+                    <p class="text-xs text-d2-text-muted">Evasion</p>
+                    <p class="font-bold text-lg text-d2-text-primary">12</p>
+                  </div>
+                </div>
+
+                <div class="space-y-2 text-sm">
+                  <div class="bg-d2-card p-2 rounded">
+                    <p class="text-d2-text-secondary">
+                      <strong class="text-red-400">Bite:</strong> 1d8+2 damage
+                    </p>
+                  </div>
+                  <div class="bg-d2-card p-2 rounded">
+                    <p class="text-d2-text-secondary">
+                      <strong class="text-amber-700">Pack Tactics:</strong> +2 to attack if ally
+                      within 5ft
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Read-Aloud -->
+            <section>
+              <h3 class="text-lg font-bold text-amber-800 mb-3 flex items-center gap-2">
+                <span>📖</span> Read-Aloud Narrative
+              </h3>
+              <div class="read-aloud-box border-l-4 border-amber-700 p-4 rounded-r">
+                <p class="text-xs text-amber-600 uppercase tracking-wide mb-2">
+                  When Combat Begins
+                </p>
+                <p class="text-gray-200 italic leading-relaxed">
+                  "Finn freezes, their eyes wide. 'They're here,' they whisper. The undergrowth
+                  explodes with movement—gaunt shapes with milky eyes and black veins..."
+                </p>
+              </div>
+            </section>
+          </div>
+
+          <!-- Action Buttons -->
+          <div
+            class="bg-d2-card rounded-xl p-6 text-d2-text-primary border border-d2-border shadow-xl shadow-black/30"
+          >
+            <h4 class="font-bold mb-4">What would you like to do with this expanded scene?</h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <button
+                class="p-4 bg-green-600 hover:bg-green-500 rounded-lg text-center transition-all text-white shadow-lg shadow-green-900/30"
+              >
+                <div class="text-3xl mb-2">✅</div>
+                <p class="font-bold">Confirm Expansion</p>
+                <p class="text-sm text-green-100">Lock this & expand Scene 3</p>
+              </button>
+              <button
+                class="p-4 bg-amber-600 hover:bg-amber-500 rounded-lg text-center transition-all text-white shadow-lg shadow-amber-900/30"
+              >
+                <div class="text-3xl mb-2">✨</div>
+                <p class="font-bold">Refine with AI</p>
+                <p class="text-sm text-amber-200">Give instructions to improve</p>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================ -->
+      <!-- DIRECTION 3: Cool Blue-Gray + Blue Depth -->
+      <!-- ============================================ -->
+      <div id="panel3" class="comparison-panel bg-pattern-3 bg-shimmer vignette p-6 hidden">
+        <div class="max-w-4xl mx-auto relative z-10">
+          <!-- Header badge -->
+          <div
+            class="mb-4 p-3 bg-blue-500/20 border border-blue-500 rounded-lg inline-block backdrop-blur-sm"
+          >
+            <span class="text-blue-400 font-bold">Direction 3: Cool Blue-Gray + Blue Depth</span>
+            <span class="text-gray-400 text-sm ml-2">(Modern/Professional feel)</span>
+          </div>
+
+          <!-- Progress indicator -->
+          <div
+            class="bg-d3-card rounded-xl p-4 mb-6 text-d3-text-primary border border-d3-border shadow-lg shadow-black/20"
+          >
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="font-bold text-d3-text-primary">Expansion Progress</h3>
+              <span class="text-blue-600 font-medium">Scene 2 of 3</span>
+            </div>
+            <div class="flex gap-2">
+              <div class="flex-1 h-2 bg-green-500 rounded-full"></div>
+              <div class="flex-1 h-2 bg-blue-500 rounded-full"></div>
+              <div class="flex-1 h-2 bg-d3-border rounded-full"></div>
+            </div>
+          </div>
+
+          <!-- Page header -->
+          <div class="flex justify-between items-start mb-4">
+            <div>
+              <span class="text-sm text-gray-400">The Witherwild Expedition</span>
+              <h2 class="text-2xl font-bold text-gray-100">
+                Expanding: Scene 2 - Into the Withering Woods
+              </h2>
+              <div class="flex gap-2 mt-2">
+                <span
+                  class="px-3 py-1 bg-red-500/20 text-red-400 rounded-full text-sm backdrop-blur-sm"
+                  >⚔️ Combat</span
+                >
+                <span
+                  class="px-3 py-1 bg-black/30 text-gray-300 rounded-full text-sm backdrop-blur-sm"
+                  >~30 min</span
+                >
+              </div>
+            </div>
+          </div>
+
+          <!-- Main content card -->
+          <div
+            class="bg-d3-card rounded-xl p-6 mb-6 space-y-6 text-d3-text-primary border border-d3-border shadow-xl shadow-black/30"
+          >
+            <!-- Setting Section -->
+            <section>
+              <h3 class="text-lg font-bold text-slate-700 mb-3 flex items-center gap-2">
+                <span>🌲</span> Setting: The Witherwild Forest
+              </h3>
+              <p class="text-d3-text-secondary leading-relaxed mb-4">
+                The forest path grows darker with each step. Trees lean at unnatural angles, their
+                bark blackened and weeping a dark sap that smells of rot. The air grows heavy,
+                pressing against your lungs.
+              </p>
+
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="bg-d3-surface p-3 rounded-lg border border-d3-border">
+                  <h4 class="font-medium text-d3-text-primary mb-2">👁️ Sights</h4>
+                  <ul class="text-d3-text-muted text-sm space-y-1">
+                    <li>• Black veins spreading up tree trunks</li>
+                    <li>• Dead animals twisted into unnatural poses</li>
+                    <li>• Shadows that seem to move against the light</li>
+                  </ul>
+                </div>
+                <div class="bg-d3-surface p-3 rounded-lg border border-d3-border">
+                  <h4 class="font-medium text-d3-text-primary mb-2">👂 Sounds</h4>
+                  <ul class="text-d3-text-muted text-sm space-y-1">
+                    <li>• Branches cracking without wind</li>
+                    <li>• Low, guttural growls from multiple directions</li>
+                    <li>• Finn's ragged breathing</li>
+                  </ul>
+                </div>
+                <div class="bg-d3-surface p-3 rounded-lg border border-d3-border">
+                  <h4 class="font-medium text-d3-text-primary mb-2">👃 Smells</h4>
+                  <ul class="text-d3-text-muted text-sm space-y-1">
+                    <li>• Decay, thick and cloying</li>
+                    <li>• Copper tang of old blood</li>
+                    <li>• Something acrid, chemical</li>
+                  </ul>
+                </div>
+              </div>
+            </section>
+
+            <!-- Context Section -->
+            <section class="border-l-4 border-blue-500 pl-4">
+              <h3 class="text-lg font-bold text-slate-700 mb-3 flex items-center gap-2">
+                <span>📍</span> Context
+              </h3>
+              <ul class="text-d3-text-secondary space-y-2">
+                <li>
+                  <strong class="text-d3-text-primary">Why they're here:</strong> Following Finn
+                  deeper into the Witherwild.
+                </li>
+                <li>
+                  <strong class="text-d3-text-primary">What they know:</strong> Seven hunters
+                  missing, corruption spreads.
+                </li>
+                <li>
+                  <strong class="text-d3-text-primary">Finn's state:</strong> Increasingly agitated,
+                  recognizing landmarks.
+                </li>
+              </ul>
+            </section>
+
+            <!-- Stat Block -->
+            <section>
+              <h3 class="text-lg font-bold text-slate-700 mb-3 flex items-center gap-2">
+                <span>⚔️</span> Combat Encounter: Blighted Beasts
+              </h3>
+              <p class="text-d3-text-muted text-sm mb-4">
+                Tier 2 encounter balanced for 4 players.
+              </p>
+
+              <div class="bg-red-900/20 border border-red-500/30 p-4 rounded-lg max-w-md">
+                <div class="flex justify-between items-start mb-3">
+                  <div>
+                    <h4 class="font-bold text-red-400">Corrupted Wolf</h4>
+                    <span class="text-xs text-gray-400">Minion (×2-3)</span>
+                  </div>
+                  <span class="px-2 py-1 bg-red-500/20 text-red-300 text-xs rounded">MINION</span>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2 mb-3 text-center">
+                  <div class="bg-d3-card p-2 rounded">
+                    <p class="text-xs text-d3-text-muted">HP</p>
+                    <p class="font-bold text-lg text-d3-text-primary">8</p>
+                  </div>
+                  <div class="bg-d3-card p-2 rounded">
+                    <p class="text-xs text-d3-text-muted">Armor</p>
+                    <p class="font-bold text-lg text-d3-text-primary">1</p>
+                  </div>
+                  <div class="bg-d3-card p-2 rounded">
+                    <p class="text-xs text-d3-text-muted">Evasion</p>
+                    <p class="font-bold text-lg text-d3-text-primary">12</p>
+                  </div>
+                </div>
+
+                <div class="space-y-2 text-sm">
+                  <div class="bg-d3-card p-2 rounded">
+                    <p class="text-d3-text-secondary">
+                      <strong class="text-red-400">Bite:</strong> 1d8+2 damage
+                    </p>
+                  </div>
+                  <div class="bg-d3-card p-2 rounded">
+                    <p class="text-d3-text-secondary">
+                      <strong class="text-blue-600">Pack Tactics:</strong> +2 to attack if ally
+                      within 5ft
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Read-Aloud -->
+            <section>
+              <h3 class="text-lg font-bold text-slate-700 mb-3 flex items-center gap-2">
+                <span>📖</span> Read-Aloud Narrative
+              </h3>
+              <div class="read-aloud-box border-l-4 border-blue-600 p-4 rounded-r">
+                <p class="text-xs text-blue-400 uppercase tracking-wide mb-2">When Combat Begins</p>
+                <p class="text-gray-200 italic leading-relaxed">
+                  "Finn freezes, their eyes wide. 'They're here,' they whisper. The undergrowth
+                  explodes with movement—gaunt shapes with milky eyes and black veins..."
+                </p>
+              </div>
+            </section>
+          </div>
+
+          <!-- Action Buttons -->
+          <div
+            class="bg-d3-card rounded-xl p-6 text-d3-text-primary border border-d3-border shadow-xl shadow-black/30"
+          >
+            <h4 class="font-bold mb-4">What would you like to do with this expanded scene?</h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <button
+                class="p-4 bg-green-600 hover:bg-green-500 rounded-lg text-center transition-all text-white shadow-lg shadow-green-900/30"
+              >
+                <div class="text-3xl mb-2">✅</div>
+                <p class="font-bold">Confirm Expansion</p>
+                <p class="text-sm text-green-100">Lock this & expand Scene 3</p>
+              </button>
+              <button
+                class="p-4 bg-blue-600 hover:bg-blue-500 rounded-lg text-center transition-all text-white shadow-lg shadow-blue-900/30"
+              >
+                <div class="text-3xl mb-2">✨</div>
+                <p class="font-bold">Refine with AI</p>
+                <p class="text-sm text-blue-200">Give instructions to improve</p>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function showPanel(num) {
+        // Hide all panels
+        document.querySelectorAll('.comparison-panel').forEach((p) => p.classList.add('hidden'))
+        // Show selected panel
+        document.getElementById('panel' + num).classList.remove('hidden')
+        // Update tab styles
+        document.querySelectorAll('.tab-button').forEach((t) => t.classList.remove('active'))
+        document.getElementById('tab' + num).classList.add('active')
+      }
+    </script>
+  </body>
+</html>

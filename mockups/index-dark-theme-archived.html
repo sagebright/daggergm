@@ -1,0 +1,2819 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DaggerGM Workflow Mockup</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      // Configure Tailwind with Daggerheart colors
+      // Direction 3: Cool Blue-Gray cards with depth
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              // Frame/chrome colors (DARK)
+              dagger: {
+                bg: '#0f0d14', // Darkest purple-black (page bg)
+                frame: '#1a1625', // Nav/header frame
+                card: '#f0f2f5', // Cool light gray cards
+                surface: '#e4e7ec', // Nested surfaces
+                border: '#c8cdd6', // Cool gray borders for cards
+                'border-dark': '#3d3555', // Dark borders for frame elements
+                muted: '#4a4260', // Muted dark elements
+              },
+              // Text colors for light cards
+              'dagger-text': {
+                primary: '#1a1d24', // Cool dark text
+                secondary: '#4a5060', // Cool medium text
+                muted: '#6b7280', // Cool muted text
+              },
+              'dagger-purple': {
+                900: '#1a1625', // Darkest (for frame)
+                800: '#2a1f4e', // Deep purple
+                700: '#3d2d6b', // Primary purple
+                600: '#5040a0', // Lighter purple
+                500: '#6b5bb5', // Even lighter
+              },
+              'dagger-teal': {
+                600: '#3ba89f', // Darker teal for light backgrounds
+                500: '#4ecdc4', // Primary teal
+                400: '#6ed7d0', // Lighter teal
+                300: '#8fe3dd', // Lightest
+              },
+              'dagger-gold': {
+                600: '#a68520', // Darker gold for light backgrounds
+                500: '#c9a227', // Primary gold
+                400: '#d4b84a', // Lighter gold
+                300: '#e0cb6d', // Lightest
+              },
+              // Direction 3 accent: Blue
+              'dagger-blue': {
+                700: '#1d4ed8', // Strong blue
+                600: '#2563eb', // Primary blue
+                500: '#3b82f6', // Lighter blue
+                400: '#60a5fa', // Light blue
+              },
+            },
+          },
+        },
+      }
+    </script>
+    <style>
+      .step-indicator {
+        transition: all 0.3s ease;
+      }
+      .step-indicator.active {
+        background-color: #4ecdc4;
+        color: #0f0d14;
+      }
+      .step-indicator.completed {
+        background-color: #22c55e;
+        color: white;
+      }
+      .page {
+        display: none;
+      }
+      .page.active {
+        display: block;
+      }
+
+      /* Custom gradient for read-aloud boxes - on light background */
+      .read-aloud-box {
+        background: linear-gradient(to right, rgba(37, 99, 235, 0.12), rgba(240, 242, 245, 1));
+      }
+
+      /* Direction 3: Cool Blue-Gray background with depth */
+      .bg-depth {
+        background-color: #0f0d14;
+        background-image:
+        /* Gradient overlay - cool blue tint */
+          linear-gradient(
+            105deg,
+            rgba(26, 29, 36, 0.75) 0%,
+            rgba(15, 13, 20, 0.65) 50%,
+            rgba(26, 29, 36, 0.72) 100%
+          ),
+          /* Cool radial glows */
+          radial-gradient(ellipse at 20% 20%, rgba(78, 205, 196, 0.1) 0%, transparent 50%),
+          radial-gradient(ellipse at 85% 75%, rgba(59, 130, 246, 0.08) 0%, transparent 45%),
+          /* Geometric grid pattern */
+          url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%234a5060' fill-opacity='0.35'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      }
+
+      /* Card shadow for depth */
+      .card-depth {
+        box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.4);
+      }
+    </style>
+  </head>
+  <body class="bg-depth text-gray-100 min-h-screen font-sans">
+    <!-- Navigation -->
+    <nav class="bg-dagger-frame border-b border-dagger-border-dark px-4 py-3 md:px-6 md:py-4">
+      <div class="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
+        <h1 class="text-lg md:text-xl font-bold text-dagger-gold-400">DaggerGM Workflow Mockup</h1>
+        <div class="flex gap-2">
+          <button
+            onclick="prevStep()"
+            class="px-3 py-2 bg-dagger-purple-800 rounded-lg hover:bg-dagger-purple-700 transition-colors"
+          >
+            &larr; Prev
+          </button>
+          <span id="step-counter" class="px-3 py-2 bg-dagger-purple-800 rounded-lg">Step 1/10</span>
+          <button
+            onclick="nextStep()"
+            class="px-3 py-2 bg-dagger-purple-800 rounded-lg hover:bg-dagger-purple-700 transition-colors"
+          >
+            Next &rarr;
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Step Indicators -->
+    <div class="bg-dagger-frame px-4 py-3 border-b border-dagger-border-dark">
+      <div class="max-w-6xl mx-auto flex gap-2 overflow-x-auto pb-1">
+        <div
+          id="step-1"
+          class="step-indicator px-3 py-1 rounded text-sm whitespace-nowrap cursor-pointer"
+          onclick="goToStep(1)"
+        >
+          1. Landing
+        </div>
+        <div
+          id="step-2"
+          class="step-indicator px-3 py-1 rounded text-sm whitespace-nowrap cursor-pointer"
+          onclick="goToStep(2)"
+        >
+          2. Login
+        </div>
+        <div
+          id="step-3"
+          class="step-indicator px-3 py-1 rounded text-sm whitespace-nowrap cursor-pointer"
+          onclick="goToStep(3)"
+        >
+          3. Dashboard
+        </div>
+        <div
+          id="step-4"
+          class="step-indicator px-3 py-1 rounded text-sm whitespace-nowrap cursor-pointer"
+          onclick="goToStep(4)"
+        >
+          4. Create
+        </div>
+        <div
+          id="step-5"
+          class="step-indicator px-3 py-1 rounded text-sm whitespace-nowrap cursor-pointer bg-dagger-teal-500/20 text-dagger-gold-400 border border-dagger-teal-500"
+          onclick="goToStep(5)"
+        >
+          5. Overview ✨
+        </div>
+        <div
+          id="step-6"
+          class="step-indicator px-3 py-1 rounded text-sm whitespace-nowrap cursor-pointer bg-dagger-teal-500/20 text-dagger-gold-400 border border-dagger-teal-500"
+          onclick="goToStep(6)"
+        >
+          6. Scene 1 ✨
+        </div>
+        <div
+          id="step-7"
+          class="step-indicator px-3 py-1 rounded text-sm whitespace-nowrap cursor-pointer bg-dagger-teal-500/20 text-dagger-gold-400 border border-dagger-teal-500"
+          onclick="goToStep(7)"
+        >
+          7. Scene 2 ✨
+        </div>
+        <div
+          id="step-8"
+          class="step-indicator px-3 py-1 rounded text-sm whitespace-nowrap cursor-pointer bg-dagger-teal-500/20 text-dagger-gold-400 border border-dagger-teal-500"
+          onclick="goToStep(8)"
+        >
+          8. Scene 3 ✨
+        </div>
+        <div
+          id="step-9"
+          class="step-indicator px-3 py-1 rounded text-sm whitespace-nowrap cursor-pointer bg-dagger-teal-500/20 text-dagger-gold-400 border border-dagger-teal-500"
+          onclick="goToStep(9)"
+        >
+          9. Expand 1 ✨
+        </div>
+        <div
+          id="step-10"
+          class="step-indicator px-3 py-1 rounded text-sm whitespace-nowrap cursor-pointer bg-dagger-teal-500/20 text-dagger-gold-400 border border-dagger-teal-500"
+          onclick="goToStep(10)"
+        >
+          10. Expand 2 ✨
+        </div>
+        <div
+          id="step-11"
+          class="step-indicator px-3 py-1 rounded text-sm whitespace-nowrap cursor-pointer bg-dagger-teal-500/20 text-dagger-gold-400 border border-dagger-teal-500"
+          onclick="goToStep(11)"
+        >
+          11. Expand 3 ✨
+        </div>
+        <div
+          id="step-12"
+          class="step-indicator px-3 py-1 rounded text-sm whitespace-nowrap cursor-pointer"
+          onclick="goToStep(12)"
+        >
+          12. Export
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="max-w-6xl mx-auto px-4 py-6 md:px-6 md:py-8">
+      <!-- Page 1: Landing -->
+      <div id="page-1" class="page">
+        <div
+          class="bg-dagger-card rounded-xl p-6 md:p-8 text-center text-dagger-text-primary border border-dagger-border"
+        >
+          <h1 class="text-2xl md:text-4xl font-bold text-dagger-purple-700 mb-4">
+            Create Epic Daggerheart Adventures
+          </h1>
+          <p class="text-lg md:text-xl text-dagger-text-secondary mb-6 md:mb-8">
+            in Minutes, Not Hours
+          </p>
+          <p class="text-dagger-text-muted mb-6 md:mb-8 max-w-2xl mx-auto">
+            AI-powered adventure generation for Game Masters who want to spend less time prepping
+            and more time playing.
+          </p>
+          <button
+            onclick="nextStep()"
+            class="bg-dagger-teal-600 hover:bg-dagger-teal-500 text-white font-bold py-3 px-8 rounded-lg text-lg transition-colors"
+          >
+            Get Started - It's Free!
+          </button>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mt-8 md:mt-12">
+            <div class="bg-dagger-surface p-6 rounded-lg border border-dagger-border">
+              <div class="text-3xl mb-3">🎭</div>
+              <h3 class="font-bold mb-2 text-dagger-text-primary">Frame-Aware</h3>
+              <p class="text-dagger-text-muted text-sm">Adventures that fit Daggerheart settings</p>
+            </div>
+            <div class="bg-dagger-surface p-6 rounded-lg border border-dagger-border">
+              <div class="text-3xl mb-3">⚔️</div>
+              <h3 class="font-bold mb-2 text-dagger-text-primary">Balanced Encounters</h3>
+              <p class="text-dagger-text-muted text-sm">Combat, RP, exploration in every session</p>
+            </div>
+            <div class="bg-dagger-surface p-6 rounded-lg border border-dagger-border">
+              <div class="text-3xl mb-3">🤖</div>
+              <h3 class="font-bold mb-2 text-dagger-text-primary">AI Refinement</h3>
+              <p class="text-dagger-text-muted text-sm">Iterate with AI until perfect</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6 p-4 bg-dagger-purple-900/30 border border-dagger-purple-700 rounded-lg">
+          <h3 class="font-bold text-dagger-teal-400 mb-2">Workflow Note:</h3>
+          <p class="text-gray-300">
+            This is the landing page. New users see this first. The CTA takes them to login/signup.
+          </p>
+        </div>
+      </div>
+
+      <!-- Page 2: Login -->
+      <div id="page-2" class="page">
+        <div
+          class="max-w-md mx-auto bg-dagger-card rounded-xl p-6 md:p-8 text-dagger-text-primary border border-dagger-border"
+        >
+          <h2 class="text-2xl font-bold text-center mb-6 text-dagger-purple-700">
+            Welcome to DaggerGM
+          </h2>
+
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm text-dagger-text-muted mb-1">Email</label>
+              <input
+                type="email"
+                value="gm@example.com"
+                class="w-full bg-dagger-surface border border-dagger-border rounded-md px-4 py-2 text-dagger-text-primary focus:border-dagger-teal-600 focus:ring-1 focus:ring-dagger-teal-600/50 focus:outline-none transition-colors"
+              />
+            </div>
+            <div>
+              <label class="block text-sm text-dagger-text-muted mb-1">Password</label>
+              <input
+                type="password"
+                value="password123"
+                class="w-full bg-dagger-surface border border-dagger-border rounded-md px-4 py-2 text-dagger-text-primary focus:border-dagger-teal-600 focus:ring-1 focus:ring-dagger-teal-600/50 focus:outline-none transition-colors"
+              />
+            </div>
+            <button
+              onclick="nextStep()"
+              class="w-full bg-dagger-teal-600 hover:bg-dagger-teal-500 text-white font-bold py-3 rounded-lg transition-colors"
+            >
+              Login
+            </button>
+            <p class="text-center text-dagger-text-muted text-sm">
+              Don't have an account?
+              <a
+                href="#"
+                class="text-dagger-purple-700 hover:text-dagger-purple-500 transition-colors"
+                >Sign up</a
+              >
+            </p>
+          </div>
+        </div>
+
+        <div class="mt-6 p-4 bg-dagger-purple-900/30 border border-dagger-purple-700 rounded-lg">
+          <h3 class="font-bold text-dagger-teal-400 mb-2">Workflow Note:</h3>
+          <p class="text-gray-300">
+            Simple email/password auth. After login, user goes to their dashboard.
+          </p>
+        </div>
+      </div>
+
+      <!-- Page 3: Dashboard -->
+      <div id="page-3" class="page">
+        <div
+          class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6"
+        >
+          <h2 class="text-2xl font-bold text-gray-100">Your Adventures</h2>
+          <div
+            class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto"
+          >
+            <span
+              class="bg-dagger-card text-dagger-text-primary border border-dagger-border px-4 py-2 rounded-lg text-center font-medium"
+              >Credits: 5 🪙</span
+            >
+            <button
+              onclick="nextStep()"
+              class="bg-dagger-teal-600 hover:bg-dagger-teal-500 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+            >
+              + Create New Adventure
+            </button>
+          </div>
+        </div>
+
+        <div class="space-y-4">
+          <!-- Empty State -->
+          <div
+            class="bg-dagger-card rounded-xl p-8 md:p-12 text-center text-dagger-text-primary border border-dagger-border"
+          >
+            <div class="text-5xl md:text-6xl mb-4">📜</div>
+            <h3 class="text-xl font-bold mb-2 text-dagger-purple-700">No adventures yet</h3>
+            <p class="text-dagger-text-muted mb-6">Create your first AI-generated adventure!</p>
+            <button
+              onclick="nextStep()"
+              class="bg-dagger-teal-600 hover:bg-dagger-teal-500 text-white font-bold py-3 px-6 rounded-lg transition-colors"
+            >
+              Create Your First Adventure
+            </button>
+          </div>
+        </div>
+
+        <div class="mt-6 p-4 bg-dagger-purple-900/30 border border-dagger-purple-700 rounded-lg">
+          <h3 class="font-bold text-dagger-teal-400 mb-2">Workflow Note:</h3>
+          <p class="text-gray-300">
+            Dashboard shows all user adventures. Credits visible. New users see empty state with
+            clear CTA.
+          </p>
+        </div>
+      </div>
+
+      <!-- Page 4: Create Adventure -->
+      <div id="page-4" class="page">
+        <div class="max-w-2xl mx-auto">
+          <h2 class="text-2xl font-bold mb-2 text-gray-100">Create New Adventure</h2>
+          <p class="text-gray-400 mb-6">This will cost 1 credit. You have 5 credits remaining.</p>
+
+          <div
+            class="bg-dagger-card rounded-xl p-6 space-y-6 text-dagger-text-primary border border-dagger-border"
+          >
+            <div>
+              <label class="block text-sm text-dagger-text-muted mb-2">Adventure Motif *</label>
+              <select
+                class="w-full bg-dagger-surface border border-dagger-border rounded-md px-4 py-2 text-dagger-text-primary focus:border-dagger-teal-600 focus:outline-none transition-colors"
+              >
+                <option>High Fantasy</option>
+                <option>Low Fantasy</option>
+                <option>Sword & Sorcery</option>
+                <option>Dark Fantasy</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm text-dagger-text-muted mb-2">Party Size *</label>
+              <select
+                class="w-full bg-dagger-surface border border-dagger-border rounded-md px-4 py-2 text-dagger-text-primary focus:border-dagger-teal-600 focus:outline-none transition-colors"
+              >
+                <option>3 players</option>
+                <option selected>4 players</option>
+                <option>5 players</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm text-dagger-text-muted mb-2">Party Tier *</label>
+              <select
+                class="w-full bg-dagger-surface border border-dagger-border rounded-md px-4 py-2 text-dagger-text-primary focus:border-dagger-teal-600 focus:outline-none transition-colors"
+              >
+                <option>Tier 1 (Levels 1-3)</option>
+                <option selected>Tier 2 (Levels 4-6)</option>
+                <option>Tier 3 (Levels 7-9)</option>
+                <option>Tier 4 (Levels 10+)</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm text-dagger-text-muted mb-2">Number of Scenes *</label>
+              <select
+                class="w-full bg-dagger-surface border border-dagger-border rounded-md px-4 py-2 text-dagger-text-primary focus:border-dagger-teal-600 focus:outline-none transition-colors"
+              >
+                <option selected>3 scenes (~1 hour session)</option>
+                <option>4 scenes (~1.5 hour session)</option>
+                <option>5 scenes (~2 hour session)</option>
+              </select>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-4 pt-4">
+              <button
+                class="px-6 py-2 bg-dagger-surface text-dagger-text-primary border border-dagger-border rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onclick="nextStep()"
+                class="flex-1 bg-dagger-teal-600 hover:bg-dagger-teal-500 text-white font-bold py-2 rounded-lg transition-colors"
+              >
+                Generate Adventure 🎲
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6 p-4 bg-dagger-purple-900/30 border border-dagger-purple-700 rounded-lg">
+          <h3 class="font-bold text-dagger-teal-400 mb-2">Workflow Note:</h3>
+          <p class="text-gray-300">
+            Simple form with essential options. Cost is clear. After submit, AI generates the
+            adventure concept.
+          </p>
+        </div>
+      </div>
+
+      <!-- Page 5: Adventure Overview (NEW!) -->
+      <div id="page-5" class="page">
+        <div class="flex items-center gap-4 mb-6">
+          <a
+            href="#"
+            onclick="
+              goToStep(3)
+              return false
+            "
+            class="text-gray-400 hover:text-white transition-colors"
+            >&larr; Back to Dashboard</a
+          >
+        </div>
+
+        <!-- NEW STEP indicator -->
+        <div
+          class="bg-dagger-teal-500/20 border border-dagger-teal-500 rounded-xl p-4 mb-6 flex items-center gap-3"
+        >
+          <span class="text-2xl">✨</span>
+          <div>
+            <h3 class="font-bold text-dagger-gold-400">NEW STEP: Adventure Overview</h3>
+            <p class="text-gray-300 text-sm">
+              Review the overall concept before diving into scenes
+            </p>
+          </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row justify-between items-start gap-4 mb-6">
+          <div>
+            <h2 class="text-2xl font-bold">Your Adventure Concept</h2>
+            <span
+              class="inline-block mt-2 px-3 py-1 bg-dagger-teal-500/20 text-dagger-teal-400 rounded-full text-sm"
+              >📋 REVIEW CONCEPT</span
+            >
+          </div>
+        </div>
+
+        <!-- Adventure Overview Card -->
+        <div
+          class="bg-dagger-card rounded-xl p-6 mb-6 text-dagger-text-primary border border-dagger-border"
+        >
+          <h3 class="text-xl font-bold text-dagger-purple-700 mb-4">The Witherwild Expedition</h3>
+
+          <!-- Quick Stats -->
+          <div
+            class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 p-4 bg-dagger-surface rounded-lg border border-dagger-border"
+          >
+            <div class="text-center">
+              <p class="text-dagger-text-muted text-sm">Motif</p>
+              <p class="font-bold text-dagger-text-primary">High Fantasy</p>
+            </div>
+            <div class="text-center">
+              <p class="text-dagger-text-muted text-sm">Party</p>
+              <p class="font-bold text-dagger-text-primary">4 Players</p>
+            </div>
+            <div class="text-center">
+              <p class="text-dagger-text-muted text-sm">Tier</p>
+              <p class="font-bold text-dagger-text-primary">Tier 2</p>
+            </div>
+            <div class="text-center">
+              <p class="text-dagger-text-muted text-sm">Duration</p>
+              <p class="font-bold text-dagger-text-primary">~75 min</p>
+            </div>
+          </div>
+
+          <!-- Adventure Description -->
+          <div class="space-y-4">
+            <div>
+              <h4 class="font-bold text-dagger-text-primary mb-2">Overview</h4>
+              <p class="text-dagger-text-secondary leading-relaxed">
+                A corruption spreads from the heart of the Witherwild forest, threatening the
+                village of Thornhaven. The party must investigate the source of the blight, battle
+                twisted creatures, and ultimately confront a tragic figure at the center of the
+                corruption. Will they show mercy or destroy the threat?
+              </p>
+            </div>
+
+            <div>
+              <h4 class="font-bold text-dagger-text-primary mb-2">Central Conflict</h4>
+              <p class="text-dagger-text-secondary leading-relaxed">
+                A grieving druid, driven mad by the death of their beloved, has made a pact with
+                dark forces. Their anguish manifests as a creeping corruption that twists the forest
+                and its creatures.
+              </p>
+            </div>
+
+            <div>
+              <h4 class="font-bold text-dagger-text-primary mb-2">Key Themes</h4>
+              <div class="flex gap-2 flex-wrap">
+                <span
+                  class="px-3 py-1 bg-dagger-purple-700/20 text-dagger-purple-700 rounded-full text-sm border border-dagger-purple-700/30"
+                  >Grief & Loss</span
+                >
+                <span
+                  class="px-3 py-1 bg-dagger-purple-700/20 text-dagger-purple-700 rounded-full text-sm border border-dagger-purple-700/30"
+                  >Nature vs Corruption</span
+                >
+                <span
+                  class="px-3 py-1 bg-dagger-purple-700/20 text-dagger-purple-700 rounded-full text-sm border border-dagger-purple-700/30"
+                  >Moral Choices</span
+                >
+                <span
+                  class="px-3 py-1 bg-dagger-purple-700/20 text-dagger-purple-700 rounded-full text-sm border border-dagger-purple-700/30"
+                  >Redemption</span
+                >
+              </div>
+            </div>
+
+            <div>
+              <h4 class="font-bold text-dagger-text-primary mb-2">Possible Outcomes</h4>
+              <ul class="text-dagger-text-secondary space-y-1 ml-4 list-disc">
+                <li>Destroy the druid and end the corruption violently</li>
+                <li>Help the druid find peace and break the pact willingly</li>
+                <li>Contain the corruption but leave the druid trapped</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div
+          class="bg-dagger-card rounded-xl p-6 text-dagger-text-primary border border-dagger-border card-depth"
+        >
+          <h4 class="font-bold mb-4 text-dagger-text-primary">What would you like to do?</h4>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <!-- Confirm -->
+            <button
+              onclick="nextStep()"
+              class="p-4 bg-green-600 hover:bg-green-500 rounded-lg text-center transition-all text-white"
+            >
+              <div class="text-3xl mb-2">✅</div>
+              <p class="font-bold">Confirm</p>
+              <p class="text-sm text-green-100">This concept works! Show me the scenes.</p>
+            </button>
+
+            <!-- Revise -->
+            <button
+              class="p-4 bg-blue-600 hover:bg-blue-500 rounded-lg text-center transition-all text-white"
+            >
+              <div class="text-3xl mb-2">✏️</div>
+              <p class="font-bold">Revise</p>
+              <p class="text-sm text-blue-200">I like it, but want to adjust some details.</p>
+            </button>
+
+            <!-- Re-Roll -->
+            <button
+              class="p-4 bg-dagger-purple-700 hover:bg-dagger-purple-600 rounded-lg text-center transition-all text-white"
+            >
+              <div class="text-3xl mb-2">🎲</div>
+              <p class="font-bold">Re-Roll</p>
+              <p class="text-sm text-purple-200">Generate a completely different concept.</p>
+            </button>
+          </div>
+
+          <p class="text-center text-dagger-text-muted text-sm mt-4">
+            Re-rolls are free and unlimited at this stage
+          </p>
+        </div>
+
+        <div class="mt-6 p-4 bg-dagger-purple-900/30 border border-dagger-purple-700 rounded-lg">
+          <h3 class="font-bold text-dagger-teal-400 mb-2">Workflow Note (NEW STEP!):</h3>
+          <p class="text-gray-300">
+            This is the NEW step between Create and Scene Review. After generation, users first see:
+          </p>
+          <ul class="text-gray-300 mt-2 ml-4 list-disc">
+            <li><strong>Adventure title</strong> - AI-generated name</li>
+            <li><strong>Quick stats</strong> - Motif, party, tier, duration at a glance</li>
+            <li><strong>Overview</strong> - What the adventure is about</li>
+            <li><strong>Central conflict</strong> - The core dramatic tension</li>
+            <li><strong>Key themes</strong> - Thematic tags for the adventure</li>
+            <li><strong>Possible outcomes</strong> - How it might resolve</li>
+          </ul>
+          <p class="text-gray-300 mt-3">User has three choices:</p>
+          <ul class="text-gray-300 mt-2 ml-4 list-disc">
+            <li><strong>Confirm</strong> - Proceed to scene-by-scene breakdown</li>
+            <li><strong>Revise</strong> - Edit specific parts of the concept</li>
+            <li><strong>Re-Roll</strong> - Generate a completely new concept (free)</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Page 6: Scene 1 Review (Sequential Generation) -->
+      <div id="page-6" class="page">
+        <div class="flex items-center gap-4 mb-6">
+          <a
+            href="#"
+            onclick="
+              goToStep(5)
+              return false
+            "
+            class="text-gray-400 hover:text-white transition-colors"
+            >&larr; Back to Overview</a
+          >
+        </div>
+
+        <!-- Progress indicator -->
+        <div
+          class="bg-dagger-card rounded-xl p-4 mb-6 text-dagger-text-primary border border-dagger-border card-depth"
+        >
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-bold text-dagger-text-primary">Scene Progress</h3>
+            <span class="text-blue-600 font-medium">Scene 1 of 3</span>
+          </div>
+          <div class="flex gap-2">
+            <div class="flex-1 h-2 bg-blue-500 rounded-full"></div>
+            <div class="flex-1 h-2 bg-dagger-border rounded-full"></div>
+            <div class="flex-1 h-2 bg-dagger-border rounded-full"></div>
+          </div>
+          <p class="text-dagger-text-muted text-sm mt-2">
+            Scenes are generated one at a time. Confirm each scene to generate the next.
+          </p>
+        </div>
+
+        <div class="flex justify-between items-start mb-4">
+          <div>
+            <span class="text-sm text-gray-400">The Witherwild Expedition</span>
+            <h2 class="text-2xl font-bold text-gray-100">Scene 1: The Village Warning</h2>
+            <div class="flex gap-2 mt-2">
+              <span
+                class="px-3 py-1 bg-dagger-teal-500/20 text-dagger-teal-400 rounded-full text-sm"
+                >🗺️ Exploration</span
+              >
+              <span class="px-3 py-1 bg-dagger-frame text-gray-300 rounded-full text-sm"
+                >~20 min</span
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- Scene Content Card -->
+        <div
+          class="bg-dagger-card rounded-xl p-6 mb-6 text-dagger-text-primary border border-dagger-border"
+        >
+          <div class="space-y-4">
+            <div>
+              <h4 class="font-bold text-dagger-text-primary mb-2">Scene Summary</h4>
+              <p class="text-dagger-text-secondary leading-relaxed">
+                The party arrives at a village on the edge of the Witherwild, where frightened
+                villagers speak of strange happenings in the forest. This opening scene establishes
+                the stakes and gives the party a chance to gather information before venturing into
+                danger.
+              </p>
+            </div>
+
+            <div>
+              <h4 class="font-bold text-dagger-text-primary mb-2">Setting</h4>
+              <p class="text-dagger-text-secondary leading-relaxed">
+                The village of Thornhaven sits at the forest's edge, its wooden palisade showing
+                signs of recent reinforcement. Nervous guards patrol the walls, and the usual bustle
+                of village life has been replaced by an uneasy quiet.
+              </p>
+            </div>
+
+            <div>
+              <h4 class="font-bold text-dagger-text-primary mb-2">Key NPCs</h4>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="bg-dagger-surface p-3 rounded border border-dagger-border">
+                  <p class="font-medium text-dagger-text-primary">Elder Mora</p>
+                  <p class="text-dagger-text-muted text-sm">
+                    Village leader, worried but pragmatic. Will offer payment for help.
+                  </p>
+                </div>
+                <div class="bg-dagger-surface p-3 rounded border border-dagger-border">
+                  <p class="font-medium text-dagger-text-primary">Finn the Scout</p>
+                  <p class="text-dagger-text-muted text-sm">
+                    Young scout who witnessed the corruption. Traumatized but willing to guide.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h4 class="font-bold text-dagger-text-primary mb-2">Scene Beats</h4>
+              <ol class="text-dagger-text-secondary space-y-1 ml-4 list-decimal">
+                <li>Arrival at the village gates - guards are suspicious</li>
+                <li>Meeting with Elder Mora in the village square</li>
+                <li>Gathering information from villagers</li>
+                <li>Decision to investigate the forest</li>
+              </ol>
+            </div>
+
+            <div>
+              <h4 class="font-bold text-dagger-text-primary mb-2">Transition to Next Scene</h4>
+              <p class="text-dagger-text-secondary leading-relaxed">
+                Finn offers to guide the party to where they last saw the corruption. The forest
+                path grows darker as they leave the safety of the village behind...
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div
+          class="bg-dagger-card rounded-xl p-6 text-dagger-text-primary border border-dagger-border card-depth"
+        >
+          <h4 class="font-bold mb-4 text-dagger-text-primary">
+            What would you like to do with this scene?
+          </h4>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <!-- Confirm -->
+            <button
+              onclick="nextStep()"
+              class="p-4 bg-green-600 hover:bg-green-500 rounded-lg text-center transition-all text-white"
+            >
+              <div class="text-3xl mb-2">✅</div>
+              <p class="font-bold">Confirm Scene</p>
+              <p class="text-sm text-green-100">Lock this scene & generate Scene 2</p>
+            </button>
+
+            <!-- Edit -->
+            <button
+              class="p-4 bg-blue-600 hover:bg-blue-500 rounded-lg text-center transition-all text-white"
+            >
+              <div class="text-3xl mb-2">✏️</div>
+              <p class="font-bold">Edit Scene</p>
+              <p class="text-sm text-blue-200">Make manual changes to the content</p>
+            </button>
+
+            <!-- Re-Roll -->
+            <button
+              class="p-4 bg-dagger-purple-700 hover:bg-dagger-purple-600 rounded-lg text-center transition-all text-white"
+            >
+              <div class="text-3xl mb-2">🎲</div>
+              <p class="font-bold">Re-Roll</p>
+              <p class="text-sm text-purple-200">Generate a different version</p>
+            </button>
+          </div>
+
+          <p class="text-center text-dagger-text-muted text-sm mt-4">
+            Re-rolls are free and unlimited for scene generation
+          </p>
+        </div>
+
+        <div class="mt-6 p-4 bg-dagger-purple-900/30 border border-dagger-purple-700 rounded-lg">
+          <h3 class="font-bold text-dagger-teal-400 mb-2">Workflow Note (UPDATED!):</h3>
+          <p class="text-gray-300">This is the NEW sequential scene flow. Key changes:</p>
+          <ul class="text-gray-300 mt-2 ml-4 list-disc">
+            <li><strong>One scene at a time</strong> - Only Scene 1 is generated initially</li>
+            <li>
+              <strong>Confirm to proceed</strong> - Scene 2 is generated AFTER Scene 1 is confirmed
+            </li>
+            <li>
+              <strong>Context-aware</strong> - Each new scene is generated with knowledge of
+              confirmed scenes
+            </li>
+            <li>
+              <strong>No wasted generation</strong> - User approves foundation before building on it
+            </li>
+          </ul>
+          <p class="text-gray-300 mt-3">User actions:</p>
+          <ul class="text-gray-300 mt-2 ml-4 list-disc">
+            <li><strong>Confirm</strong> - Lock scene, generate next one</li>
+            <li><strong>Edit</strong> - Open editor to make manual changes</li>
+            <li><strong>Re-Roll</strong> - Generate a completely different scene (free)</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Page 7: Scene 2 Review (Sequential Generation) -->
+      <div id="page-7" class="page">
+        <div class="flex items-center gap-4 mb-6">
+          <a
+            href="#"
+            onclick="
+              goToStep(6)
+              return false
+            "
+            class="text-gray-400 hover:text-white transition-colors"
+            >&larr; Back to Scene 1</a
+          >
+        </div>
+
+        <!-- Progress indicator -->
+        <div
+          class="bg-dagger-card rounded-xl p-4 mb-6 text-dagger-text-primary border border-dagger-border card-depth"
+        >
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-bold text-dagger-text-primary">Scene Progress</h3>
+            <span class="text-blue-600 font-medium">Scene 2 of 3</span>
+          </div>
+          <div class="flex gap-2">
+            <div class="flex-1 h-2 bg-green-500 rounded-full"></div>
+            <div class="flex-1 h-2 bg-blue-500 rounded-full"></div>
+            <div class="flex-1 h-2 bg-dagger-border rounded-full"></div>
+          </div>
+          <div class="flex gap-2 mt-3 text-sm">
+            <span class="text-green-600">✓ Scene 1 confirmed</span>
+          </div>
+        </div>
+
+        <div class="flex justify-between items-start mb-4">
+          <div>
+            <span class="text-sm text-gray-400">The Witherwild Expedition</span>
+            <h2 class="text-2xl font-bold text-gray-100">Scene 2: Into the Withering Woods</h2>
+            <div class="flex gap-2 mt-2">
+              <span class="px-3 py-1 bg-red-500/20 text-red-400 rounded-full text-sm"
+                >⚔️ Combat</span
+              >
+              <span class="px-3 py-1 bg-dagger-frame text-gray-300 rounded-full text-sm"
+                >~30 min</span
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- Scene Content Card -->
+        <div
+          class="bg-dagger-card rounded-xl p-6 mb-6 text-dagger-text-primary border border-dagger-border"
+        >
+          <div class="space-y-4">
+            <div>
+              <h4 class="font-bold text-dagger-text-primary mb-2">Scene Summary</h4>
+              <p class="text-dagger-text-secondary leading-relaxed">
+                Deep in the corrupted forest, the party encounters twisted creatures born from the
+                spreading blight. This combat scene raises the stakes and demonstrates the true
+                danger of the corruption they're investigating.
+              </p>
+            </div>
+
+            <div>
+              <h4 class="font-bold text-dagger-text-primary mb-2">Setting</h4>
+              <p class="text-dagger-text-secondary leading-relaxed">
+                The forest path grows darker and more twisted. Trees lean at unnatural angles, their
+                bark blackened and weeping a dark sap. The air smells of rot and something
+                else—something wrong. Finn grows increasingly nervous, recognizing the signs.
+              </p>
+            </div>
+
+            <div>
+              <h4 class="font-bold text-dagger-text-primary mb-2">Encounter</h4>
+              <div class="bg-red-50 border border-red-200 p-4 rounded">
+                <p class="font-medium text-red-600 mb-2">Blighted Beasts (Tier 2 Combat)</p>
+                <ul class="text-dagger-text-secondary text-sm space-y-1">
+                  <li>• 2-3 Corrupted Wolves (minions) - fast, pack tactics</li>
+                  <li>• 1 Blighted Stag (standard) - goring charge, spreads corruption on hit</li>
+                  <li>
+                    • Terrain: Difficult terrain from twisted roots, areas of corruption that deal
+                    damage
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div>
+              <h4 class="font-bold text-dagger-text-primary mb-2">Scene Beats</h4>
+              <ol class="text-dagger-text-secondary space-y-1 ml-4 list-decimal">
+                <li>Journey into the forest - environmental storytelling</li>
+                <li>Finn spots signs of corruption - warning signs</li>
+                <li>Ambush! Blighted creatures attack</li>
+                <li>Combat resolution - party can capture or examine remains</li>
+              </ol>
+            </div>
+
+            <div>
+              <h4 class="font-bold text-dagger-text-primary mb-2">Transition to Next Scene</h4>
+              <p class="text-dagger-text-secondary leading-relaxed">
+                Following the trail of corruption deeper into the forest, the party discovers its
+                source—a clearing where the blight is strongest, and a tragic figure awaits...
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div
+          class="bg-dagger-card rounded-xl p-6 text-dagger-text-primary border border-dagger-border card-depth"
+        >
+          <h4 class="font-bold mb-4 text-dagger-text-primary">
+            What would you like to do with this scene?
+          </h4>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <button
+              onclick="nextStep()"
+              class="p-4 bg-green-600 hover:bg-green-500 rounded-lg text-center transition-all text-white"
+            >
+              <div class="text-3xl mb-2">✅</div>
+              <p class="font-bold">Confirm Scene</p>
+              <p class="text-sm text-green-100">Lock this scene & generate Scene 3</p>
+            </button>
+
+            <button
+              class="p-4 bg-blue-600 hover:bg-blue-500 rounded-lg text-center transition-all text-white"
+            >
+              <div class="text-3xl mb-2">✏️</div>
+              <p class="font-bold">Edit Scene</p>
+              <p class="text-sm text-blue-200">Make manual changes to the content</p>
+            </button>
+
+            <button
+              class="p-4 bg-dagger-purple-700 hover:bg-dagger-purple-600 rounded-lg text-center transition-all text-white"
+            >
+              <div class="text-3xl mb-2">🎲</div>
+              <p class="font-bold">Re-Roll</p>
+              <p class="text-sm text-purple-200">Generate a different version</p>
+            </button>
+          </div>
+        </div>
+
+        <div class="mt-6 p-4 bg-dagger-purple-900/30 border border-dagger-purple-700 rounded-lg">
+          <h3 class="font-bold text-dagger-teal-400 mb-2">Workflow Note:</h3>
+          <p class="text-gray-300">
+            Scene 2 was generated with full context of the confirmed Scene 1. The AI knows:
+          </p>
+          <ul class="text-gray-300 mt-2 ml-4 list-disc">
+            <li>The party met Elder Mora and Finn</li>
+            <li>They learned about the missing hunters</li>
+            <li>Finn is guiding them into the forest</li>
+          </ul>
+          <p class="text-gray-300 mt-2">This ensures narrative continuity between scenes.</p>
+        </div>
+      </div>
+
+      <!-- Page 8: Scene 3 Review (Final Scene) -->
+      <div id="page-8" class="page">
+        <div class="flex items-center gap-4 mb-6">
+          <a
+            href="#"
+            onclick="
+              goToStep(7)
+              return false
+            "
+            class="text-gray-400 hover:text-white transition-colors"
+            >&larr; Back to Scene 2</a
+          >
+        </div>
+
+        <!-- Progress indicator -->
+        <div
+          class="bg-dagger-card rounded-xl p-4 mb-6 text-dagger-text-primary border border-dagger-border card-depth"
+        >
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-bold text-dagger-text-primary">Scene Progress</h3>
+            <span class="text-blue-600 font-medium">Scene 3 of 3 (Final!)</span>
+          </div>
+          <div class="flex gap-2">
+            <div class="flex-1 h-2 bg-green-500 rounded-full"></div>
+            <div class="flex-1 h-2 bg-green-500 rounded-full"></div>
+            <div class="flex-1 h-2 bg-blue-500 rounded-full"></div>
+          </div>
+          <div class="flex gap-2 mt-3 text-sm">
+            <span class="text-green-600">✓ Scene 1 confirmed</span>
+            <span class="text-dagger-text-muted">•</span>
+            <span class="text-green-600">✓ Scene 2 confirmed</span>
+          </div>
+        </div>
+
+        <div class="flex justify-between items-start mb-4">
+          <div>
+            <span class="text-sm text-gray-400">The Witherwild Expedition</span>
+            <h2 class="text-2xl font-bold text-gray-100">Scene 3: The Heart of Corruption</h2>
+            <div class="flex gap-2 mt-2">
+              <span
+                class="px-3 py-1 bg-dagger-purple-700/20 text-dagger-purple-500 rounded-full text-sm"
+                >🎭 Social</span
+              >
+              <span class="px-3 py-1 bg-dagger-frame text-gray-300 rounded-full text-sm"
+                >~25 min</span
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- Scene Content Card -->
+        <div
+          class="bg-dagger-card rounded-xl p-6 mb-6 text-dagger-text-primary border border-dagger-border"
+        >
+          <div class="space-y-4">
+            <div>
+              <h4 class="font-bold text-dagger-text-primary mb-2">Scene Summary</h4>
+              <p class="text-dagger-text-secondary leading-relaxed">
+                At the source of the blight, the party discovers a tragic figure who may be reasoned
+                with or destroyed. This climactic scene offers multiple resolution paths and
+                meaningful choices that will determine the adventure's outcome.
+              </p>
+            </div>
+
+            <div>
+              <h4 class="font-bold text-dagger-text-primary mb-2">Setting</h4>
+              <p class="text-dagger-text-secondary leading-relaxed">
+                A clearing in the heart of the Witherwild, where the corruption is strongest. Dead
+                trees form a natural amphitheater around a pool of dark, viscous liquid. At its
+                center stands a figure wreathed in shadow and twisted vines—the source of the
+                blight.
+              </p>
+            </div>
+
+            <div>
+              <h4 class="font-bold text-dagger-text-primary mb-2">Key NPC</h4>
+              <div class="bg-dagger-purple-700/10 border border-dagger-purple-700/30 p-4 rounded">
+                <p class="font-medium text-dagger-purple-700 mb-2">
+                  Aldric the Grieving (The Corrupted Druid)
+                </p>
+                <ul class="text-dagger-text-secondary text-sm space-y-1">
+                  <li>
+                    • <strong>Appearance:</strong> Once-kind face now twisted with grief, eyes that
+                    flicker between lucidity and madness
+                  </li>
+                  <li>
+                    • <strong>Motivation:</strong> Made a pact with dark forces to bring back their
+                    beloved, now trapped
+                  </li>
+                  <li>
+                    • <strong>Secret:</strong> Part of them wants to be stopped; they're horrified
+                    by what they've become
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div>
+              <h4 class="font-bold text-dagger-text-primary mb-2">Resolution Paths</h4>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="bg-red-50 border border-red-200 p-3 rounded">
+                  <p class="font-medium text-red-600 text-sm">Combat</p>
+                  <p class="text-dagger-text-muted text-xs">
+                    Destroy Aldric and end the corruption violently
+                  </p>
+                </div>
+                <div class="bg-green-50 border border-green-200 p-3 rounded">
+                  <p class="font-medium text-green-600 text-sm">Redemption</p>
+                  <p class="text-dagger-text-muted text-xs">
+                    Help Aldric find peace and break the pact willingly
+                  </p>
+                </div>
+                <div class="bg-yellow-50 border border-yellow-200 p-3 rounded">
+                  <p class="font-medium text-yellow-600 text-sm">Containment</p>
+                  <p class="text-dagger-text-muted text-xs">
+                    Seal the corruption but leave Aldric trapped
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h4 class="font-bold text-dagger-text-primary mb-2">Scene Beats</h4>
+              <ol class="text-dagger-text-secondary space-y-1 ml-4 list-decimal">
+                <li>Approach the clearing - sense of dread builds</li>
+                <li>Confrontation with Aldric - they speak of their loss</li>
+                <li>Choice moment - party decides approach</li>
+                <li>Resolution - based on party's choice</li>
+                <li>Aftermath - return to village with news</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons - Final Scene -->
+        <div
+          class="bg-dagger-card rounded-xl p-6 text-dagger-text-primary border border-dagger-border card-depth"
+        >
+          <h4 class="font-bold mb-4 text-dagger-text-primary">
+            This is the final scene! What would you like to do?
+          </h4>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <button
+              onclick="nextStep()"
+              class="p-4 bg-green-600 hover:bg-green-500 rounded-lg text-center transition-all text-white"
+            >
+              <div class="text-3xl mb-2">✅</div>
+              <p class="font-bold">Confirm & Expand</p>
+              <p class="text-sm text-green-100">Lock scene & add details!</p>
+            </button>
+
+            <button
+              class="p-4 bg-blue-600 hover:bg-blue-500 rounded-lg text-center transition-all text-white"
+            >
+              <div class="text-3xl mb-2">✏️</div>
+              <p class="font-bold">Edit Scene</p>
+              <p class="text-sm text-blue-200">Make manual changes</p>
+            </button>
+
+            <button
+              class="p-4 bg-dagger-purple-700 hover:bg-dagger-purple-600 rounded-lg text-center transition-all text-white"
+            >
+              <div class="text-3xl mb-2">🎲</div>
+              <p class="font-bold">Re-Roll</p>
+              <p class="text-sm text-purple-200">Generate different finale</p>
+            </button>
+          </div>
+        </div>
+
+        <div class="mt-6 p-4 bg-dagger-purple-900/30 border border-dagger-purple-700 rounded-lg">
+          <h3 class="font-bold text-dagger-teal-400 mb-2">Workflow Note:</h3>
+          <p class="text-gray-300">Scene 3 knows about ALL previous scenes. The AI incorporated:</p>
+          <ul class="text-gray-300 mt-2 ml-4 list-disc">
+            <li>Elder Mora's son was among the missing (from Scene 1)</li>
+            <li>The blighted creatures the party fought (from Scene 2)</li>
+            <li>Finn's guidance and knowledge (from Scene 1)</li>
+            <li>The overall theme of grief and corruption (from Overview)</li>
+          </ul>
+          <p class="text-gray-300 mt-2">Confirming this scene completes the adventure!</p>
+        </div>
+      </div>
+
+      <!-- Page 9: Expansion Mode (Sequential - Scene 1) -->
+      <div id="page-9" class="page">
+        <div class="flex items-center gap-4 mb-6">
+          <a
+            href="#"
+            onclick="
+              goToStep(8)
+              return false
+            "
+            class="text-gray-400 hover:text-white transition-colors"
+            >&larr; Back to Scene Review</a
+          >
+        </div>
+
+        <!-- Progress indicator -->
+        <div
+          class="bg-dagger-card rounded-xl p-4 mb-6 text-dagger-text-primary border border-dagger-border card-depth"
+        >
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-bold text-dagger-text-primary">Expansion Progress</h3>
+            <span class="text-blue-600 font-medium">Scene 1 of 3</span>
+          </div>
+          <div class="flex gap-2">
+            <div class="flex-1 h-2 bg-blue-500 rounded-full"></div>
+            <div class="flex-1 h-2 bg-dagger-border rounded-full"></div>
+            <div class="flex-1 h-2 bg-dagger-border rounded-full"></div>
+          </div>
+          <p class="text-dagger-text-muted text-sm mt-2">
+            Scenes are expanded one at a time. Confirm each expansion to proceed to the next.
+          </p>
+        </div>
+
+        <div class="flex justify-between items-start mb-4">
+          <div>
+            <span class="text-sm text-gray-400">The Witherwild Expedition</span>
+            <h2 class="text-2xl font-bold text-gray-100">
+              Expanding: Scene 1 - The Village Warning
+            </h2>
+            <div class="flex gap-2 mt-2">
+              <span
+                class="px-3 py-1 bg-dagger-teal-500/20 text-dagger-teal-400 rounded-full text-sm"
+                >🗺️ Exploration</span
+              >
+              <span class="px-3 py-1 bg-dagger-frame text-gray-300 rounded-full text-sm"
+                >~20 min</span
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- Expanded Scene Content (Rich Text Display) -->
+        <div
+          class="bg-dagger-card rounded-xl p-6 mb-6 space-y-6 text-dagger-text-primary border border-dagger-border card-depth"
+        >
+          <!-- Setting Section -->
+          <section>
+            <h3 class="text-lg font-bold text-slate-700 mb-3 flex items-center gap-2">
+              <span>🏘️</span> Setting: Thornhaven Village
+            </h3>
+            <p class="text-dagger-text-secondary leading-relaxed mb-4">
+              The village of Thornhaven clings to the edge of the Witherwild like a barnacle to a
+              ship's hull. Wooden palisades, recently reinforced with fresh-cut timber still weeping
+              sap, encircle two dozen buildings. Smoke rises from chimneys, but the usual bustle of
+              village life is absent.
+            </p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div class="bg-dagger-surface p-3 rounded border border-dagger-border">
+                <h4 class="font-medium text-dagger-text-primary mb-2">👁️ Sights</h4>
+                <ul class="text-dagger-text-muted text-sm space-y-1">
+                  <li>• Shuttered windows with pale faces peering through gaps</li>
+                  <li>• A well in the village center, its rope frayed</li>
+                  <li>• Hunting trophies on doorposts, but no fresh game</li>
+                </ul>
+              </div>
+              <div class="bg-dagger-surface p-3 rounded border border-dagger-border">
+                <h4 class="font-medium text-dagger-text-primary mb-2">👂 Sounds</h4>
+                <ul class="text-dagger-text-muted text-sm space-y-1">
+                  <li>• Hushed whispers that stop when strangers approach</li>
+                  <li>• Dogs whimpering, refusing to bark</li>
+                  <li>• Wind carrying distant, unnatural sounds</li>
+                </ul>
+              </div>
+              <div class="bg-dagger-surface p-3 rounded border border-dagger-border">
+                <h4 class="font-medium text-dagger-text-primary mb-2">👃 Smells</h4>
+                <ul class="text-dagger-text-muted text-sm space-y-1">
+                  <li>• Wood smoke with an acrid undertone</li>
+                  <li>• Something rotting, faint but persistent</li>
+                  <li>• Fear-sweat on the villagers</li>
+                </ul>
+              </div>
+            </div>
+          </section>
+
+          <!-- Context Section (NEW!) -->
+          <section class="border-l-4 border-blue-500 pl-4">
+            <h3 class="text-lg font-bold text-slate-700 mb-3 flex items-center gap-2">
+              <span>📍</span> Context
+            </h3>
+            <ul class="text-dagger-text-secondary space-y-2">
+              <li>
+                <strong class="text-dagger-text-primary">Why they're here:</strong> Rumors of
+                missing hunters reached the party in Millford. Elder Mora sent word to the guild
+                requesting aid, promising payment.
+              </li>
+              <li>
+                <strong class="text-dagger-text-primary">What's happening:</strong> Seven hunters
+                have vanished over two weeks. All disappeared near the Witherwild's edge. No bodies
+                found.
+              </li>
+              <li>
+                <strong class="text-dagger-text-primary">The stakes:</strong> The corruption is
+                spreading. If not stopped, it will reach Thornhaven within a week.
+              </li>
+              <li>
+                <strong class="text-dagger-text-primary">Key intel:</strong> Finn, a young scout,
+                escaped and witnessed unnatural creatures in the forest.
+              </li>
+            </ul>
+          </section>
+
+          <!-- Key NPCs Section -->
+          <section>
+            <h3 class="text-lg font-bold text-slate-700 mb-3 flex items-center gap-2">
+              <span>👥</span> Key NPCs
+            </h3>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <!-- Elder Mora -->
+              <div class="bg-dagger-surface p-4 rounded border border-dagger-border">
+                <div class="flex justify-between items-start mb-2">
+                  <h4 class="font-bold text-dagger-text-primary">Elder Mora</h4>
+                  <span class="text-xs text-dagger-text-muted">she/her</span>
+                </div>
+                <table class="w-full text-sm">
+                  <tr class="border-b border-dagger-border">
+                    <td class="text-dagger-text-muted py-1 w-24">Appearance</td>
+                    <td class="text-dagger-text-secondary py-1">
+                      Silver-haired woman in her 60s, weathered face, sharp eyes
+                    </td>
+                  </tr>
+                  <tr class="border-b border-dagger-border">
+                    <td class="text-dagger-text-muted py-1">Personality</td>
+                    <td class="text-dagger-text-secondary py-1">
+                      Pragmatic, protective, hiding fear behind authority
+                    </td>
+                  </tr>
+                  <tr class="border-b border-dagger-border">
+                    <td class="text-dagger-text-muted py-1">Motivation</td>
+                    <td class="text-dagger-text-secondary py-1">
+                      Protect her village, find her missing son Tomas
+                    </td>
+                  </tr>
+                  <tr class="border-b border-dagger-border">
+                    <td class="text-dagger-text-muted py-1">Secret</td>
+                    <td class="text-dagger-gold-600 py-1">
+                      Her son was among the first to disappear
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="text-dagger-text-muted py-1">Voice</td>
+                    <td class="text-dagger-text-secondary py-1 italic">
+                      Measured, clipped sentences, occasional tremor
+                    </td>
+                  </tr>
+                </table>
+              </div>
+
+              <!-- Finn -->
+              <div class="bg-dagger-surface p-4 rounded border border-dagger-border">
+                <div class="flex justify-between items-start mb-2">
+                  <h4 class="font-bold text-dagger-text-primary">Finn the Scout</h4>
+                  <span class="text-xs text-dagger-text-muted">they/them</span>
+                </div>
+                <table class="w-full text-sm">
+                  <tr class="border-b border-dagger-border">
+                    <td class="text-dagger-text-muted py-1 w-24">Appearance</td>
+                    <td class="text-dagger-text-secondary py-1">
+                      Young adult, lean, haunted eyes, bandaged arm
+                    </td>
+                  </tr>
+                  <tr class="border-b border-dagger-border">
+                    <td class="text-dagger-text-muted py-1">Personality</td>
+                    <td class="text-dagger-text-secondary py-1">
+                      Traumatized but determined to help, guilt-ridden
+                    </td>
+                  </tr>
+                  <tr class="border-b border-dagger-border">
+                    <td class="text-dagger-text-muted py-1">Motivation</td>
+                    <td class="text-dagger-text-secondary py-1">
+                      Redeem themselves for fleeing, save the others
+                    </td>
+                  </tr>
+                  <tr class="border-b border-dagger-border">
+                    <td class="text-dagger-text-muted py-1">Knowledge</td>
+                    <td class="text-dagger-teal-600 py-1">
+                      Witnessed "shadows with teeth" and "trees that walked"
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="text-dagger-text-muted py-1">Voice</td>
+                    <td class="text-dagger-text-secondary py-1 italic">
+                      Speaks in bursts, trails off, jumps at sounds
+                    </td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <!-- Read-Aloud Narrative Section (NEW!) -->
+          <section>
+            <h3 class="text-lg font-bold text-slate-700 mb-3 flex items-center gap-2">
+              <span>📖</span> Read-Aloud Narrative
+            </h3>
+
+            <!-- Scene Opening -->
+            <div class="read-aloud-box border-l-4 border-blue-600 p-4 rounded-r mb-4">
+              <p class="text-xs text-blue-600 uppercase tracking-wide mb-2">Scene Opening</p>
+              <p class="text-dagger-text-primary italic leading-relaxed">
+                "The village gates creak open just wide enough for you to pass single-file. The
+                guards' crossbows lower reluctantly, their eyes never leaving your weapons. Beyond
+                the palisade, Thornhaven feels... wrong. Too quiet. The usual sounds of village
+                life—children playing, merchants hawking, livestock complaining—are absent. Instead,
+                there's only the whisper of shutters closing as you pass."
+              </p>
+            </div>
+
+            <!-- Elder Mora's Plea -->
+            <div class="read-aloud-box border-l-4 border-blue-600 p-4 rounded-r mb-4">
+              <p class="text-xs text-blue-600 uppercase tracking-wide mb-2">
+                When Elder Mora speaks
+              </p>
+              <p class="text-dagger-text-primary italic leading-relaxed">
+                "You've come. Good."
+                <span class="text-dagger-text-muted not-italic"
+                  >[She studies each of you in turn.]</span
+                >
+                "I won't waste words—we're desperate. Seven hunters. Gone. Two weeks now, and the
+                forest... it's changing. The animals that wander back are twisted, wrong. If you can
+                find out what's happening, stop it, there's fifty gold and whatever supplies we can
+                spare. It's not much, but it's everything we have."
+              </p>
+            </div>
+
+            <!-- Finn's Warning -->
+            <div class="read-aloud-box border-l-4 border-blue-600 p-4 rounded-r">
+              <p class="text-xs text-blue-600 uppercase tracking-wide mb-2">Finn's Warning</p>
+              <p class="text-dagger-text-primary italic leading-relaxed">
+                <span class="text-dagger-text-muted not-italic"
+                  >[Finn's eyes dart to the forest, then back.]</span
+                >
+                "I was there. I saw—"
+                <span class="text-dagger-text-muted not-italic">[They swallow hard.]</span> "The
+                trees moved. Not like wind. Like they were... reaching. And the shadows had teeth. I
+                ran. I left them and I ran."
+                <span class="text-dagger-text-muted not-italic"
+                  >[Their voice drops to a whisper.]</span
+                >
+                "They're still out there. I can feel it."
+              </p>
+            </div>
+          </section>
+
+          <!-- Scene Beats Section -->
+          <section>
+            <h3 class="text-lg font-bold text-slate-700 mb-3 flex items-center gap-2">
+              <span>🎬</span> Scene Beats
+            </h3>
+
+            <div class="space-y-3">
+              <div class="flex gap-4 items-start">
+                <div
+                  class="bg-dagger-surface border border-dagger-border rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold flex-shrink-0 text-dagger-text-primary"
+                >
+                  1
+                </div>
+                <div class="flex-1">
+                  <div class="flex justify-between items-center mb-1">
+                    <h4 class="font-medium text-dagger-text-primary">Arrival at the Gates</h4>
+                    <span class="text-xs text-dagger-text-muted">~5 min</span>
+                  </div>
+                  <p class="text-dagger-text-secondary text-sm">
+                    Guards are nervous with crossbows raised.
+                  </p>
+                  <p class="text-dagger-teal-600 text-sm mt-1">
+                    <strong>Mechanic:</strong> Presence roll (DC 12) to ease tensions. Failure
+                    doesn't prevent entry but creates hostile first impression.
+                  </p>
+                </div>
+              </div>
+
+              <div class="flex gap-4 items-start">
+                <div
+                  class="bg-dagger-surface border border-dagger-border rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold flex-shrink-0 text-dagger-text-primary"
+                >
+                  2
+                </div>
+                <div class="flex-1">
+                  <div class="flex justify-between items-center mb-1">
+                    <h4 class="font-medium text-dagger-text-primary">Meeting Elder Mora</h4>
+                    <span class="text-xs text-dagger-text-muted">~5 min</span>
+                  </div>
+                  <p class="text-dagger-text-secondary text-sm">
+                    She approaches in the village square, sizing up the party. Offers payment: 50
+                    gold + supplies.
+                  </p>
+                  <p class="text-dagger-gold-600 text-sm mt-1">
+                    <strong>Branch:</strong> If asked about her family, her composure cracks—her son
+                    Tomas was first to vanish.
+                  </p>
+                </div>
+              </div>
+
+              <div class="flex gap-4 items-start">
+                <div
+                  class="bg-dagger-surface border border-dagger-border rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold flex-shrink-0 text-dagger-text-primary"
+                >
+                  3
+                </div>
+                <div class="flex-1">
+                  <div class="flex justify-between items-center mb-1">
+                    <h4 class="font-medium text-dagger-text-primary">Gathering Intel</h4>
+                    <span class="text-xs text-dagger-text-muted">~10 min</span>
+                  </div>
+                  <p class="text-dagger-text-secondary text-sm mb-2">Multiple NPCs to interview:</p>
+                  <div class="bg-dagger-surface rounded p-2 text-sm border border-dagger-border">
+                    <table class="w-full">
+                      <tr class="border-b border-dagger-border">
+                        <td class="text-dagger-text-muted py-1 w-32">Elder Mora</td>
+                        <td class="text-dagger-text-secondary py-1">
+                          7 hunters missing, started 2 weeks ago, no bodies
+                        </td>
+                      </tr>
+                      <tr class="border-b border-dagger-border">
+                        <td class="text-dagger-text-muted py-1">Finn</td>
+                        <td class="text-dagger-text-secondary py-1">
+                          "Shadows with teeth", "trees that walked"
+                        </td>
+                      </tr>
+                      <tr>
+                        <td class="text-dagger-text-muted py-1">Village Healer</td>
+                        <td class="text-dagger-text-secondary py-1">
+                          Strange wounds on returned livestock—black veins
+                        </td>
+                      </tr>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex gap-4 items-start">
+                <div
+                  class="bg-dagger-surface border border-dagger-border rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold flex-shrink-0 text-dagger-text-primary"
+                >
+                  4
+                </div>
+                <div class="flex-1">
+                  <div class="flex justify-between items-center mb-1">
+                    <h4 class="font-medium text-dagger-text-primary">Decision Point</h4>
+                    <span class="text-xs text-dagger-text-muted">~5 min</span>
+                  </div>
+                  <p class="text-dagger-text-secondary text-sm">
+                    Party decides to investigate. Finn offers to guide them.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Transition Section -->
+          <section class="border-t border-dagger-border pt-4">
+            <h3 class="text-lg font-bold text-slate-700 mb-3 flex items-center gap-2">
+              <span>➡️</span> Transition to Scene 2
+            </h3>
+            <div class="read-aloud-box border-l-4 border-blue-600 p-4 rounded-r">
+              <p class="text-dagger-text-primary italic leading-relaxed">
+                "Finn pauses at the treeline, their hand on a weathered signpost pointing into the
+                Witherwild. 'This is where we went in,' they say, voice barely above a whisper. 'The
+                path is still there, but... it feels different now. Darker.' They look back at you.
+                'Stay close. And if the shadows start moving, run.'"
+              </p>
+            </div>
+            <p class="text-dagger-text-muted text-sm mt-3">
+              <strong>Carry Forward:</strong> Party knows 7 are missing, Finn is guide, Elder Mora's
+              son was first victim, corruption causes physical changes to creatures.
+            </p>
+          </section>
+        </div>
+
+        <!-- Action Buttons - Confirm or Refine (NO Re-Roll) -->
+        <div
+          class="bg-dagger-card rounded-xl p-6 text-dagger-text-primary border border-dagger-border card-depth"
+        >
+          <h4 class="font-bold mb-4 text-dagger-text-primary">
+            What would you like to do with this expanded scene?
+          </h4>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Confirm -->
+            <button
+              onclick="nextStep()"
+              class="p-4 bg-green-600 hover:bg-green-500 rounded-lg text-center transition-all text-white"
+            >
+              <div class="text-3xl mb-2">✅</div>
+              <p class="font-bold">Confirm Expansion</p>
+              <p class="text-sm text-green-100">Lock this & expand Scene 2</p>
+            </button>
+
+            <!-- Refine with AI -->
+            <button
+              class="p-4 bg-blue-600 hover:bg-blue-500 rounded-lg text-center transition-all text-white"
+            >
+              <div class="text-3xl mb-2">✨</div>
+              <p class="font-bold">Refine with AI</p>
+              <p class="text-sm text-blue-200">Give instructions to improve</p>
+            </button>
+          </div>
+
+          <!-- AI Refinement Input (shown when Refine clicked) -->
+          <div class="mt-4 p-4 bg-dagger-surface rounded-lg border border-dagger-teal-600/30">
+            <label class="block text-sm text-dagger-text-secondary mb-2"
+              >What would you like to change?</label
+            >
+            <div class="flex gap-2">
+              <input
+                type="text"
+                placeholder="e.g., Add more tension to Elder Mora's dialogue"
+                class="flex-1 bg-white border border-dagger-border rounded-md px-3 py-2 text-sm text-dagger-text-primary focus:border-dagger-teal-600 focus:outline-none transition-colors"
+              />
+              <button
+                class="px-4 py-2 bg-dagger-teal-600 text-white rounded-lg hover:bg-dagger-teal-500 font-medium transition-colors"
+              >
+                Apply
+              </button>
+            </div>
+            <p class="text-xs text-dagger-text-muted mt-2">
+              Examples: "Add a bar scene", "Make Finn more suspicious", "Include weather details"
+            </p>
+          </div>
+        </div>
+
+        <div class="mt-6 p-4 bg-dagger-purple-900/30 border border-dagger-purple-700 rounded-lg">
+          <h3 class="font-bold text-dagger-teal-400 mb-2">Workflow Note (UPDATED!):</h3>
+          <p class="text-gray-300">This is the redesigned Expand stage with key improvements:</p>
+          <ul class="text-gray-300 mt-2 ml-4 list-disc">
+            <li>
+              <strong>Sequential pattern</strong> - Expand Scene 1, confirm, then Scene 2 generates
+            </li>
+            <li>
+              <strong>Rich text display</strong> - Formatted web content, NOT a markdown textarea
+            </li>
+            <li>
+              <strong>Context section</strong> - Explains WHY the party is here (prevents narrative
+              confusion)
+            </li>
+            <li>
+              <strong>Read-aloud narrative</strong> - Boxed text GMs can read directly to players
+            </li>
+            <li>
+              <strong>Stat blocks</strong> - Added for adversaries (see Scene 2 for combat example)
+            </li>
+            <li>
+              <strong>Two actions only</strong> - Confirm or Refine (NO re-roll at expansion stage)
+            </li>
+          </ul>
+          <p class="text-gray-300 mt-3">
+            Content structure documented in <code>docs/EXPANDED_SCENE_STRUCTURE.md</code>
+          </p>
+        </div>
+      </div>
+
+      <!-- Page 10: Expansion Mode (Sequential - Scene 2 with Combat/Stat Blocks) -->
+      <div id="page-10" class="page">
+        <div class="flex items-center gap-4 mb-6">
+          <a
+            href="#"
+            onclick="
+              goToStep(9)
+              return false
+            "
+            class="text-gray-400 hover:text-white transition-colors"
+            >&larr; Back to Scene 1 Expansion</a
+          >
+        </div>
+
+        <!-- Progress indicator -->
+        <div
+          class="bg-dagger-card rounded-xl p-4 mb-6 text-dagger-text-primary border border-dagger-border card-depth"
+        >
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-bold text-dagger-text-primary">Expansion Progress</h3>
+            <span class="text-blue-600 font-medium">Scene 2 of 3</span>
+          </div>
+          <div class="flex gap-2">
+            <div class="flex-1 h-2 bg-green-500 rounded-full"></div>
+            <div class="flex-1 h-2 bg-blue-500 rounded-full"></div>
+            <div class="flex-1 h-2 bg-dagger-border rounded-full"></div>
+          </div>
+          <div class="flex gap-2 mt-3 text-sm">
+            <span class="text-green-600">✓ Scene 1 expansion confirmed</span>
+          </div>
+        </div>
+
+        <div class="flex justify-between items-start mb-4">
+          <div>
+            <span class="text-sm text-gray-400">The Witherwild Expedition</span>
+            <h2 class="text-2xl font-bold text-gray-100">
+              Expanding: Scene 2 - Into the Withering Woods
+            </h2>
+            <div class="flex gap-2 mt-2">
+              <span class="px-3 py-1 bg-red-500/20 text-red-400 rounded-full text-sm"
+                >⚔️ Combat</span
+              >
+              <span class="px-3 py-1 bg-dagger-frame text-gray-300 rounded-full text-sm"
+                >~30 min</span
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- Expanded Scene Content (Rich Text Display) -->
+        <div
+          class="bg-dagger-card rounded-xl p-6 mb-6 space-y-6 text-dagger-text-primary border border-dagger-border card-depth"
+        >
+          <!-- Setting Section -->
+          <section>
+            <h3 class="text-lg font-bold text-slate-700 mb-3 flex items-center gap-2">
+              <span>🌲</span> Setting: The Witherwild Forest
+            </h3>
+            <p class="text-dagger-text-secondary leading-relaxed mb-4">
+              The forest path grows darker with each step. Trees lean at unnatural angles, their
+              bark blackened and weeping a dark sap that smells of rot. The air grows heavy,
+              pressing against your lungs. What was once a well-traveled hunter's trail is now
+              barely visible beneath twisted roots and creeping vines.
+            </p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div class="bg-dagger-surface p-3 rounded border border-dagger-border">
+                <h4 class="font-medium text-dagger-text-primary mb-2">👁️ Sights</h4>
+                <ul class="text-dagger-text-muted text-sm space-y-1">
+                  <li>• Black veins spreading up tree trunks</li>
+                  <li>• Dead animals twisted into unnatural poses</li>
+                  <li>• Shadows that seem to move against the light</li>
+                </ul>
+              </div>
+              <div class="bg-dagger-surface p-3 rounded border border-dagger-border">
+                <h4 class="font-medium text-dagger-text-primary mb-2">👂 Sounds</h4>
+                <ul class="text-dagger-text-muted text-sm space-y-1">
+                  <li>• Branches cracking without wind</li>
+                  <li>• Low, guttural growls from multiple directions</li>
+                  <li>• Finn's ragged breathing</li>
+                </ul>
+              </div>
+              <div class="bg-dagger-surface p-3 rounded border border-dagger-border">
+                <h4 class="font-medium text-dagger-text-primary mb-2">👃 Smells</h4>
+                <ul class="text-dagger-text-muted text-sm space-y-1">
+                  <li>• Decay, thick and cloying</li>
+                  <li>• Copper tang of old blood</li>
+                  <li>• Something acrid, chemical</li>
+                </ul>
+              </div>
+            </div>
+          </section>
+
+          <!-- Context Section -->
+          <section class="border-l-4 border-blue-500 pl-4">
+            <h3 class="text-lg font-bold text-slate-700 mb-3 flex items-center gap-2">
+              <span>📍</span> Context
+            </h3>
+            <ul class="text-dagger-text-secondary space-y-2">
+              <li>
+                <strong class="text-dagger-text-primary">Why they're here:</strong> Following Finn
+                deeper into the Witherwild to find the source of the corruption.
+              </li>
+              <li>
+                <strong class="text-dagger-text-primary">What they know:</strong> Seven hunters
+                missing, corruption spreads, unnatural creatures roam.
+              </li>
+              <li>
+                <strong class="text-dagger-text-primary">Finn's state:</strong> Increasingly
+                agitated, recognizing landmarks from their escape. They keep glancing at their
+                bandaged arm.
+              </li>
+              <li>
+                <strong class="text-dagger-text-primary">Foreshadowing:</strong> The creatures
+                they'll fight were once normal forest animals, twisted by the corruption.
+              </li>
+            </ul>
+          </section>
+
+          <!-- Adversary Stat Blocks (NEW!) -->
+          <section>
+            <h3 class="text-lg font-bold text-slate-700 mb-3 flex items-center gap-2">
+              <span>⚔️</span> Combat Encounter: Blighted Beasts
+            </h3>
+
+            <p class="text-gray-400 text-sm mb-4">
+              Tier 2 encounter balanced for 4 players. Adjust numbers based on party strength.
+            </p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <!-- Corrupted Wolves -->
+              <div class="bg-red-900/20 border border-red-500/30 p-4 rounded">
+                <div class="flex justify-between items-start mb-3">
+                  <div>
+                    <h4 class="font-bold text-red-400">Corrupted Wolf</h4>
+                    <span class="text-xs text-gray-400">Minion (×2-3)</span>
+                  </div>
+                  <span class="px-2 py-1 bg-red-500/20 text-red-300 text-xs rounded">MINION</span>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2 mb-3 text-center">
+                  <div class="bg-dagger-card p-2 rounded">
+                    <p class="text-xs text-gray-500">HP</p>
+                    <p class="font-bold text-lg">8</p>
+                  </div>
+                  <div class="bg-dagger-card p-2 rounded">
+                    <p class="text-xs text-gray-500">Armor</p>
+                    <p class="font-bold text-lg">1</p>
+                  </div>
+                  <div class="bg-dagger-card p-2 rounded">
+                    <p class="text-xs text-gray-500">Evasion</p>
+                    <p class="font-bold text-lg">12</p>
+                  </div>
+                </div>
+
+                <div class="space-y-2 text-sm">
+                  <div class="bg-dagger-card p-2 rounded">
+                    <p class="text-gray-400">
+                      <strong class="text-red-300">Bite:</strong> 1d8+2 damage
+                    </p>
+                  </div>
+                  <div class="bg-dagger-card p-2 rounded">
+                    <p class="text-gray-400">
+                      <strong class="text-dagger-purple-700">Pack Tactics:</strong> +2 to attack if
+                      ally within 5ft of target
+                    </p>
+                  </div>
+                </div>
+
+                <p class="text-gray-500 text-xs mt-3 italic">
+                  Once normal wolves, now gaunt with black veins and milky eyes
+                </p>
+              </div>
+
+              <!-- Blighted Stag -->
+              <div class="bg-red-900/20 border border-red-500/30 p-4 rounded">
+                <div class="flex justify-between items-start mb-3">
+                  <div>
+                    <h4 class="font-bold text-red-400">Blighted Stag</h4>
+                    <span class="text-xs text-gray-400">Standard (×1)</span>
+                  </div>
+                  <span class="px-2 py-1 bg-orange-500/20 text-orange-300 text-xs rounded"
+                    >STANDARD</span
+                  >
+                </div>
+
+                <div class="grid grid-cols-3 gap-2 mb-3 text-center">
+                  <div class="bg-dagger-card p-2 rounded">
+                    <p class="text-xs text-gray-500">HP</p>
+                    <p class="font-bold text-lg">24</p>
+                  </div>
+                  <div class="bg-dagger-card p-2 rounded">
+                    <p class="text-xs text-gray-500">Armor</p>
+                    <p class="font-bold text-lg">2</p>
+                  </div>
+                  <div class="bg-dagger-card p-2 rounded">
+                    <p class="text-xs text-gray-500">Evasion</p>
+                    <p class="font-bold text-lg">10</p>
+                  </div>
+                </div>
+
+                <div class="space-y-2 text-sm">
+                  <div class="bg-dagger-card p-2 rounded">
+                    <p class="text-gray-400">
+                      <strong class="text-red-300">Goring Charge:</strong> 2d8+3 damage, push target
+                      10ft
+                    </p>
+                  </div>
+                  <div class="bg-dagger-card p-2 rounded">
+                    <p class="text-gray-400">
+                      <strong class="text-dagger-purple-700">Corruption Touch:</strong> On hit,
+                      Mettle DC 13 or 1d4 necrotic/turn for 3 rounds
+                    </p>
+                  </div>
+                  <div class="bg-dagger-card p-2 rounded">
+                    <p class="text-gray-400">
+                      <strong class="text-dagger-teal-400">Blight Aura:</strong> 10ft radius
+                      difficult terrain from twisted roots
+                    </p>
+                  </div>
+                </div>
+
+                <p class="text-gray-500 text-xs mt-3 italic">
+                  Massive elk with blackened antlers dripping dark ichor
+                </p>
+              </div>
+            </div>
+
+            <!-- Terrain & Tactics -->
+            <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="bg-dagger-surface p-3 rounded border border-dagger-border">
+                <h4 class="font-medium text-dagger-text-primary mb-2">🗺️ Terrain Features</h4>
+                <ul class="text-dagger-text-muted text-sm space-y-1">
+                  <li>• <strong>Twisted Roots:</strong> Difficult terrain in patches</li>
+                  <li>• <strong>Corruption Pools:</strong> 1d6 necrotic if ending turn in pool</li>
+                  <li>• <strong>Fallen Tree:</strong> Half cover, climbable</li>
+                </ul>
+              </div>
+              <div class="bg-dagger-surface p-3 rounded border border-dagger-border">
+                <h4 class="font-medium text-dagger-text-primary mb-2">🧠 Tactics</h4>
+                <ul class="text-dagger-text-muted text-sm space-y-1">
+                  <li>• Wolves flank and use pack tactics</li>
+                  <li>• Stag charges the most armored target</li>
+                  <li>• Use terrain to split the party</li>
+                  <li>• Wolves retreat if stag falls</li>
+                </ul>
+              </div>
+            </div>
+          </section>
+
+          <!-- Read-Aloud Narrative Section -->
+          <section>
+            <h3 class="text-lg font-bold text-slate-700 mb-3 flex items-center gap-2">
+              <span>📖</span> Read-Aloud Narrative
+            </h3>
+
+            <!-- Ambush -->
+            <div class="read-aloud-box border-l-4 border-blue-600 p-4 rounded-r mb-4">
+              <p class="text-xs text-blue-600 uppercase tracking-wide mb-2">When Combat Begins</p>
+              <p class="text-gray-200 italic leading-relaxed">
+                "Finn freezes, their eyes wide. 'They're here,' they whisper. The undergrowth
+                explodes with movement—gaunt shapes with milky eyes and black veins, moving wrong,
+                joints bending in ways nature never intended. And behind them, something larger. A
+                stag, magnificent and terrible, its antlers dripping with something that isn't
+                blood. It turns its head toward you, and you swear you see intelligence—and
+                hunger—in those corrupted eyes."
+              </p>
+            </div>
+
+            <!-- Mid-Combat -->
+            <div class="read-aloud-box border-l-4 border-blue-600 p-4 rounded-r mb-4">
+              <p class="text-xs text-blue-600 uppercase tracking-wide mb-2">
+                When Stag Uses Corruption Touch
+              </p>
+              <p class="text-gray-200 italic leading-relaxed">
+                "The stag's antlers connect, and cold spreads from the wound—not the cold of ice,
+                but of something wrong, something that doesn't belong in the living world. Black
+                veins begin to spread from the point of contact, and you feel your strength being
+                drained."
+              </p>
+            </div>
+
+            <!-- Victory -->
+            <div class="read-aloud-box border-l-4 border-blue-600 p-4 rounded-r">
+              <p class="text-xs text-blue-600 uppercase tracking-wide mb-2">After Combat</p>
+              <p class="text-gray-200 italic leading-relaxed">
+                "The last creature falls, and the forest goes silent. Finn approaches the stag's
+                body, their expression a mixture of horror and pity. 'I... I knew this one,' they
+                say quietly. 'Old Bramble. The hunters used to see him every season. He was never
+                aggressive.' They look deeper into the forest. 'Whatever did this... it's close now.
+                I can feel it.'"
+              </p>
+            </div>
+          </section>
+
+          <!-- Scene Beats Section -->
+          <section>
+            <h3 class="text-lg font-bold text-slate-700 mb-3 flex items-center gap-2">
+              <span>🎬</span> Scene Beats
+            </h3>
+
+            <div class="space-y-3">
+              <div class="flex gap-4 items-start">
+                <div
+                  class="bg-dagger-surface rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold flex-shrink-0"
+                >
+                  1
+                </div>
+                <div class="flex-1">
+                  <div class="flex justify-between items-center mb-1">
+                    <h4 class="font-medium text-gray-200">Journey Into Darkness</h4>
+                    <span class="text-xs text-gray-500">~5 min</span>
+                  </div>
+                  <p class="text-gray-400 text-sm">
+                    Environmental storytelling as the corruption grows more visible. Finn grows
+                    anxious.
+                  </p>
+                </div>
+              </div>
+
+              <div class="flex gap-4 items-start">
+                <div
+                  class="bg-dagger-surface rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold flex-shrink-0"
+                >
+                  2
+                </div>
+                <div class="flex-1">
+                  <div class="flex justify-between items-center mb-1">
+                    <h4 class="font-medium text-gray-200">Warning Signs</h4>
+                    <span class="text-xs text-gray-500">~5 min</span>
+                  </div>
+                  <p class="text-gray-400 text-sm">
+                    Finn spots movement. Party can prepare or be surprised.
+                  </p>
+                  <p class="text-dagger-teal-400 text-sm mt-1">
+                    <strong>Mechanic:</strong> Knowledge roll (DC 14) to identify blighted creatures
+                    and gain advantage on first attack.
+                  </p>
+                </div>
+              </div>
+
+              <div class="flex gap-4 items-start">
+                <div
+                  class="bg-red-700 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold flex-shrink-0"
+                >
+                  3
+                </div>
+                <div class="flex-1">
+                  <div class="flex justify-between items-center mb-1">
+                    <h4 class="font-medium text-gray-200">Combat: Blighted Beasts</h4>
+                    <span class="text-xs text-gray-500">~15 min</span>
+                  </div>
+                  <p class="text-gray-400 text-sm">The ambush! See stat blocks above.</p>
+                  <p class="text-dagger-gold-400 text-sm mt-1">
+                    <strong>Finn:</strong> Hides and provides Help actions. Will not fight directly
+                    (traumatized).
+                  </p>
+                </div>
+              </div>
+
+              <div class="flex gap-4 items-start">
+                <div
+                  class="bg-dagger-surface rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold flex-shrink-0"
+                >
+                  4
+                </div>
+                <div class="flex-1">
+                  <div class="flex justify-between items-center mb-1">
+                    <h4 class="font-medium text-gray-200">Investigation</h4>
+                    <span class="text-xs text-gray-500">~5 min</span>
+                  </div>
+                  <p class="text-gray-400 text-sm">
+                    Examining the creatures reveals the corruption's nature.
+                  </p>
+                  <p class="text-dagger-teal-400 text-sm mt-1">
+                    <strong>Mechanic:</strong> Investigation (DC 12) reveals the corruption spreads
+                    through wounds. Knowledge (DC 14) suggests druidic magic gone wrong.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Transition Section -->
+          <section class="border-t border-dagger-border pt-4">
+            <h3 class="text-lg font-bold text-slate-700 mb-3 flex items-center gap-2">
+              <span>➡️</span> Transition to Scene 3
+            </h3>
+            <div class="read-aloud-box border-l-4 border-blue-600 p-4 rounded-r">
+              <p class="text-gray-200 italic leading-relaxed">
+                "The trail of corruption leads deeper still, the darkness between the trees growing
+                absolute. Then—light. Sickly green, pulsing slowly, filtering through the dead
+                branches ahead. 'That's where they came from,' Finn whispers. 'That's where it all
+                started.' They look at you, fear and hope mingling in their eyes. 'Will you... will
+                you end it?'"
+              </p>
+            </div>
+            <p class="text-gray-400 text-sm mt-3">
+              <strong>Carry Forward:</strong> Corruption is druidic in origin, spreads through
+              wounds, animals are victims not evil. Source is nearby.
+            </p>
+          </section>
+        </div>
+
+        <!-- Action Buttons -->
+        <div
+          class="bg-dagger-card rounded-xl p-6 text-dagger-text-primary border border-dagger-border card-depth"
+        >
+          <h4 class="font-bold mb-4">What would you like to do with this expanded scene?</h4>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <button
+              onclick="nextStep()"
+              class="p-4 bg-green-600 hover:bg-green-500 rounded-lg text-center transition-all text-white"
+            >
+              <div class="text-3xl mb-2">✅</div>
+              <p class="font-bold">Confirm Expansion</p>
+              <p class="text-sm text-green-100">Lock this & expand Scene 3</p>
+            </button>
+
+            <button
+              class="p-4 bg-blue-600 hover:bg-blue-500 rounded-lg text-center transition-all text-white"
+            >
+              <div class="text-3xl mb-2">✨</div>
+              <p class="font-bold">Refine with AI</p>
+              <p class="text-sm text-blue-200">Give instructions to improve</p>
+            </button>
+          </div>
+
+          <div class="mt-4 p-4 bg-dagger-surface/50 rounded-lg border border-dagger-teal-500/30">
+            <label class="block text-sm text-gray-300 mb-2">What would you like to change?</label>
+            <div class="flex gap-2">
+              <input
+                type="text"
+                placeholder="e.g., Add more wolves, reduce stag HP"
+                class="flex-1 bg-dagger-surface border border-dagger-border rounded-md px-3 py-2 text-sm focus:border-dagger-teal-500 focus:outline-none transition-colors"
+              />
+              <button
+                class="px-4 py-2 bg-dagger-teal-500 text-dagger-bg rounded-lg hover:bg-dagger-teal-400 font-medium transition-colors"
+              >
+                Apply
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6 p-4 bg-dagger-purple-900/30 border border-dagger-purple-700 rounded-lg">
+          <h3 class="font-bold text-dagger-teal-400 mb-2">Workflow Note:</h3>
+          <p class="text-gray-300">This combat scene demonstrates:</p>
+          <ul class="text-gray-300 mt-2 ml-4 list-disc">
+            <li><strong>Stat blocks</strong> - Full adversary stats with HP, Armor, abilities</li>
+            <li><strong>Threat levels</strong> - Minion vs Standard distinction</li>
+            <li><strong>Terrain features</strong> - Environmental hazards and cover</li>
+            <li><strong>Tactics guidance</strong> - How the GM should run the enemies</li>
+            <li><strong>Read-aloud for combat</strong> - Dramatic moments during the fight</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Page 11: Expansion Mode (Sequential - Scene 3 Final) -->
+      <div id="page-11" class="page">
+        <div class="flex items-center gap-4 mb-6">
+          <a
+            href="#"
+            onclick="
+              goToStep(10)
+              return false
+            "
+            class="text-gray-400 hover:text-white transition-colors"
+            >&larr; Back to Scene 2 Expansion</a
+          >
+        </div>
+
+        <!-- Progress indicator -->
+        <div
+          class="bg-dagger-card rounded-xl p-4 mb-6 text-dagger-text-primary border border-dagger-border card-depth"
+        >
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-bold">Expansion Progress</h3>
+            <span class="text-dagger-gold-400">Scene 3 of 3 (Final!)</span>
+          </div>
+          <div class="flex gap-2">
+            <div class="flex-1 h-2 bg-green-500 rounded-full"></div>
+            <div class="flex-1 h-2 bg-green-500 rounded-full"></div>
+            <div class="flex-1 h-2 bg-dagger-teal-500 rounded-full"></div>
+          </div>
+          <div class="flex gap-2 mt-3 text-sm">
+            <span class="text-green-600">✓ Scene 1 confirmed</span>
+            <span class="text-gray-500">•</span>
+            <span class="text-green-600">✓ Scene 2 confirmed</span>
+          </div>
+        </div>
+
+        <div class="flex justify-between items-start mb-4">
+          <div>
+            <span class="text-sm text-gray-400">The Witherwild Expedition</span>
+            <h2 class="text-2xl font-bold">Expanding: Scene 3 - The Heart of Corruption</h2>
+            <div class="flex gap-2 mt-2">
+              <span
+                class="px-3 py-1 bg-dagger-purple-800/20 text-dagger-purple-700 rounded-full text-sm"
+                >🎭 Social/Boss</span
+              >
+              <span class="px-3 py-1 bg-dagger-surface text-gray-300 rounded-full text-sm"
+                >~25 min</span
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- Expanded Scene Content -->
+        <div class="bg-dagger-card rounded-xl p-6 mb-6 space-y-6">
+          <!-- Setting -->
+          <section>
+            <h3 class="text-lg font-bold text-slate-700 mb-3 flex items-center gap-2">
+              <span>🌑</span> Setting: The Corrupted Heart
+            </h3>
+            <p class="text-dagger-text-secondary leading-relaxed mb-4">
+              A clearing in the deepest heart of the Witherwild, where the corruption is absolute.
+              Dead trees form a natural amphitheater around a pool of viscous darkness that pulses
+              with sickly green light. At its center stands a figure wreathed in shadow and twisted
+              vines—the source of all this suffering.
+            </p>
+          </section>
+
+          <!-- Context -->
+          <section class="border-l-4 border-dagger-teal-500 pl-4">
+            <h3 class="text-lg font-bold text-slate-700 mb-3 flex items-center gap-2">
+              <span>📍</span> Context
+            </h3>
+            <ul class="text-dagger-text-secondary space-y-2">
+              <li>
+                <strong class="text-dagger-text-primary">Why they're here:</strong> To confront the
+                source and end the corruption threatening Thornhaven.
+              </li>
+              <li>
+                <strong class="text-dagger-text-primary">What they've learned:</strong> This is
+                druidic magic gone wrong. The creatures are victims, not monsters.
+              </li>
+              <li>
+                <strong class="text-dagger-text-primary">The twist:</strong> Aldric didn't choose
+                evil—they made a desperate bargain to save their beloved from death, and lost
+                themselves in the process.
+              </li>
+              <li>
+                <strong class="text-dagger-text-primary">Multiple paths:</strong> Combat will work,
+                but so might compassion. The party chooses the resolution.
+              </li>
+            </ul>
+          </section>
+
+          <!-- Key NPC with Stat Block -->
+          <section>
+            <h3 class="text-lg font-bold text-slate-700 mb-3 flex items-center gap-2">
+              <span>👤</span> Aldric the Grieving (Boss NPC)
+            </h3>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <!-- Roleplay Profile -->
+              <div class="bg-dagger-surface/50 p-4 rounded">
+                <h4 class="font-bold text-gray-200 mb-3">Roleplay Profile</h4>
+                <table class="w-full text-sm">
+                  <tr class="border-b border-dagger-border">
+                    <td class="text-gray-400 py-1 w-24">Appearance</td>
+                    <td class="text-gray-300 py-1">
+                      Gaunt figure, once-handsome face twisted by grief, eyes that flicker between
+                      sanity and madness
+                    </td>
+                  </tr>
+                  <tr class="border-b border-dagger-border">
+                    <td class="text-gray-400 py-1">Motivation</td>
+                    <td class="text-gray-300 py-1">
+                      Bring back their beloved Elara, who died of sickness
+                    </td>
+                  </tr>
+                  <tr class="border-b border-dagger-border">
+                    <td class="text-gray-400 py-1">Secret</td>
+                    <td class="text-gray-300 py-1 text-dagger-gold-400">
+                      Part of them wants to be stopped—they're horrified by what they've become
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="text-gray-400 py-1">Voice</td>
+                    <td class="text-gray-300 py-1 italic">
+                      Shifts between tender memory and bitter rage, often mid-sentence
+                    </td>
+                  </tr>
+                </table>
+              </div>
+
+              <!-- Combat Stats -->
+              <div class="bg-red-900/20 border border-red-500/30 p-4 rounded">
+                <div class="flex justify-between items-start mb-3">
+                  <h4 class="font-bold text-red-400">Combat Stats (If Needed)</h4>
+                  <span
+                    class="px-2 py-1 bg-dagger-purple-800/20 text-dagger-purple-700 text-xs rounded"
+                    >BOSS</span
+                  >
+                </div>
+
+                <div class="grid grid-cols-3 gap-2 mb-3 text-center">
+                  <div class="bg-dagger-card p-2 rounded">
+                    <p class="text-xs text-gray-500">HP</p>
+                    <p class="font-bold text-lg">45</p>
+                  </div>
+                  <div class="bg-dagger-card p-2 rounded">
+                    <p class="text-xs text-gray-500">Armor</p>
+                    <p class="font-bold text-lg">3</p>
+                  </div>
+                  <div class="bg-dagger-card p-2 rounded">
+                    <p class="text-xs text-gray-500">Evasion</p>
+                    <p class="font-bold text-lg">14</p>
+                  </div>
+                </div>
+
+                <div class="space-y-2 text-sm">
+                  <div class="bg-dagger-card p-2 rounded">
+                    <p class="text-gray-400">
+                      <strong class="text-red-300">Corrupting Vines:</strong> 2d10+4, grapple on hit
+                    </p>
+                  </div>
+                  <div class="bg-dagger-card p-2 rounded">
+                    <p class="text-gray-400">
+                      <strong class="text-dagger-purple-700">Summon Blighted:</strong> 1/round,
+                      summon 2 corrupted wolves
+                    </p>
+                  </div>
+                  <div class="bg-dagger-card p-2 rounded">
+                    <p class="text-gray-400">
+                      <strong class="text-dagger-teal-400">Grief's Embrace:</strong> When below 20
+                      HP, heals 2d8 and weeps
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Resolution Paths -->
+          <section>
+            <h3 class="text-lg font-bold text-slate-700 mb-3 flex items-center gap-2">
+              <span>🔀</span> Resolution Paths
+            </h3>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div class="bg-red-900/20 border border-red-500/30 p-4 rounded">
+                <h4 class="font-bold text-red-400 mb-2">⚔️ Combat</h4>
+                <p class="text-gray-400 text-sm mb-2">Destroy Aldric by force</p>
+                <ul class="text-gray-500 text-xs space-y-1">
+                  <li>• Corruption ends immediately</li>
+                  <li>• Finn is relieved but haunted</li>
+                  <li>• Village celebrates but mourns</li>
+                </ul>
+              </div>
+
+              <div class="bg-green-900/20 border border-green-500/30 p-4 rounded">
+                <h4 class="font-bold text-green-600 mb-2">💚 Redemption</h4>
+                <p class="text-gray-400 text-sm mb-2">Help Aldric find peace</p>
+                <ul class="text-gray-500 text-xs space-y-1">
+                  <li>• Requires DC 16 Presence check</li>
+                  <li>• Mention Elara's memory positively</li>
+                  <li>• Aldric willingly breaks the pact</li>
+                </ul>
+              </div>
+
+              <div class="bg-yellow-900/20 border border-yellow-500/30 p-4 rounded">
+                <h4 class="font-bold text-yellow-400 mb-2">🔒 Containment</h4>
+                <p class="text-gray-400 text-sm mb-2">Seal the corruption</p>
+                <ul class="text-gray-500 text-xs space-y-1">
+                  <li>• Requires ritual components</li>
+                  <li>• Corruption stops spreading</li>
+                  <li>• Aldric trapped forever</li>
+                </ul>
+              </div>
+            </div>
+          </section>
+
+          <!-- Read-Aloud -->
+          <section>
+            <h3 class="text-lg font-bold text-slate-700 mb-3 flex items-center gap-2">
+              <span>📖</span> Read-Aloud Narrative
+            </h3>
+
+            <div class="read-aloud-box border-l-4 border-blue-600 p-4 rounded-r mb-4">
+              <p class="text-xs text-blue-600 uppercase tracking-wide mb-2">When Aldric Speaks</p>
+              <p class="text-gray-200 italic leading-relaxed">
+                "Elara..."
+                <span class="text-gray-400 not-italic"
+                  >[The figure turns, and for a moment you see the person they once were—kind eyes,
+                  a gentle smile.]</span
+                >
+                "You're not her. You're not—"
+                <span class="text-gray-400 not-italic">[The eyes harden.]</span> "You've come to
+                stop me. Like the others. But I was so close. She was right there, just beyond the
+                veil, and all I had to do was..."
+                <span class="text-gray-400 not-italic">[Voice breaking]</span> "They promised. They
+                PROMISED she would return."
+              </p>
+            </div>
+
+            <div class="read-aloud-box border-l-4 border-blue-600 p-4 rounded-r">
+              <p class="text-xs text-blue-600 uppercase tracking-wide mb-2">
+                If Party Shows Compassion
+              </p>
+              <p class="text-gray-200 italic leading-relaxed">
+                <span class="text-gray-400 not-italic"
+                  >[Aldric's form wavers, the shadows receding slightly.]</span
+                >
+                "You... you would help me? After what I've done?"
+                <span class="text-gray-400 not-italic"
+                  >[A tear, unnaturally dark, slides down their cheek.]</span
+                >
+                "I didn't mean for this. I just wanted her back. I just..."
+                <span class="text-gray-400 not-italic">[They sink to their knees.]</span> "I'm so
+                tired. So tired of the voices, the hunger. Can you... can you make it stop?"
+              </p>
+            </div>
+          </section>
+
+          <!-- Transition -->
+          <section class="border-t border-dagger-border pt-4">
+            <h3 class="text-lg font-bold text-slate-700 mb-3 flex items-center gap-2">
+              <span>🏁</span> Resolution & Return
+            </h3>
+            <div class="read-aloud-box border-l-4 border-blue-600 p-4 rounded-r">
+              <p class="text-gray-200 italic leading-relaxed">
+                "The journey back to Thornhaven feels shorter somehow, the forest already beginning
+                to heal. Finn walks beside you, lighter than before—though the haunted look hasn't
+                fully left their eyes. As the village gates come into view, Elder Mora is waiting,
+                her face a mixture of hope and fear. 'Is it... is it over?' she asks. And in the
+                distance, the first birdsong in weeks echoes through the Witherwild."
+              </p>
+            </div>
+          </section>
+        </div>
+
+        <!-- Action Buttons -->
+        <div
+          class="bg-dagger-card rounded-xl p-6 text-dagger-text-primary border border-dagger-border card-depth"
+        >
+          <h4 class="font-bold mb-4">This is the final expansion! What would you like to do?</h4>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <button
+              onclick="nextStep()"
+              class="p-4 bg-green-600 hover:bg-green-500 rounded-lg text-center transition-all text-white"
+            >
+              <div class="text-3xl mb-2">✅</div>
+              <p class="font-bold">Confirm & Finish</p>
+              <p class="text-sm text-green-100">Complete expansion & go to export</p>
+            </button>
+
+            <button
+              class="p-4 bg-blue-600 hover:bg-blue-500 rounded-lg text-center transition-all text-white"
+            >
+              <div class="text-3xl mb-2">✨</div>
+              <p class="font-bold">Refine with AI</p>
+              <p class="text-sm text-blue-200">Make final adjustments</p>
+            </button>
+          </div>
+
+          <div class="mt-4 p-4 bg-dagger-surface/50 rounded-lg border border-dagger-teal-500/30">
+            <label class="block text-sm text-gray-300 mb-2">What would you like to change?</label>
+            <div class="flex gap-2">
+              <input
+                type="text"
+                placeholder="e.g., Add a fourth resolution path"
+                class="flex-1 bg-dagger-surface border border-dagger-border rounded-md px-3 py-2 text-sm focus:border-dagger-teal-500 focus:outline-none transition-colors"
+              />
+              <button
+                class="px-4 py-2 bg-dagger-teal-500 text-dagger-bg rounded-lg hover:bg-dagger-teal-400 font-medium transition-colors"
+              >
+                Apply
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6 p-4 bg-green-900/30 border border-green-500 rounded-lg">
+          <h3 class="font-bold text-green-600 mb-2">🎉 Almost Done!</h3>
+          <p class="text-gray-300">
+            Confirming this scene completes all expansions. You'll proceed to export your adventure!
+          </p>
+        </div>
+      </div>
+
+      <!-- Page 12: Export -->
+      <div id="page-12" class="page">
+        <div class="flex items-center gap-4 mb-6">
+          <a
+            href="#"
+            onclick="
+              goToStep(11)
+              return false
+            "
+            class="text-gray-400 hover:text-white transition-colors"
+            >&larr; Back to Scene 3 Expansion</a
+          >
+        </div>
+
+        <!-- Success Banner -->
+        <div
+          class="bg-green-900/30 border border-green-500 rounded-lg p-4 mb-6 flex items-center gap-4"
+        >
+          <span class="text-4xl">🎉</span>
+          <div>
+            <h3 class="font-bold text-green-600">Adventure Complete!</h3>
+            <p class="text-gray-300">Your adventure is fully expanded and ready to export.</p>
+          </div>
+        </div>
+
+        <!-- Adventure Summary Card -->
+        <div
+          class="bg-dagger-card rounded-xl p-6 mb-6 text-dagger-text-primary border border-dagger-border"
+        >
+          <div class="flex items-start justify-between mb-4">
+            <div>
+              <h2 class="text-2xl font-bold text-dagger-gold-400">The Witherwild Expedition</h2>
+              <p class="text-gray-400">High Fantasy Adventure for Daggerheart</p>
+            </div>
+            <span class="px-3 py-1 bg-green-500/20 text-green-600 rounded-full text-sm"
+              >✓ Ready to Export</span
+            >
+          </div>
+
+          <div
+            class="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-dagger-surface rounded-lg border border-dagger-border"
+          >
+            <div class="text-center">
+              <p class="text-dagger-text-muted text-sm">Scenes</p>
+              <p class="font-bold text-xl text-dagger-text-primary">3</p>
+            </div>
+            <div class="text-center">
+              <p class="text-dagger-text-muted text-sm">Duration</p>
+              <p class="font-bold text-xl text-dagger-text-primary">~75 min</p>
+            </div>
+            <div class="text-center">
+              <p class="text-dagger-text-muted text-sm">Party</p>
+              <p class="font-bold text-xl text-dagger-text-primary">4 players</p>
+            </div>
+            <div class="text-center">
+              <p class="text-dagger-text-muted text-sm">Tier</p>
+              <p class="font-bold text-xl text-dagger-text-primary">Tier 2</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Export Options -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <!-- HTML Export -->
+          <div class="bg-dagger-card rounded-xl p-6 border-2 border-dagger-teal-500">
+            <div class="flex items-center gap-3 mb-4">
+              <div
+                class="w-12 h-12 bg-dagger-teal-500/20 rounded-lg flex items-center justify-center"
+              >
+                <span class="text-2xl">🌐</span>
+              </div>
+              <div>
+                <h3 class="font-bold text-lg">HTML Export</h3>
+                <p class="text-dagger-gold-600 text-sm font-medium">Recommended</p>
+              </div>
+            </div>
+
+            <p class="text-dagger-text-secondary text-sm mb-4">
+              Self-contained HTML file that preserves all formatting, stat blocks, and read-aloud
+              sections exactly as you see them.
+            </p>
+
+            <ul class="text-dagger-text-secondary text-sm space-y-2 mb-4">
+              <li class="flex items-center gap-2">
+                <span class="text-green-600">✓</span> Perfect layout preservation
+              </li>
+              <li class="flex items-center gap-2">
+                <span class="text-green-600">✓</span> Works offline in any browser
+              </li>
+              <li class="flex items-center gap-2">
+                <span class="text-green-600">✓</span> Print to PDF from browser
+              </li>
+              <li class="flex items-center gap-2">
+                <span class="text-green-600">✓</span> Editable (if you know HTML)
+              </li>
+            </ul>
+
+            <button
+              class="w-full py-3 bg-dagger-teal-600 hover:bg-dagger-teal-500 text-dagger-bg font-bold rounded-lg flex items-center justify-center gap-2 transition-colors"
+            >
+              <span>↓</span> Download HTML
+            </button>
+            <p class="text-center text-dagger-text-muted text-xs mt-2">
+              TheWitherwildExpedition.html (~45 KB)
+            </p>
+          </div>
+
+          <!-- PDF Export -->
+          <div
+            class="bg-dagger-card rounded-xl p-6 text-dagger-text-primary border border-dagger-border card-depth"
+          >
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-12 h-12 bg-red-500/20 rounded-lg flex items-center justify-center">
+                <span class="text-2xl">📄</span>
+              </div>
+              <div>
+                <h3 class="font-bold text-lg">PDF Export</h3>
+                <p class="text-dagger-text-muted text-sm">Print-ready</p>
+              </div>
+            </div>
+
+            <p class="text-dagger-text-secondary text-sm mb-4">
+              Formatted PDF document optimized for printing. Great for physical copies at the table.
+            </p>
+
+            <ul class="text-dagger-text-secondary text-sm space-y-2 mb-4">
+              <li class="flex items-center gap-2">
+                <span class="text-green-600">✓</span> Print-optimized layout
+              </li>
+              <li class="flex items-center gap-2">
+                <span class="text-green-600">✓</span> Universal compatibility
+              </li>
+              <li class="flex items-center gap-2">
+                <span class="text-green-600">✓</span> Professional appearance
+              </li>
+              <li class="flex items-center gap-2">
+                <span class="text-dagger-text-muted">○</span> Not editable
+              </li>
+            </ul>
+
+            <button
+              class="w-full py-3 bg-dagger-surface hover:bg-dagger-muted font-bold rounded-lg flex items-center justify-center gap-2 transition-colors"
+            >
+              <span>↓</span> Download PDF
+            </button>
+            <p class="text-center text-dagger-text-muted text-xs mt-2">
+              TheWitherwildExpedition.pdf (~2.1 MB)
+            </p>
+          </div>
+        </div>
+
+        <!-- HTML Preview -->
+        <div
+          class="bg-dagger-card rounded-xl p-6 mb-6 text-dagger-text-primary border border-dagger-border"
+        >
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-lg">Preview: HTML Export</h3>
+            <span class="text-dagger-text-muted text-sm">Showing Scene 1 excerpt</span>
+          </div>
+
+          <!-- Mock browser window -->
+          <div class="bg-dagger-bg rounded-lg overflow-hidden border border-dagger-border">
+            <!-- Browser chrome -->
+            <div
+              class="bg-dagger-card px-4 py-2 flex items-center gap-2 border-b border-dagger-border"
+            >
+              <div class="flex gap-1.5">
+                <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+              </div>
+              <div class="flex-1 ml-4">
+                <div class="bg-dagger-surface rounded px-3 py-1 text-xs text-dagger-text-muted">
+                  file:///Users/gm/Downloads/TheWitherwildExpedition.html
+                </div>
+              </div>
+            </div>
+
+            <!-- Preview content - matches expansion styling -->
+            <div class="p-6 max-h-96 overflow-y-auto">
+              <!-- Title -->
+              <div class="text-center mb-6 pb-4 border-b border-dagger-border">
+                <h1 class="text-2xl font-bold text-dagger-gold-400 mb-2">
+                  The Witherwild Expedition
+                </h1>
+                <p class="text-gray-400">
+                  A Daggerheart Adventure for 4 Players | Tier 2 | ~75 minutes
+                </p>
+              </div>
+
+              <!-- Scene 1 Preview -->
+              <div class="mb-6">
+                <div class="flex items-center gap-3 mb-4">
+                  <span
+                    class="px-3 py-1 bg-dagger-teal-500/20 text-dagger-teal-400 rounded-full text-sm"
+                    >Scene 1</span
+                  >
+                  <h2 class="text-xl font-bold">The Village Warning</h2>
+                  <span class="text-gray-500 text-sm ml-auto">~20 min</span>
+                </div>
+
+                <!-- Setting preview -->
+                <div class="mb-4">
+                  <h3 class="text-lg font-bold text-dagger-gold-400 mb-2 flex items-center gap-2">
+                    <span>🏘️</span> Setting: Thornhaven Village
+                  </h3>
+                  <p class="text-gray-300 text-sm leading-relaxed">
+                    The village of Thornhaven clings to the edge of the Witherwild like a barnacle
+                    to a ship's hull. Wooden palisades, recently reinforced with fresh-cut timber
+                    still weeping sap, encircle two dozen buildings.
+                  </p>
+                </div>
+
+                <!-- Context preview -->
+                <div class="border-l-4 border-dagger-teal-500 pl-4 mb-4">
+                  <h3 class="text-lg font-bold text-dagger-gold-400 mb-2 flex items-center gap-2">
+                    <span>📍</span> Context
+                  </h3>
+                  <ul class="text-gray-300 text-sm space-y-1">
+                    <li>
+                      <strong>Why they're here:</strong> Rumors of missing hunters reached the party
+                      in Millford.
+                    </li>
+                    <li>
+                      <strong>The stakes:</strong> The corruption is spreading toward the village.
+                    </li>
+                  </ul>
+                </div>
+
+                <!-- Read-aloud preview -->
+                <div class="read-aloud-box border-l-4 border-blue-600 p-4 rounded-r mb-4">
+                  <p class="text-xs text-blue-600 uppercase tracking-wide mb-2">Scene Opening</p>
+                  <p class="text-gray-200 italic text-sm leading-relaxed">
+                    "The village gates creak open just wide enough for you to pass single-file. The
+                    guards' crossbows lower reluctantly, their eyes never leaving your weapons..."
+                  </p>
+                </div>
+
+                <!-- NPC preview -->
+                <div class="bg-dagger-surface p-3 rounded border border-dagger-border text-sm">
+                  <div class="flex justify-between items-start mb-2">
+                    <h4 class="font-bold text-gray-200">Elder Mora</h4>
+                    <span class="text-xs text-gray-400">she/her</span>
+                  </div>
+                  <p class="text-gray-400 text-xs">
+                    Silver-haired woman in her 60s, weathered face, sharp eyes. Pragmatic,
+                    protective, hiding fear behind authority.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Stat block preview -->
+              <div class="mb-4">
+                <p class="text-gray-500 text-sm mb-2">Scene 2 includes full stat blocks:</p>
+                <div class="bg-red-900/20 border border-red-500/30 p-3 rounded inline-block">
+                  <div class="flex items-center gap-2 mb-2">
+                    <h4 class="font-bold text-red-400 text-sm">Blighted Stag</h4>
+                    <span class="px-2 py-0.5 bg-orange-500/20 text-orange-300 text-xs rounded"
+                      >STANDARD</span
+                    >
+                  </div>
+                  <div class="flex gap-4 text-xs">
+                    <span class="text-gray-400"
+                      >HP: <span class="text-white font-bold">24</span></span
+                    >
+                    <span class="text-gray-400"
+                      >Armor: <span class="text-white font-bold">2</span></span
+                    >
+                    <span class="text-gray-400"
+                      >Evasion: <span class="text-white font-bold">10</span></span
+                    >
+                  </div>
+                </div>
+              </div>
+
+              <p class="text-gray-500 text-sm text-center">... continues with Scenes 2 & 3 ...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Additional Options -->
+        <div
+          class="bg-dagger-card rounded-xl p-6 mb-6 text-dagger-text-primary border border-dagger-border"
+        >
+          <h3 class="font-bold mb-4">Additional Options</h3>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <button
+              class="p-4 bg-dagger-surface hover:bg-dagger-muted rounded-lg text-center transition-all"
+            >
+              <div class="text-2xl mb-2">📋</div>
+              <p class="font-medium text-sm">Copy to Clipboard</p>
+              <p class="text-xs text-dagger-text-muted">Plain text version</p>
+            </button>
+
+            <button
+              class="p-4 bg-dagger-surface hover:bg-dagger-muted rounded-lg text-center transition-all"
+            >
+              <div class="text-2xl mb-2">🔗</div>
+              <p class="font-medium text-sm">Share Link</p>
+              <p class="text-xs text-dagger-text-muted">View-only link</p>
+            </button>
+
+            <button
+              class="p-4 bg-dagger-surface hover:bg-dagger-muted rounded-lg text-center transition-all"
+            >
+              <div class="text-2xl mb-2">📝</div>
+              <p class="font-medium text-sm">Markdown</p>
+              <p class="text-xs text-dagger-text-muted">For Obsidian/Notion</p>
+            </button>
+          </div>
+        </div>
+
+        <!-- Back to Dashboard -->
+        <div class="text-center">
+          <button
+            onclick="goToStep(3)"
+            class="px-6 py-3 bg-dagger-surface hover:bg-dagger-muted rounded-lg font-medium transition-colors"
+          >
+            ← Back to Dashboard
+          </button>
+        </div>
+
+        <div class="mt-6 p-4 bg-dagger-purple-900/30 border border-dagger-purple-700 rounded-lg">
+          <h3 class="font-bold text-dagger-teal-400 mb-2">Workflow Note (UPDATED!):</h3>
+          <p class="text-gray-300">New export system with dual HTML/PDF options:</p>
+          <ul class="text-gray-300 mt-2 ml-4 list-disc">
+            <li>
+              <strong>HTML (Recommended)</strong> - Perfect layout preservation, works offline,
+              printable
+            </li>
+            <li><strong>PDF</strong> - Print-optimized, universal compatibility</li>
+            <li>
+              <strong>Additional options</strong> - Clipboard, share link, Markdown for power users
+            </li>
+          </ul>
+          <p class="text-gray-300 mt-3">
+            The HTML export is a self-contained file with embedded CSS that looks identical to the
+            expansion view. GMs can:
+          </p>
+          <ul class="text-gray-300 mt-2 ml-4 list-disc">
+            <li>Open in browser and use during session</li>
+            <li>Print directly or save as PDF</li>
+            <li>Edit if they know HTML</li>
+          </ul>
+          <p class="text-green-600 mt-4 font-bold">
+            🎉 Workflow Complete! The GM is ready to run their session.
+          </p>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      let currentStep = 1
+      const totalSteps = 12
+      const newSteps = [5, 6, 7, 8, 9, 10, 11] // Steps with ✨ NEW indicator (Overview, Scenes, Expansions)
+
+      function updateUI() {
+        // Hide all pages
+        document.querySelectorAll('.page').forEach((p) => p.classList.remove('active'))
+        // Show current page
+        document.getElementById(`page-${currentStep}`).classList.add('active')
+
+        // Update step indicators
+        for (let i = 1; i <= totalSteps; i++) {
+          const indicator = document.getElementById(`step-${i}`)
+          indicator.classList.remove('active', 'completed')
+
+          if (i === currentStep) {
+            indicator.className =
+              'step-indicator px-3 py-1 rounded text-sm whitespace-nowrap cursor-pointer active'
+          } else if (i < currentStep) {
+            indicator.className =
+              'step-indicator px-3 py-1 rounded text-sm whitespace-nowrap cursor-pointer completed'
+          } else if (newSteps.includes(i)) {
+            // Keep NEW highlight for unvisited new steps
+            indicator.className =
+              'step-indicator px-3 py-1 rounded text-sm whitespace-nowrap cursor-pointer bg-dagger-teal-500/20 text-dagger-gold-400 border border-dagger-teal-500'
+          } else {
+            indicator.className =
+              'step-indicator px-3 py-1 rounded text-sm whitespace-nowrap cursor-pointer'
+          }
+        }
+
+        // Update counter
+        document.getElementById('step-counter').textContent = `Step ${currentStep}/${totalSteps}`
+      }
+
+      function nextStep() {
+        if (currentStep < totalSteps) {
+          currentStep++
+          updateUI()
+        }
+      }
+
+      function prevStep() {
+        if (currentStep > 1) {
+          currentStep--
+          updateUI()
+        }
+      }
+
+      function goToStep(step) {
+        currentStep = step
+        updateUI()
+      }
+
+      // Initialize
+      updateUI()
+    </script>
+  </body>
+</html>

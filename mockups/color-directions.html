@@ -1,0 +1,958 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DaggerGM Color Direction Options</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              // Option A: Arcane Violet
+              arcane: {
+                bg: '#faf9fc',
+                card: '#ffffff',
+                surface: '#f5f3ff',
+                border: '#e4e0f0',
+                muted: '#c4b5fd',
+                primary: '#7c3aed',
+                'primary-dark': '#6d28d9',
+                accent: '#f59e0b',
+                'accent-light': '#fbbf24',
+                text: '#1e1b4b',
+                'text-secondary': '#4c4680',
+                'text-muted': '#6b6994',
+              },
+              // Option B: Ember & Ash
+              ember: {
+                bg: '#fafaf9',
+                card: '#ffffff',
+                surface: '#f5f5f4',
+                border: '#e7e5e4',
+                muted: '#d6d3d1',
+                primary: '#ea580c',
+                'primary-dark': '#c2410c',
+                accent: '#ca8a04',
+                'accent-light': '#eab308',
+                text: '#1c1917',
+                'text-secondary': '#44403c',
+                'text-muted': '#78716c',
+              },
+              // Option C: Moonlit Steel
+              moonlit: {
+                bg: '#f8fafc',
+                card: '#ffffff',
+                surface: '#f1f5f9',
+                border: '#e2e8f0',
+                muted: '#cbd5e1',
+                primary: '#475569',
+                'primary-dark': '#334155',
+                accent: '#d4af37',
+                'accent-light': '#e5c158',
+                text: '#0f172a',
+                'text-secondary': '#334155',
+                'text-muted': '#64748b',
+              },
+              // Option D: Forest & Flame
+              forest: {
+                bg: '#f9faf9',
+                card: '#ffffff',
+                surface: '#f0fdf4',
+                border: '#dcfce7',
+                muted: '#bbf7d0',
+                primary: '#16a34a',
+                'primary-dark': '#15803d',
+                accent: '#b45309',
+                'accent-light': '#d97706',
+                text: '#14532d',
+                'text-secondary': '#166534',
+                'text-muted': '#4d7c5f',
+              },
+            },
+          },
+        },
+      }
+    </script>
+    <style>
+      /* Subtle particle effect */
+      .particles {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        overflow: hidden;
+        pointer-events: none;
+      }
+
+      .particle {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        opacity: 0.4;
+        animation: float 8s ease-in-out infinite;
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0) translateX(0);
+          opacity: 0.2;
+        }
+        50% {
+          transform: translateY(-20px) translateX(10px);
+          opacity: 0.6;
+        }
+      }
+
+      /* Subtle glow effect on cards */
+      .card-glow {
+        box-shadow:
+          0 4px 6px -1px rgba(0, 0, 0, 0.1),
+          0 2px 4px -2px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+      }
+
+      .card-glow:hover {
+        transform: translateY(-2px);
+      }
+
+      /* Arcane glow */
+      .arcane-glow:hover {
+        box-shadow:
+          0 8px 25px -5px rgba(124, 58, 237, 0.25),
+          0 4px 6px -4px rgba(124, 58, 237, 0.1);
+      }
+
+      /* Ember glow */
+      .ember-glow:hover {
+        box-shadow:
+          0 8px 25px -5px rgba(234, 88, 12, 0.25),
+          0 4px 6px -4px rgba(234, 88, 12, 0.1);
+      }
+
+      /* Moonlit glow */
+      .moonlit-glow:hover {
+        box-shadow:
+          0 8px 25px -5px rgba(71, 85, 105, 0.25),
+          0 4px 6px -4px rgba(212, 175, 55, 0.15);
+      }
+
+      /* Forest glow */
+      .forest-glow:hover {
+        box-shadow:
+          0 8px 25px -5px rgba(22, 163, 74, 0.25),
+          0 4px 6px -4px rgba(180, 83, 9, 0.1);
+      }
+
+      /* Read-aloud box styles */
+      .read-aloud-arcane {
+        background: linear-gradient(to right, rgba(124, 58, 237, 0.08), rgba(255, 255, 255, 0));
+        border-left: 3px solid #7c3aed;
+      }
+
+      .read-aloud-ember {
+        background: linear-gradient(to right, rgba(234, 88, 12, 0.08), rgba(255, 255, 255, 0));
+        border-left: 3px solid #ea580c;
+      }
+
+      .read-aloud-moonlit {
+        background: linear-gradient(to right, rgba(71, 85, 105, 0.08), rgba(255, 255, 255, 0));
+        border-left: 3px solid #475569;
+      }
+
+      .read-aloud-forest {
+        background: linear-gradient(to right, rgba(22, 163, 74, 0.08), rgba(255, 255, 255, 0));
+        border-left: 3px solid #16a34a;
+      }
+
+      /* Stat block accent borders */
+      .stat-arcane {
+        border-top: 3px solid #7c3aed;
+      }
+      .stat-ember {
+        border-top: 3px solid #ea580c;
+      }
+      .stat-moonlit {
+        border-top: 3px solid #475569;
+      }
+      .stat-forest {
+        border-top: 3px solid #16a34a;
+      }
+
+      /* Button pulse animation */
+      .btn-pulse {
+        position: relative;
+        overflow: hidden;
+      }
+
+      .btn-pulse::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transform: translate(-50%, -50%);
+        transition:
+          width 0.3s,
+          height 0.3s;
+      }
+
+      .btn-pulse:hover::after {
+        width: 200px;
+        height: 200px;
+      }
+
+      /* Section divider */
+      .section-divider {
+        border-bottom: 1px solid #e5e7eb;
+        padding-bottom: 4rem;
+        margin-bottom: 4rem;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100 text-gray-900">
+    <!-- Header -->
+    <div class="bg-white border-b border-gray-200 sticky top-0 z-50">
+      <div class="max-w-7xl mx-auto px-6 py-4">
+        <h1 class="text-2xl font-bold text-gray-900">DaggerGM Color Direction Options</h1>
+        <p class="text-gray-600 mt-1">
+          Click each section to see how UI elements feel in each palette
+        </p>
+      </div>
+      <div class="max-w-7xl mx-auto px-6 pb-4 flex gap-4 text-sm">
+        <a href="#arcane" class="px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700"
+          >A: Arcane Violet</a
+        >
+        <a href="#ember" class="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
+          >B: Ember & Ash</a
+        >
+        <a href="#moonlit" class="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700"
+          >C: Moonlit Steel</a
+        >
+        <a href="#forest" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+          >D: Forest & Flame</a
+        >
+      </div>
+    </div>
+
+    <!-- ================================ -->
+    <!-- OPTION A: ARCANE VIOLET -->
+    <!-- ================================ -->
+    <section id="arcane" class="section-divider">
+      <div class="bg-arcane-bg min-h-screen py-12 relative">
+        <!-- Subtle particles -->
+        <div class="particles">
+          <div
+            class="particle bg-arcane-primary"
+            style="left: 10%; top: 20%; animation-delay: 0s"
+          ></div>
+          <div
+            class="particle bg-arcane-accent"
+            style="left: 30%; top: 60%; animation-delay: 2s"
+          ></div>
+          <div
+            class="particle bg-arcane-primary"
+            style="left: 70%; top: 30%; animation-delay: 4s"
+          ></div>
+          <div
+            class="particle bg-arcane-accent"
+            style="left: 85%; top: 70%; animation-delay: 1s"
+          ></div>
+          <div
+            class="particle bg-arcane-primary"
+            style="left: 50%; top: 80%; animation-delay: 3s"
+          ></div>
+        </div>
+
+        <div class="max-w-5xl mx-auto px-6 relative z-10">
+          <!-- Title Badge -->
+          <div
+            class="inline-block mb-8 px-4 py-2 bg-arcane-primary text-white rounded-full text-sm font-medium"
+          >
+            Option A: Arcane Violet
+          </div>
+          <p class="text-arcane-text-secondary mb-8 max-w-2xl">
+            <strong>Feel:</strong> Mysterious, magical, scholarly.
+            <strong>Associations:</strong> Arcane magic, wizardry, ancient knowledge.
+          </p>
+
+          <!-- Landing Hero Preview -->
+          <div
+            class="bg-arcane-card rounded-2xl p-8 mb-8 card-glow arcane-glow border border-arcane-border"
+          >
+            <div class="text-center max-w-2xl mx-auto">
+              <h2 class="text-4xl font-bold text-arcane-text mb-4">Create Epic Adventures</h2>
+              <p class="text-xl text-arcane-text-secondary mb-6">in Minutes, Not Hours</p>
+              <p class="text-arcane-text-muted mb-8">
+                AI-powered adventure generation for Game Masters who want to spend less time
+                prepping and more time playing.
+              </p>
+              <button
+                class="btn-pulse px-8 py-3 bg-arcane-primary hover:bg-arcane-primary-dark text-white font-semibold rounded-lg transition-colors"
+              >
+                Get Started Free
+              </button>
+            </div>
+          </div>
+
+          <!-- UI Components Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <!-- Scene Card -->
+            <div
+              class="bg-arcane-card rounded-xl p-6 card-glow arcane-glow border border-arcane-border"
+            >
+              <div class="flex items-center gap-3 mb-4">
+                <span
+                  class="px-3 py-1 bg-arcane-surface text-arcane-primary rounded-full text-sm font-medium"
+                  >Scene 1</span
+                >
+                <span class="text-arcane-text-muted text-sm">~20 min</span>
+              </div>
+              <h3 class="text-lg font-bold text-arcane-text mb-2">The Village Warning</h3>
+              <p class="text-arcane-text-secondary text-sm mb-4">
+                The party arrives at a village on the edge of the Witherwild, where frightened
+                villagers speak of strange happenings.
+              </p>
+              <div class="flex gap-2">
+                <button
+                  class="px-4 py-2 bg-arcane-primary text-white text-sm rounded-lg hover:bg-arcane-primary-dark transition-colors"
+                >
+                  Confirm
+                </button>
+                <button
+                  class="px-4 py-2 bg-arcane-surface text-arcane-text text-sm rounded-lg hover:bg-arcane-border transition-colors"
+                >
+                  Edit
+                </button>
+              </div>
+            </div>
+
+            <!-- NPC Card -->
+            <div
+              class="bg-arcane-card rounded-xl p-6 card-glow arcane-glow border border-arcane-border"
+            >
+              <h3 class="text-lg font-bold text-arcane-text mb-3">Elder Mora</h3>
+              <table class="w-full text-sm">
+                <tr class="border-b border-arcane-border">
+                  <td class="py-2 text-arcane-text-muted w-28">Appearance</td>
+                  <td class="py-2 text-arcane-text-secondary">
+                    Silver-haired woman, weathered face
+                  </td>
+                </tr>
+                <tr class="border-b border-arcane-border">
+                  <td class="py-2 text-arcane-text-muted">Motivation</td>
+                  <td class="py-2 text-arcane-text-secondary">Protect her village, find her son</td>
+                </tr>
+                <tr>
+                  <td class="py-2 text-arcane-text-muted">Secret</td>
+                  <td class="py-2 text-arcane-accent font-medium">
+                    Her son was first to disappear
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </div>
+
+          <!-- Read-Aloud Box -->
+          <div
+            class="bg-arcane-card rounded-xl p-6 mb-8 card-glow arcane-glow border border-arcane-border"
+          >
+            <h4 class="text-sm font-semibold text-arcane-text-muted uppercase tracking-wide mb-3">
+              Read-Aloud Narrative
+            </h4>
+            <div class="read-aloud-arcane p-4 rounded-r-lg">
+              <p class="text-arcane-text italic leading-relaxed">
+                "The village gates creak open just wide enough for you to pass single-file. Beyond
+                the palisade, Thornhaven feels... wrong. Too quiet. The usual sounds of village life
+                are absent."
+              </p>
+            </div>
+          </div>
+
+          <!-- Stat Block -->
+          <div
+            class="bg-arcane-card rounded-xl p-6 card-glow arcane-glow border border-arcane-border stat-arcane"
+          >
+            <div class="flex justify-between items-start mb-4">
+              <div>
+                <h3 class="text-lg font-bold text-arcane-text">Corrupted Wolf</h3>
+                <span class="text-arcane-text-muted text-sm">Minion</span>
+              </div>
+              <span class="px-2 py-1 bg-red-100 text-red-700 text-xs font-medium rounded"
+                >MINION</span
+              >
+            </div>
+            <div class="grid grid-cols-3 gap-4 mb-4">
+              <div class="bg-arcane-surface p-3 rounded-lg text-center">
+                <p class="text-xs text-arcane-text-muted">HP</p>
+                <p class="text-2xl font-bold text-arcane-text">8</p>
+              </div>
+              <div class="bg-arcane-surface p-3 rounded-lg text-center">
+                <p class="text-xs text-arcane-text-muted">Armor</p>
+                <p class="text-2xl font-bold text-arcane-text">1</p>
+              </div>
+              <div class="bg-arcane-surface p-3 rounded-lg text-center">
+                <p class="text-xs text-arcane-text-muted">Evasion</p>
+                <p class="text-2xl font-bold text-arcane-text">12</p>
+              </div>
+            </div>
+            <div class="space-y-2 text-sm">
+              <div class="bg-arcane-surface p-2 rounded">
+                <strong class="text-red-600">Bite:</strong>
+                <span class="text-arcane-text-secondary">1d8+2 damage</span>
+              </div>
+              <div class="bg-arcane-surface p-2 rounded">
+                <strong class="text-arcane-primary">Pack Tactics:</strong>
+                <span class="text-arcane-text-secondary">+2 to attack if ally within 5ft</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================ -->
+    <!-- OPTION B: EMBER & ASH -->
+    <!-- ================================ -->
+    <section id="ember" class="section-divider">
+      <div class="bg-ember-bg min-h-screen py-12 relative">
+        <!-- Subtle particles -->
+        <div class="particles">
+          <div
+            class="particle bg-ember-primary"
+            style="left: 15%; top: 25%; animation-delay: 0.5s"
+          ></div>
+          <div
+            class="particle bg-ember-accent"
+            style="left: 40%; top: 55%; animation-delay: 2.5s"
+          ></div>
+          <div
+            class="particle bg-ember-primary"
+            style="left: 65%; top: 35%; animation-delay: 4.5s"
+          ></div>
+          <div
+            class="particle bg-ember-accent"
+            style="left: 80%; top: 65%; animation-delay: 1.5s"
+          ></div>
+          <div
+            class="particle bg-ember-primary"
+            style="left: 55%; top: 85%; animation-delay: 3.5s"
+          ></div>
+        </div>
+
+        <div class="max-w-5xl mx-auto px-6 relative z-10">
+          <!-- Title Badge -->
+          <div
+            class="inline-block mb-8 px-4 py-2 bg-ember-primary text-white rounded-full text-sm font-medium"
+          >
+            Option B: Ember & Ash
+          </div>
+          <p class="text-ember-text-secondary mb-8 max-w-2xl">
+            <strong>Feel:</strong> Warm, inviting, like firelight in a tavern.
+            <strong>Associations:</strong> Campfire storytelling, adventure, warmth.
+          </p>
+
+          <!-- Landing Hero Preview -->
+          <div
+            class="bg-ember-card rounded-2xl p-8 mb-8 card-glow ember-glow border border-ember-border"
+          >
+            <div class="text-center max-w-2xl mx-auto">
+              <h2 class="text-4xl font-bold text-ember-text mb-4">Create Epic Adventures</h2>
+              <p class="text-xl text-ember-text-secondary mb-6">in Minutes, Not Hours</p>
+              <p class="text-ember-text-muted mb-8">
+                AI-powered adventure generation for Game Masters who want to spend less time
+                prepping and more time playing.
+              </p>
+              <button
+                class="btn-pulse px-8 py-3 bg-ember-primary hover:bg-ember-primary-dark text-white font-semibold rounded-lg transition-colors"
+              >
+                Get Started Free
+              </button>
+            </div>
+          </div>
+
+          <!-- UI Components Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <!-- Scene Card -->
+            <div
+              class="bg-ember-card rounded-xl p-6 card-glow ember-glow border border-ember-border"
+            >
+              <div class="flex items-center gap-3 mb-4">
+                <span
+                  class="px-3 py-1 bg-ember-surface text-ember-primary rounded-full text-sm font-medium"
+                  >Scene 1</span
+                >
+                <span class="text-ember-text-muted text-sm">~20 min</span>
+              </div>
+              <h3 class="text-lg font-bold text-ember-text mb-2">The Village Warning</h3>
+              <p class="text-ember-text-secondary text-sm mb-4">
+                The party arrives at a village on the edge of the Witherwild, where frightened
+                villagers speak of strange happenings.
+              </p>
+              <div class="flex gap-2">
+                <button
+                  class="px-4 py-2 bg-ember-primary text-white text-sm rounded-lg hover:bg-ember-primary-dark transition-colors"
+                >
+                  Confirm
+                </button>
+                <button
+                  class="px-4 py-2 bg-ember-surface text-ember-text text-sm rounded-lg hover:bg-ember-border transition-colors"
+                >
+                  Edit
+                </button>
+              </div>
+            </div>
+
+            <!-- NPC Card -->
+            <div
+              class="bg-ember-card rounded-xl p-6 card-glow ember-glow border border-ember-border"
+            >
+              <h3 class="text-lg font-bold text-ember-text mb-3">Elder Mora</h3>
+              <table class="w-full text-sm">
+                <tr class="border-b border-ember-border">
+                  <td class="py-2 text-ember-text-muted w-28">Appearance</td>
+                  <td class="py-2 text-ember-text-secondary">
+                    Silver-haired woman, weathered face
+                  </td>
+                </tr>
+                <tr class="border-b border-ember-border">
+                  <td class="py-2 text-ember-text-muted">Motivation</td>
+                  <td class="py-2 text-ember-text-secondary">Protect her village, find her son</td>
+                </tr>
+                <tr>
+                  <td class="py-2 text-ember-text-muted">Secret</td>
+                  <td class="py-2 text-ember-accent font-medium">Her son was first to disappear</td>
+                </tr>
+              </table>
+            </div>
+          </div>
+
+          <!-- Read-Aloud Box -->
+          <div
+            class="bg-ember-card rounded-xl p-6 mb-8 card-glow ember-glow border border-ember-border"
+          >
+            <h4 class="text-sm font-semibold text-ember-text-muted uppercase tracking-wide mb-3">
+              Read-Aloud Narrative
+            </h4>
+            <div class="read-aloud-ember p-4 rounded-r-lg">
+              <p class="text-ember-text italic leading-relaxed">
+                "The village gates creak open just wide enough for you to pass single-file. Beyond
+                the palisade, Thornhaven feels... wrong. Too quiet. The usual sounds of village life
+                are absent."
+              </p>
+            </div>
+          </div>
+
+          <!-- Stat Block -->
+          <div
+            class="bg-ember-card rounded-xl p-6 card-glow ember-glow border border-ember-border stat-ember"
+          >
+            <div class="flex justify-between items-start mb-4">
+              <div>
+                <h3 class="text-lg font-bold text-ember-text">Corrupted Wolf</h3>
+                <span class="text-ember-text-muted text-sm">Minion</span>
+              </div>
+              <span class="px-2 py-1 bg-red-100 text-red-700 text-xs font-medium rounded"
+                >MINION</span
+              >
+            </div>
+            <div class="grid grid-cols-3 gap-4 mb-4">
+              <div class="bg-ember-surface p-3 rounded-lg text-center">
+                <p class="text-xs text-ember-text-muted">HP</p>
+                <p class="text-2xl font-bold text-ember-text">8</p>
+              </div>
+              <div class="bg-ember-surface p-3 rounded-lg text-center">
+                <p class="text-xs text-ember-text-muted">Armor</p>
+                <p class="text-2xl font-bold text-ember-text">1</p>
+              </div>
+              <div class="bg-ember-surface p-3 rounded-lg text-center">
+                <p class="text-xs text-ember-text-muted">Evasion</p>
+                <p class="text-2xl font-bold text-ember-text">12</p>
+              </div>
+            </div>
+            <div class="space-y-2 text-sm">
+              <div class="bg-ember-surface p-2 rounded">
+                <strong class="text-red-600">Bite:</strong>
+                <span class="text-ember-text-secondary">1d8+2 damage</span>
+              </div>
+              <div class="bg-ember-surface p-2 rounded">
+                <strong class="text-ember-primary">Pack Tactics:</strong>
+                <span class="text-ember-text-secondary">+2 to attack if ally within 5ft</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================ -->
+    <!-- OPTION C: MOONLIT STEEL -->
+    <!-- ================================ -->
+    <section id="moonlit" class="section-divider">
+      <div class="bg-moonlit-bg min-h-screen py-12 relative">
+        <!-- Subtle particles -->
+        <div class="particles">
+          <div
+            class="particle bg-moonlit-primary"
+            style="left: 12%; top: 22%; animation-delay: 0.2s"
+          ></div>
+          <div
+            class="particle bg-moonlit-accent"
+            style="left: 35%; top: 58%; animation-delay: 2.2s"
+          ></div>
+          <div
+            class="particle bg-moonlit-primary"
+            style="left: 68%; top: 32%; animation-delay: 4.2s"
+          ></div>
+          <div
+            class="particle bg-moonlit-accent"
+            style="left: 82%; top: 68%; animation-delay: 1.2s"
+          ></div>
+          <div
+            class="particle bg-moonlit-primary"
+            style="left: 52%; top: 82%; animation-delay: 3.2s"
+          ></div>
+        </div>
+
+        <div class="max-w-5xl mx-auto px-6 relative z-10">
+          <!-- Title Badge -->
+          <div
+            class="inline-block mb-8 px-4 py-2 bg-moonlit-primary text-white rounded-full text-sm font-medium"
+          >
+            Option C: Moonlit Steel
+          </div>
+          <p class="text-moonlit-text-secondary mb-8 max-w-2xl">
+            <strong>Feel:</strong> Elegant, refined, heroic.
+            <strong>Associations:</strong> Moonlight, armor, nobility, quests.
+          </p>
+
+          <!-- Landing Hero Preview -->
+          <div
+            class="bg-moonlit-card rounded-2xl p-8 mb-8 card-glow moonlit-glow border border-moonlit-border"
+          >
+            <div class="text-center max-w-2xl mx-auto">
+              <h2 class="text-4xl font-bold text-moonlit-text mb-4">Create Epic Adventures</h2>
+              <p class="text-xl text-moonlit-text-secondary mb-6">in Minutes, Not Hours</p>
+              <p class="text-moonlit-text-muted mb-8">
+                AI-powered adventure generation for Game Masters who want to spend less time
+                prepping and more time playing.
+              </p>
+              <button
+                class="btn-pulse px-8 py-3 bg-moonlit-primary hover:bg-moonlit-primary-dark text-white font-semibold rounded-lg transition-colors"
+              >
+                Get Started Free
+              </button>
+            </div>
+          </div>
+
+          <!-- UI Components Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <!-- Scene Card -->
+            <div
+              class="bg-moonlit-card rounded-xl p-6 card-glow moonlit-glow border border-moonlit-border"
+            >
+              <div class="flex items-center gap-3 mb-4">
+                <span
+                  class="px-3 py-1 bg-moonlit-surface text-moonlit-primary rounded-full text-sm font-medium"
+                  >Scene 1</span
+                >
+                <span class="text-moonlit-text-muted text-sm">~20 min</span>
+              </div>
+              <h3 class="text-lg font-bold text-moonlit-text mb-2">The Village Warning</h3>
+              <p class="text-moonlit-text-secondary text-sm mb-4">
+                The party arrives at a village on the edge of the Witherwild, where frightened
+                villagers speak of strange happenings.
+              </p>
+              <div class="flex gap-2">
+                <button
+                  class="px-4 py-2 bg-moonlit-primary text-white text-sm rounded-lg hover:bg-moonlit-primary-dark transition-colors"
+                >
+                  Confirm
+                </button>
+                <button
+                  class="px-4 py-2 bg-moonlit-surface text-moonlit-text text-sm rounded-lg hover:bg-moonlit-border transition-colors"
+                >
+                  Edit
+                </button>
+              </div>
+            </div>
+
+            <!-- NPC Card -->
+            <div
+              class="bg-moonlit-card rounded-xl p-6 card-glow moonlit-glow border border-moonlit-border"
+            >
+              <h3 class="text-lg font-bold text-moonlit-text mb-3">Elder Mora</h3>
+              <table class="w-full text-sm">
+                <tr class="border-b border-moonlit-border">
+                  <td class="py-2 text-moonlit-text-muted w-28">Appearance</td>
+                  <td class="py-2 text-moonlit-text-secondary">
+                    Silver-haired woman, weathered face
+                  </td>
+                </tr>
+                <tr class="border-b border-moonlit-border">
+                  <td class="py-2 text-moonlit-text-muted">Motivation</td>
+                  <td class="py-2 text-moonlit-text-secondary">
+                    Protect her village, find her son
+                  </td>
+                </tr>
+                <tr>
+                  <td class="py-2 text-moonlit-text-muted">Secret</td>
+                  <td class="py-2 text-moonlit-accent font-medium">
+                    Her son was first to disappear
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </div>
+
+          <!-- Read-Aloud Box -->
+          <div
+            class="bg-moonlit-card rounded-xl p-6 mb-8 card-glow moonlit-glow border border-moonlit-border"
+          >
+            <h4 class="text-sm font-semibold text-moonlit-text-muted uppercase tracking-wide mb-3">
+              Read-Aloud Narrative
+            </h4>
+            <div class="read-aloud-moonlit p-4 rounded-r-lg">
+              <p class="text-moonlit-text italic leading-relaxed">
+                "The village gates creak open just wide enough for you to pass single-file. Beyond
+                the palisade, Thornhaven feels... wrong. Too quiet. The usual sounds of village life
+                are absent."
+              </p>
+            </div>
+          </div>
+
+          <!-- Stat Block -->
+          <div
+            class="bg-moonlit-card rounded-xl p-6 card-glow moonlit-glow border border-moonlit-border stat-moonlit"
+          >
+            <div class="flex justify-between items-start mb-4">
+              <div>
+                <h3 class="text-lg font-bold text-moonlit-text">Corrupted Wolf</h3>
+                <span class="text-moonlit-text-muted text-sm">Minion</span>
+              </div>
+              <span class="px-2 py-1 bg-red-100 text-red-700 text-xs font-medium rounded"
+                >MINION</span
+              >
+            </div>
+            <div class="grid grid-cols-3 gap-4 mb-4">
+              <div class="bg-moonlit-surface p-3 rounded-lg text-center">
+                <p class="text-xs text-moonlit-text-muted">HP</p>
+                <p class="text-2xl font-bold text-moonlit-text">8</p>
+              </div>
+              <div class="bg-moonlit-surface p-3 rounded-lg text-center">
+                <p class="text-xs text-moonlit-text-muted">Armor</p>
+                <p class="text-2xl font-bold text-moonlit-text">1</p>
+              </div>
+              <div class="bg-moonlit-surface p-3 rounded-lg text-center">
+                <p class="text-xs text-moonlit-text-muted">Evasion</p>
+                <p class="text-2xl font-bold text-moonlit-text">12</p>
+              </div>
+            </div>
+            <div class="space-y-2 text-sm">
+              <div class="bg-moonlit-surface p-2 rounded">
+                <strong class="text-red-600">Bite:</strong>
+                <span class="text-moonlit-text-secondary">1d8+2 damage</span>
+              </div>
+              <div class="bg-moonlit-surface p-2 rounded">
+                <strong class="text-moonlit-primary">Pack Tactics:</strong>
+                <span class="text-moonlit-text-secondary">+2 to attack if ally within 5ft</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================ -->
+    <!-- OPTION D: FOREST & FLAME -->
+    <!-- ================================ -->
+    <section id="forest">
+      <div class="bg-forest-bg min-h-screen py-12 relative">
+        <!-- Subtle particles -->
+        <div class="particles">
+          <div
+            class="particle bg-forest-primary"
+            style="left: 18%; top: 28%; animation-delay: 0.8s"
+          ></div>
+          <div
+            class="particle bg-forest-accent"
+            style="left: 38%; top: 52%; animation-delay: 2.8s"
+          ></div>
+          <div
+            class="particle bg-forest-primary"
+            style="left: 62%; top: 38%; animation-delay: 4.8s"
+          ></div>
+          <div
+            class="particle bg-forest-accent"
+            style="left: 78%; top: 72%; animation-delay: 1.8s"
+          ></div>
+          <div
+            class="particle bg-forest-primary"
+            style="left: 48%; top: 78%; animation-delay: 3.8s"
+          ></div>
+        </div>
+
+        <div class="max-w-5xl mx-auto px-6 relative z-10">
+          <!-- Title Badge -->
+          <div
+            class="inline-block mb-8 px-4 py-2 bg-forest-primary text-white rounded-full text-sm font-medium"
+          >
+            Option D: Forest & Flame
+          </div>
+          <p class="text-forest-text-secondary mb-8 max-w-2xl">
+            <strong>Feel:</strong> Natural, grounded, adventurous.
+            <strong>Associations:</strong> Wilderness, druids, exploration, nature.
+          </p>
+
+          <!-- Landing Hero Preview -->
+          <div
+            class="bg-forest-card rounded-2xl p-8 mb-8 card-glow forest-glow border border-forest-border"
+          >
+            <div class="text-center max-w-2xl mx-auto">
+              <h2 class="text-4xl font-bold text-forest-text mb-4">Create Epic Adventures</h2>
+              <p class="text-xl text-forest-text-secondary mb-6">in Minutes, Not Hours</p>
+              <p class="text-forest-text-muted mb-8">
+                AI-powered adventure generation for Game Masters who want to spend less time
+                prepping and more time playing.
+              </p>
+              <button
+                class="btn-pulse px-8 py-3 bg-forest-primary hover:bg-forest-primary-dark text-white font-semibold rounded-lg transition-colors"
+              >
+                Get Started Free
+              </button>
+            </div>
+          </div>
+
+          <!-- UI Components Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <!-- Scene Card -->
+            <div
+              class="bg-forest-card rounded-xl p-6 card-glow forest-glow border border-forest-border"
+            >
+              <div class="flex items-center gap-3 mb-4">
+                <span
+                  class="px-3 py-1 bg-forest-surface text-forest-primary rounded-full text-sm font-medium"
+                  >Scene 1</span
+                >
+                <span class="text-forest-text-muted text-sm">~20 min</span>
+              </div>
+              <h3 class="text-lg font-bold text-forest-text mb-2">The Village Warning</h3>
+              <p class="text-forest-text-secondary text-sm mb-4">
+                The party arrives at a village on the edge of the Witherwild, where frightened
+                villagers speak of strange happenings.
+              </p>
+              <div class="flex gap-2">
+                <button
+                  class="px-4 py-2 bg-forest-primary text-white text-sm rounded-lg hover:bg-forest-primary-dark transition-colors"
+                >
+                  Confirm
+                </button>
+                <button
+                  class="px-4 py-2 bg-forest-surface text-forest-text text-sm rounded-lg hover:bg-forest-border transition-colors"
+                >
+                  Edit
+                </button>
+              </div>
+            </div>
+
+            <!-- NPC Card -->
+            <div
+              class="bg-forest-card rounded-xl p-6 card-glow forest-glow border border-forest-border"
+            >
+              <h3 class="text-lg font-bold text-forest-text mb-3">Elder Mora</h3>
+              <table class="w-full text-sm">
+                <tr class="border-b border-forest-border">
+                  <td class="py-2 text-forest-text-muted w-28">Appearance</td>
+                  <td class="py-2 text-forest-text-secondary">
+                    Silver-haired woman, weathered face
+                  </td>
+                </tr>
+                <tr class="border-b border-forest-border">
+                  <td class="py-2 text-forest-text-muted">Motivation</td>
+                  <td class="py-2 text-forest-text-secondary">Protect her village, find her son</td>
+                </tr>
+                <tr>
+                  <td class="py-2 text-forest-text-muted">Secret</td>
+                  <td class="py-2 text-forest-accent font-medium">
+                    Her son was first to disappear
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </div>
+
+          <!-- Read-Aloud Box -->
+          <div
+            class="bg-forest-card rounded-xl p-6 mb-8 card-glow forest-glow border border-forest-border"
+          >
+            <h4 class="text-sm font-semibold text-forest-text-muted uppercase tracking-wide mb-3">
+              Read-Aloud Narrative
+            </h4>
+            <div class="read-aloud-forest p-4 rounded-r-lg">
+              <p class="text-forest-text italic leading-relaxed">
+                "The village gates creak open just wide enough for you to pass single-file. Beyond
+                the palisade, Thornhaven feels... wrong. Too quiet. The usual sounds of village life
+                are absent."
+              </p>
+            </div>
+          </div>
+
+          <!-- Stat Block -->
+          <div
+            class="bg-forest-card rounded-xl p-6 card-glow forest-glow border border-forest-border stat-forest"
+          >
+            <div class="flex justify-between items-start mb-4">
+              <div>
+                <h3 class="text-lg font-bold text-forest-text">Corrupted Wolf</h3>
+                <span class="text-forest-text-muted text-sm">Minion</span>
+              </div>
+              <span class="px-2 py-1 bg-red-100 text-red-700 text-xs font-medium rounded"
+                >MINION</span
+              >
+            </div>
+            <div class="grid grid-cols-3 gap-4 mb-4">
+              <div class="bg-forest-surface p-3 rounded-lg text-center">
+                <p class="text-xs text-forest-text-muted">HP</p>
+                <p class="text-2xl font-bold text-forest-text">8</p>
+              </div>
+              <div class="bg-forest-surface p-3 rounded-lg text-center">
+                <p class="text-xs text-forest-text-muted">Armor</p>
+                <p class="text-2xl font-bold text-forest-text">1</p>
+              </div>
+              <div class="bg-forest-surface p-3 rounded-lg text-center">
+                <p class="text-xs text-forest-text-muted">Evasion</p>
+                <p class="text-2xl font-bold text-forest-text">12</p>
+              </div>
+            </div>
+            <div class="space-y-2 text-sm">
+              <div class="bg-forest-surface p-2 rounded">
+                <strong class="text-red-600">Bite:</strong>
+                <span class="text-forest-text-secondary">1d8+2 damage</span>
+              </div>
+              <div class="bg-forest-surface p-2 rounded">
+                <strong class="text-forest-primary">Pack Tactics:</strong>
+                <span class="text-forest-text-secondary">+2 to attack if ally within 5ft</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <div class="bg-gray-800 text-white py-8 px-6 text-center">
+      <p class="text-lg mb-2">Which direction resonates with you?</p>
+      <p class="text-gray-400">
+        Consider: How does each palette make you feel? Which supports "intentionally understated
+        with subtle magic"?
+      </p>
+    </div>
+  </body>
+</html>
