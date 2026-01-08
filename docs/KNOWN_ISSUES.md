@@ -62,6 +62,8 @@ TypeError: fetch failed
 
 **Priority**: Medium - Can be addressed after MVP launch
 
+**Detailed Task**: See [tasks/FIX_001_node_fetch_failures.md](tasks/FIX_001_node_fetch_failures.md) for investigation steps and proposed solutions.
+
 **Next Steps**:
 
 1. Investigate Node.js fetch polyfill options
@@ -72,4 +74,4 @@ TypeError: fetch failed
 ---
 
 **Created**: 2025-10-26
-**Last Updated**: 2025-10-26
+**Last Updated**: 2025-12-28

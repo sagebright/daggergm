@@ -14,7 +14,7 @@
     "allowJs": true, // For .js config files
     "checkJs": false, // Don't type-check .js
     // Next.js Requirements
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "incremental": true,
     "esModuleInterop": true,
     "isolatedModules": true,
