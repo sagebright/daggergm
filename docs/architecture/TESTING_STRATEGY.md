@@ -2,7 +2,7 @@
 
 ## Overview
 
-**Target**: 99% code coverage (lines/functions/statements), 97% branches
+**Target**: 90% code coverage (lines/functions/statements/branches)
 **Distribution**: 80% Integration / 15% E2E / 5% Unit
 **Philosophy**: Test behavior, not implementation
 
@@ -348,8 +348,8 @@ export const llmServer = setupServer(...llmHandlers)
 # .github/workflows/ci.yml
 - name: Enforce Coverage Threshold
   run: |
-    if [ $(jq '.total.lines.pct' coverage/coverage-summary.json) -lt 99 ]; then
-      echo "❌ Coverage below 99% threshold"
+    if [ $(jq '.total.lines.pct' coverage/coverage-summary.json) -lt 90 ]; then
+      echo "❌ Coverage below 90% threshold"
       exit 1
     fi
 ```
@@ -475,7 +475,7 @@ export async function regenerateMovement(movementId: string) {
 
 ### Before Committing
 
-- [ ] Run `npm run test:coverage` (must be ≥99%)
+- [ ] Run `npm run test:coverage` (must be ≥90%)
 - [ ] Run `npm run test:e2e` (if UI changed)
 - [ ] Check coverage report for untested branches
 

@@ -38,9 +38,8 @@ vi.mock('@supabase/supabase-js', () => ({
 }))
 
 // Import after mocks are set up
-const { searchAdversaries, searchWeapons, searchEnvironments, searchItems } = await import(
-  '@/lib/supabase/search-content'
-)
+const { searchAdversaries, searchWeapons, searchEnvironments, searchItems } =
+  await import('@/lib/supabase/search-content')
 
 describe('search-content vector search functions', () => {
   beforeEach(() => {
