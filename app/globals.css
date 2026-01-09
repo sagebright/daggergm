@@ -1,92 +1,169 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
 
-:root {
-  /* Daggerheart-inspired color palette */
-  --dagger-purple-900: 0.18 0.15 285;
-  --dagger-purple-800: 0.24 0.12 285;
-  --dagger-teal-400: 0.75 0.08 180;
-  --dagger-gold-400: 0.82 0.12 85;
+@source './**/*.{js,ts,jsx,tsx,mdx}';
 
-  /* Semantic color tokens using Daggerheart palette */
-  --radius: 0.625rem;
-  --background: 0.98 0.005 285; /* Light with subtle purple tint */
-  --foreground: 0.15 0.12 285; /* Dark purple text */
-  --card: 0.98 0.005 285;
-  --card-foreground: 0.15 0.12 285;
-  --popover: 0.98 0.005 285;
-  --popover-foreground: 0.15 0.12 285;
-  --primary: var(--dagger-purple-800);
-  --primary-foreground: 0.98 0.005 285;
-  --secondary: 0.95 0.005 285;
-  --secondary-foreground: 0.15 0.12 285;
-  --muted: 0.9 0.01 285;
-  --muted-foreground: 0.45 0.06 285;
-  --accent: var(--dagger-teal-400);
-  --accent-foreground: 0.15 0.12 285;
-  --destructive: 0.577 0.245 27.325;
-  --destructive-foreground: 0.985 0 0;
-  --border: 0.85 0.01 285;
-  --input: 0.85 0.01 285;
-  --ring: var(--dagger-purple-800);
+@theme {
+  --color-dagger-purple-800: oklch(var(--dagger-purple-800));
+  --color-dagger-purple-900: oklch(var(--dagger-purple-900));
 
-  /* Chart colors with Daggerheart palette */
-  --chart-1: var(--dagger-purple-800);
-  --chart-2: var(--dagger-teal-400);
-  --chart-3: var(--dagger-gold-400);
-  --chart-4: 0.828 0.189 84.429;
-  --chart-5: 0.769 0.188 70.08;
+  --color-dagger-teal-400: oklch(var(--dagger-teal-400));
 
-  /* Sidebar with Daggerheart theming */
-  --sidebar: 0.985 0.005 285;
-  --sidebar-foreground: 0.15 0.12 285;
-  --sidebar-primary: var(--dagger-purple-800);
-  --sidebar-primary-foreground: 0.985 0.005 285;
-  --sidebar-accent: var(--dagger-teal-400);
-  --sidebar-accent-foreground: 0.15 0.12 285;
-  --sidebar-border: 0.85 0.01 285;
-  --sidebar-ring: var(--dagger-purple-800);
+  --color-dagger-gold-400: oklch(var(--dagger-gold-400));
+
+  --color-border: oklch(var(--border));
+  --color-input: oklch(var(--input));
+  --color-ring: oklch(var(--ring));
+  --color-background: oklch(var(--background));
+  --color-foreground: oklch(var(--foreground));
+
+  --color-primary: oklch(var(--primary));
+  --color-primary-foreground: oklch(var(--primary-foreground));
+
+  --color-secondary: oklch(var(--secondary));
+  --color-secondary-foreground: oklch(var(--secondary-foreground));
+
+  --color-destructive: oklch(var(--destructive));
+  --color-destructive-foreground: oklch(var(--destructive-foreground));
+
+  --color-muted: oklch(var(--muted));
+  --color-muted-foreground: oklch(var(--muted-foreground));
+
+  --color-accent: oklch(var(--accent));
+  --color-accent-foreground: oklch(var(--accent-foreground));
+
+  --color-popover: oklch(var(--popover));
+  --color-popover-foreground: oklch(var(--popover-foreground));
+
+  --color-card: oklch(var(--card));
+  --color-card-foreground: oklch(var(--card-foreground));
+
+  --font-sans:
+    system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Inter, 'Helvetica Neue',
+    Arial, sans-serif;
+
+  --text-display: 24px;
+  --text-display--line-height: 32px;
+  --text-display--font-weight: 600;
+  --text-medium: 18px;
+  --text-medium--line-height: 28px;
+  --text-medium--font-weight: 500;
+  --text-small: 16px;
+  --text-small--line-height: 24px;
+  --text-small--font-weight: 400;
+  --text-caption: 14px;
+  --text-caption--line-height: 20px;
+  --text-caption--font-weight: 400;
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
 }
 
-.dark {
-  /* Dark mode with Daggerheart palette - structure ready for future implementation */
-  --background: 0.15 0.08 285; /* Dark purple background */
-  --foreground: 0.95 0.005 285; /* Light text */
-  --card: 0.18 0.07 285;
-  --card-foreground: 0.95 0.005 285;
-  --popover: 0.18 0.07 285;
-  --popover-foreground: 0.95 0.005 285;
-  --primary: var(--dagger-teal-400); /* Teal primary in dark mode */
-  --primary-foreground: 0.15 0.12 285;
-  --secondary: 0.25 0.06 285;
-  --secondary-foreground: 0.95 0.005 285;
-  --muted: 0.25 0.06 285;
-  --muted-foreground: 0.65 0.03 285;
-  --accent: var(--dagger-gold-400); /* Gold accent in dark mode */
-  --accent-foreground: 0.15 0.12 285;
-  --destructive: 0.704 0.191 22.216;
-  --destructive-foreground: 0.145 0 0;
-  --border: 0.3 0.05 285;
-  --input: 0.3 0.05 285;
-  --ring: var(--dagger-teal-400);
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
 
-  /* Chart colors for dark mode */
-  --chart-1: var(--dagger-teal-400);
-  --chart-2: var(--dagger-gold-400);
-  --chart-3: var(--dagger-purple-800);
-  --chart-4: 0.627 0.265 303.9;
-  --chart-5: 0.645 0.246 16.439;
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+}
 
-  /* Sidebar dark mode */
-  --sidebar: 0.18 0.07 285;
-  --sidebar-foreground: 0.95 0.005 285;
-  --sidebar-primary: var(--dagger-teal-400);
-  --sidebar-primary-foreground: 0.15 0.12 285;
-  --sidebar-accent: var(--dagger-gold-400);
-  --sidebar-accent-foreground: 0.15 0.12 285;
-  --sidebar-border: 0.3 0.05 285;
-  --sidebar-ring: var(--dagger-teal-400);
+@layer utilities {
+  :root {
+    /* Daggerheart-inspired color palette */
+    --dagger-purple-900: 0.18 0.15 285;
+    --dagger-purple-800: 0.24 0.12 285;
+    --dagger-teal-400: 0.75 0.08 180;
+    --dagger-gold-400: 0.82 0.12 85;
+
+    /* Semantic color tokens using Daggerheart palette */
+    --radius: 0.625rem;
+    --background: 0.98 0.005 285; /* Light with subtle purple tint */
+    --foreground: 0.15 0.12 285; /* Dark purple text */
+    --card: 0.98 0.005 285;
+    --card-foreground: 0.15 0.12 285;
+    --popover: 0.98 0.005 285;
+    --popover-foreground: 0.15 0.12 285;
+    --primary: var(--dagger-purple-800);
+    --primary-foreground: 0.98 0.005 285;
+    --secondary: 0.95 0.005 285;
+    --secondary-foreground: 0.15 0.12 285;
+    --muted: 0.9 0.01 285;
+    --muted-foreground: 0.45 0.06 285;
+    --accent: var(--dagger-teal-400);
+    --accent-foreground: 0.15 0.12 285;
+    --destructive: 0.577 0.245 27.325;
+    --destructive-foreground: 0.985 0 0;
+    --border: 0.85 0.01 285;
+    --input: 0.85 0.01 285;
+    --ring: var(--dagger-purple-800);
+
+    /* Chart colors with Daggerheart palette */
+    --chart-1: var(--dagger-purple-800);
+    --chart-2: var(--dagger-teal-400);
+    --chart-3: var(--dagger-gold-400);
+    --chart-4: 0.828 0.189 84.429;
+    --chart-5: 0.769 0.188 70.08;
+
+    /* Sidebar with Daggerheart theming */
+    --sidebar: 0.985 0.005 285;
+    --sidebar-foreground: 0.15 0.12 285;
+    --sidebar-primary: var(--dagger-purple-800);
+    --sidebar-primary-foreground: 0.985 0.005 285;
+    --sidebar-accent: var(--dagger-teal-400);
+    --sidebar-accent-foreground: 0.15 0.12 285;
+    --sidebar-border: 0.85 0.01 285;
+    --sidebar-ring: var(--dagger-purple-800);
+  }
+
+  .dark {
+    /* Dark mode with Daggerheart palette - structure ready for future implementation */
+    --background: 0.15 0.08 285; /* Dark purple background */
+    --foreground: 0.95 0.005 285; /* Light text */
+    --card: 0.18 0.07 285;
+    --card-foreground: 0.95 0.005 285;
+    --popover: 0.18 0.07 285;
+    --popover-foreground: 0.95 0.005 285;
+    --primary: var(--dagger-teal-400); /* Teal primary in dark mode */
+    --primary-foreground: 0.15 0.12 285;
+    --secondary: 0.25 0.06 285;
+    --secondary-foreground: 0.95 0.005 285;
+    --muted: 0.25 0.06 285;
+    --muted-foreground: 0.65 0.03 285;
+    --accent: var(--dagger-gold-400); /* Gold accent in dark mode */
+    --accent-foreground: 0.15 0.12 285;
+    --destructive: 0.704 0.191 22.216;
+    --destructive-foreground: 0.145 0 0;
+    --border: 0.3 0.05 285;
+    --input: 0.3 0.05 285;
+    --ring: var(--dagger-teal-400);
+
+    /* Chart colors for dark mode */
+    --chart-1: var(--dagger-teal-400);
+    --chart-2: var(--dagger-gold-400);
+    --chart-3: var(--dagger-purple-800);
+    --chart-4: 0.627 0.265 303.9;
+    --chart-5: 0.645 0.246 16.439;
+
+    /* Sidebar dark mode */
+    --sidebar: 0.18 0.07 285;
+    --sidebar-foreground: 0.95 0.005 285;
+    --sidebar-primary: var(--dagger-teal-400);
+    --sidebar-primary-foreground: 0.15 0.12 285;
+    --sidebar-accent: var(--dagger-gold-400);
+    --sidebar-accent-foreground: 0.15 0.12 285;
+    --sidebar-border: 0.3 0.05 285;
+    --sidebar-ring: var(--dagger-teal-400);
+  }
 }
 
 @layer base {

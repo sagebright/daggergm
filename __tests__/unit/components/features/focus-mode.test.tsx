@@ -442,7 +442,7 @@ describe('FocusMode', () => {
 
       // Initially should have default padding
       expect(movementList).toHaveClass('pr-4')
-      expect(movementList).not.toHaveClass('pr-[25rem]')
+      expect(movementList).not.toHaveClass('pr-100')
 
       // Focus movement to show panel
       await user.click(screen.getByText('The Journey Begins'))
@@ -452,7 +452,7 @@ describe('FocusMode', () => {
       })
 
       // Should have extra padding to prevent content from being covered
-      expect(movementList).toHaveClass('pr-[25rem]')
+      expect(movementList).toHaveClass('pr-100')
       expect(movementList).not.toHaveClass('pr-4')
     })
 
@@ -482,7 +482,7 @@ describe('FocusMode', () => {
       await user.click(screen.getByText('The Journey Begins'))
 
       await waitFor(() => {
-        expect(movementList).toHaveClass('pr-[25rem]')
+        expect(movementList).toHaveClass('pr-100')
       })
 
       // Toggle panel off
@@ -503,7 +503,7 @@ describe('FocusMode', () => {
       // Should revert to default padding
       await waitFor(() => {
         expect(movementList).toHaveClass('pr-4')
-        expect(movementList).not.toHaveClass('pr-[25rem]')
+        expect(movementList).not.toHaveClass('pr-100')
       })
     })
   })

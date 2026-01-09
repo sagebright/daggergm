@@ -19,7 +19,7 @@ export default async function Home() {
       {/* Hero Section */}
       <div className="relative isolate overflow-hidden">
         <div className="mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-32 lg:flex lg:px-8 lg:py-40">
-          <div className="mx-auto max-w-2xl lg:mx-0 lg:max-w-xl lg:flex-shrink-0 lg:pt-8">
+          <div className="mx-auto max-w-2xl lg:mx-0 lg:max-w-xl lg:shrink-0 lg:pt-8">
             <h1 className="mt-10 text-4xl font-bold tracking-tight sm:text-6xl">
               Create Epic Daggerheart Adventures in Minutes
             </h1>

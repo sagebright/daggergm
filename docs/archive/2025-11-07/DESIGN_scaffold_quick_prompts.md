@@ -304,7 +304,7 @@ interface FocusModeProps {
 
 **LLM regenerates with higher stakes**:
 
-> "The party arrives to find Thistleborn under siege, with the chieftain's daughter among the missing. Panic grips the villagers as shadow creatures emerge at dusk..."
+> "The party arrives to find Thistleborn under siege, with the chieftain's daughter among the missing. Panic grips the villagers as shadow-sm creatures emerge at dusk..."
 
 ### Expansion Phase (Ready State)
 

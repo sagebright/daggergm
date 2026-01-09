@@ -141,7 +141,7 @@
   </head>
   <body class="bg-slate-50 text-slate-900 min-h-screen font-sans">
     <!-- Navigation -->
-    <nav class="bg-white border-b border-slate-200 px-4 py-3 md:px-6 md:py-4 shadow-sm">
+    <nav class="bg-white border-b border-slate-200 px-4 py-3 md:px-6 md:py-4 shadow-xs">
       <div class="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
         <h1 class="text-lg md:text-xl font-bold text-slate-900">
           DaggerGM <span class="text-amber-600">Workflow Mockup</span>
@@ -261,7 +261,7 @@
       <!-- Page 1: Landing -->
       <div id="page-1" class="page">
         <div
-          class="bg-white rounded-xl p-8 md:p-12 text-center border border-slate-200 shadow-sm relative overflow-hidden"
+          class="bg-white rounded-xl p-8 md:p-12 text-center border border-slate-200 shadow-xs relative overflow-hidden"
         >
           <!-- Subtle particles - 8 total with varied sizes and staggered delays -->
           <div class="particle particle-sm" style="top: 15%; left: 10%; animation-delay: 0s"></div>
@@ -293,7 +293,7 @@
           </p>
           <button
             onclick="nextStep()"
-            class="btn-shimmer hover:brightness-110 text-white font-semibold py-3 px-8 rounded-lg text-lg transition-all shadow-sm"
+            class="btn-shimmer hover:brightness-110 text-white font-semibold py-3 px-8 rounded-lg text-lg transition-all shadow-xs"
           >
             Get Started Free
           </button>
@@ -337,7 +337,7 @@
       <!-- Page 2: Login -->
       <div id="page-2" class="page">
         <div
-          class="max-w-md mx-auto bg-white rounded-xl p-6 md:p-8 border border-slate-200 shadow-sm card-glow transition-all"
+          class="max-w-md mx-auto bg-white rounded-xl p-6 md:p-8 border border-slate-200 shadow-xs card-glow transition-all"
         >
           <h2 class="text-2xl font-bold text-center mb-6 text-slate-900">Welcome to DaggerGM</h2>
 
@@ -347,7 +347,7 @@
               <input
                 type="email"
                 value="gm@example.com"
-                class="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-slate-900 focus:border-slate-500 focus:ring-2 focus:ring-slate-500/20 focus:outline-none transition-all"
+                class="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-slate-900 focus:border-slate-500 focus:ring-2 focus:ring-slate-500/20 focus:outline-hidden transition-all"
               />
             </div>
             <div>
@@ -355,12 +355,12 @@
               <input
                 type="password"
                 value="password123"
-                class="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-slate-900 focus:border-slate-500 focus:ring-2 focus:ring-slate-500/20 focus:outline-none transition-all"
+                class="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-slate-900 focus:border-slate-500 focus:ring-2 focus:ring-slate-500/20 focus:outline-hidden transition-all"
               />
             </div>
             <button
               onclick="nextStep()"
-              class="w-full bg-slate-600 hover:bg-slate-700 text-white font-semibold py-3 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
+              class="w-full bg-slate-600 hover:bg-slate-700 text-white font-semibold py-3 rounded-lg transition-colors focus:outline-hidden focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
             >
               Login
             </button>
@@ -399,7 +399,7 @@
             </span>
             <button
               onclick="nextStep()"
-              class="bg-slate-600 hover:bg-slate-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 hover:scale-[1.02]"
+              class="bg-slate-600 hover:bg-slate-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors focus:outline-hidden focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 hover:scale-[1.02]"
             >
               + Create New Adventure
             </button>
@@ -409,14 +409,14 @@
         <div class="space-y-4">
           <!-- Empty State -->
           <div
-            class="bg-white rounded-xl p-8 md:p-12 text-center border border-slate-200 shadow-sm card-glow transition-all"
+            class="bg-white rounded-xl p-8 md:p-12 text-center border border-slate-200 shadow-xs card-glow transition-all"
           >
             <div class="text-6xl md:text-7xl mb-6">📜</div>
             <h3 class="text-xl font-bold mb-2 text-slate-900">No adventures yet</h3>
             <p class="text-slate-500 mb-6">Create your first AI-generated adventure!</p>
             <button
               onclick="nextStep()"
-              class="bg-slate-600 hover:bg-slate-700 text-white font-semibold py-3 px-6 rounded-lg transition-all btn-shimmer hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
+              class="bg-slate-600 hover:bg-slate-700 text-white font-semibold py-3 px-6 rounded-lg transition-all btn-shimmer hover:scale-[1.02] focus:outline-hidden focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
             >
               Create Your First Adventure
             </button>
@@ -439,12 +439,12 @@
           <p class="text-slate-500 mb-6">This will cost 1 credit. You have 5 credits remaining.</p>
 
           <div
-            class="bg-white rounded-xl p-6 space-y-6 border border-slate-200 shadow-sm card-glow transition-all"
+            class="bg-white rounded-xl p-6 space-y-6 border border-slate-200 shadow-xs card-glow transition-all"
           >
             <div>
               <label class="block text-sm text-slate-500 mb-2">Adventure Motif *</label>
               <select
-                class="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-slate-900 focus:border-slate-500 focus:ring-2 focus:ring-slate-500/20 focus:outline-none transition-all"
+                class="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-slate-900 focus:border-slate-500 focus:ring-2 focus:ring-slate-500/20 focus:outline-hidden transition-all"
               >
                 <option>High Fantasy</option>
                 <option>Low Fantasy</option>
@@ -456,7 +456,7 @@
             <div>
               <label class="block text-sm text-slate-500 mb-2">Party Size *</label>
               <select
-                class="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-slate-900 focus:border-slate-500 focus:ring-2 focus:ring-slate-500/20 focus:outline-none transition-all"
+                class="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-slate-900 focus:border-slate-500 focus:ring-2 focus:ring-slate-500/20 focus:outline-hidden transition-all"
               >
                 <option>3 players</option>
                 <option selected>4 players</option>
@@ -467,7 +467,7 @@
             <div>
               <label class="block text-sm text-slate-500 mb-2">Party Tier *</label>
               <select
-                class="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-slate-900 focus:border-slate-500 focus:ring-2 focus:ring-slate-500/20 focus:outline-none transition-all"
+                class="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-slate-900 focus:border-slate-500 focus:ring-2 focus:ring-slate-500/20 focus:outline-hidden transition-all"
               >
                 <option>Tier 1 (Levels 1-3)</option>
                 <option selected>Tier 2 (Levels 4-6)</option>
@@ -479,7 +479,7 @@
             <div>
               <label class="block text-sm text-slate-500 mb-2">Number of Scenes *</label>
               <select
-                class="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-slate-900 focus:border-slate-500 focus:ring-2 focus:ring-slate-500/20 focus:outline-none transition-all"
+                class="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-slate-900 focus:border-slate-500 focus:ring-2 focus:ring-slate-500/20 focus:outline-hidden transition-all"
               >
                 <option selected>3 scenes (~1 hour session)</option>
                 <option>4 scenes (~1.5 hour session)</option>
@@ -489,13 +489,13 @@
 
             <div class="flex flex-col sm:flex-row gap-4 pt-4">
               <button
-                class="px-6 py-2 bg-slate-100 text-slate-700 border border-slate-200 rounded-lg hover:bg-slate-200 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
+                class="px-6 py-2 bg-slate-100 text-slate-700 border border-slate-200 rounded-lg hover:bg-slate-200 transition-colors focus:outline-hidden focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
               >
                 Cancel
               </button>
               <button
                 onclick="nextStep()"
-                class="flex-1 bg-slate-600 hover:bg-slate-700 text-white font-semibold py-3 rounded-lg transition-all btn-shimmer hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
+                class="flex-1 bg-slate-600 hover:bg-slate-700 text-white font-semibold py-3 rounded-lg transition-all btn-shimmer hover:scale-[1.02] focus:outline-hidden focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
               >
                 Generate Adventure 🎲
               </button>
@@ -538,7 +538,7 @@
 
         <!-- Adventure Overview Card -->
         <div
-          class="bg-white rounded-xl p-6 mb-6 border border-slate-200 shadow-sm card-glow transition-all"
+          class="bg-white rounded-xl p-6 mb-6 border border-slate-200 shadow-xs card-glow transition-all"
         >
           <h3 class="text-xl font-bold text-slate-900 mb-4">The Witherwild Expedition</h3>
 
@@ -615,13 +615,13 @@
         </div>
 
         <!-- Action Buttons -->
-        <div class="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+        <div class="bg-white rounded-xl p-6 border border-slate-200 shadow-xs">
           <h4 class="font-semibold mb-4 text-slate-900">What would you like to do?</h4>
 
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <button
               onclick="nextStep()"
-              class="p-4 bg-green-600 hover:bg-green-700 rounded-lg text-center transition-all text-white shadow-sm btn-confirm-glow hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+              class="p-4 bg-green-600 hover:bg-green-700 rounded-lg text-center transition-all text-white shadow-xs btn-confirm-glow hover:scale-[1.02] focus:outline-hidden focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
             >
               <div class="text-3xl mb-2">✅</div>
               <p class="font-semibold">Confirm</p>
@@ -629,7 +629,7 @@
             </button>
 
             <button
-              class="p-4 bg-white border-2 border-amber-400 text-amber-700 hover:bg-amber-50 rounded-lg text-center transition-all btn-edit-glow hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2"
+              class="p-4 bg-white border-2 border-amber-400 text-amber-700 hover:bg-amber-50 rounded-lg text-center transition-all btn-edit-glow hover:scale-[1.02] focus:outline-hidden focus:ring-2 focus:ring-amber-400 focus:ring-offset-2"
             >
               <div class="text-3xl mb-2">✏️</div>
               <p class="font-semibold">Revise</p>
@@ -637,7 +637,7 @@
             </button>
 
             <button
-              class="p-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-center transition-all hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
+              class="p-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-center transition-all hover:scale-[1.02] focus:outline-hidden focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
             >
               <div class="text-3xl mb-2">🎲</div>
               <p class="font-semibold">Re-Roll</p>
@@ -674,7 +674,7 @@
         </div>
 
         <!-- Progress indicator -->
-        <div class="bg-white rounded-xl p-4 mb-6 border border-slate-200 shadow-sm">
+        <div class="bg-white rounded-xl p-4 mb-6 border border-slate-200 shadow-xs">
           <div class="flex items-center justify-between mb-3">
             <h3 class="font-semibold text-slate-900">Scene Progress</h3>
             <span class="text-amber-600 font-medium">Scene 1 of 3</span>
@@ -709,7 +709,7 @@
         </div>
 
         <!-- Scene Content Card -->
-        <div class="bg-white rounded-xl p-6 mb-6 border border-slate-200 shadow-sm">
+        <div class="bg-white rounded-xl p-6 mb-6 border border-slate-200 shadow-xs">
           <div class="space-y-4">
             <div>
               <h4 class="font-semibold text-slate-900 mb-2">Scene Summary</h4>
@@ -769,7 +769,7 @@
         </div>
 
         <!-- Action Buttons -->
-        <div class="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+        <div class="bg-white rounded-xl p-6 border border-slate-200 shadow-xs">
           <h4 class="font-semibold mb-4 text-slate-900">
             What would you like to do with this scene?
           </h4>
@@ -777,7 +777,7 @@
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <button
               onclick="nextStep()"
-              class="p-4 bg-green-600 hover:bg-green-700 rounded-lg text-center transition-all text-white shadow-sm btn-confirm-glow hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+              class="p-4 bg-green-600 hover:bg-green-700 rounded-lg text-center transition-all text-white shadow-xs btn-confirm-glow hover:scale-[1.02] focus:outline-hidden focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
             >
               <div class="text-3xl mb-2">✅</div>
               <p class="font-semibold">Confirm Scene</p>
@@ -785,7 +785,7 @@
             </button>
 
             <button
-              class="p-4 bg-white border-2 border-amber-400 text-amber-700 hover:bg-amber-50 rounded-lg text-center transition-all btn-edit-glow hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2"
+              class="p-4 bg-white border-2 border-amber-400 text-amber-700 hover:bg-amber-50 rounded-lg text-center transition-all btn-edit-glow hover:scale-[1.02] focus:outline-hidden focus:ring-2 focus:ring-amber-400 focus:ring-offset-2"
             >
               <div class="text-3xl mb-2">✏️</div>
               <p class="font-semibold">Edit Scene</p>
@@ -793,7 +793,7 @@
             </button>
 
             <button
-              class="p-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-center transition-all hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
+              class="p-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-center transition-all hover:scale-[1.02] focus:outline-hidden focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
             >
               <div class="text-3xl mb-2">🎲</div>
               <p class="font-semibold">Re-Roll</p>
@@ -830,7 +830,7 @@
         </div>
 
         <!-- Progress indicator -->
-        <div class="bg-white rounded-xl p-4 mb-6 border border-slate-200 shadow-sm">
+        <div class="bg-white rounded-xl p-4 mb-6 border border-slate-200 shadow-xs">
           <div class="flex items-center justify-between mb-3">
             <h3 class="font-semibold text-slate-900">Scene Progress</h3>
             <span class="text-amber-600 font-medium">Scene 2 of 3</span>
@@ -863,7 +863,7 @@
         </div>
 
         <!-- Scene Content Card -->
-        <div class="bg-white rounded-xl p-6 mb-6 border border-slate-200 shadow-sm">
+        <div class="bg-white rounded-xl p-6 mb-6 border border-slate-200 shadow-xs">
           <div class="space-y-4">
             <div>
               <h4 class="font-semibold text-slate-900 mb-2">Scene Summary</h4>
@@ -902,7 +902,7 @@
         </div>
 
         <!-- Action Buttons -->
-        <div class="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+        <div class="bg-white rounded-xl p-6 border border-slate-200 shadow-xs">
           <h4 class="font-semibold mb-4 text-slate-900">
             What would you like to do with this scene?
           </h4>
@@ -910,7 +910,7 @@
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <button
               onclick="nextStep()"
-              class="p-4 bg-green-600 hover:bg-green-700 rounded-lg text-center transition-all text-white shadow-sm btn-confirm-glow hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+              class="p-4 bg-green-600 hover:bg-green-700 rounded-lg text-center transition-all text-white shadow-xs btn-confirm-glow hover:scale-[1.02] focus:outline-hidden focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
             >
               <div class="text-3xl mb-2">✅</div>
               <p class="font-semibold">Confirm Scene</p>
@@ -918,7 +918,7 @@
             </button>
 
             <button
-              class="p-4 bg-white border-2 border-amber-400 text-amber-700 hover:bg-amber-50 rounded-lg text-center transition-all btn-edit-glow hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2"
+              class="p-4 bg-white border-2 border-amber-400 text-amber-700 hover:bg-amber-50 rounded-lg text-center transition-all btn-edit-glow hover:scale-[1.02] focus:outline-hidden focus:ring-2 focus:ring-amber-400 focus:ring-offset-2"
             >
               <div class="text-3xl mb-2">✏️</div>
               <p class="font-semibold">Edit Scene</p>
@@ -926,7 +926,7 @@
             </button>
 
             <button
-              class="p-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-center transition-all hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
+              class="p-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-center transition-all hover:scale-[1.02] focus:outline-hidden focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
             >
               <div class="text-3xl mb-2">🎲</div>
               <p class="font-semibold">Re-Roll</p>
@@ -959,7 +959,7 @@
         </div>
 
         <!-- Progress indicator -->
-        <div class="bg-white rounded-xl p-4 mb-6 border border-slate-200 shadow-sm">
+        <div class="bg-white rounded-xl p-4 mb-6 border border-slate-200 shadow-xs">
           <div class="flex items-center justify-between mb-3">
             <h3 class="font-semibold text-slate-900">Scene Progress</h3>
             <span class="text-amber-600 font-medium">Scene 3 of 3 (Final!)</span>
@@ -994,7 +994,7 @@
         </div>
 
         <!-- Scene Content Card -->
-        <div class="bg-white rounded-xl p-6 mb-6 border border-slate-200 shadow-sm">
+        <div class="bg-white rounded-xl p-6 mb-6 border border-slate-200 shadow-xs">
           <div class="space-y-4">
             <div>
               <h4 class="font-semibold text-slate-900 mb-2">Scene Summary</h4>
@@ -1030,7 +1030,7 @@
         </div>
 
         <!-- Action Buttons -->
-        <div class="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+        <div class="bg-white rounded-xl p-6 border border-slate-200 shadow-xs">
           <h4 class="font-semibold mb-4 text-slate-900">
             This is the final scene! What would you like to do?
           </h4>
@@ -1038,7 +1038,7 @@
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <button
               onclick="nextStep()"
-              class="p-4 bg-green-600 hover:bg-green-700 rounded-lg text-center transition-all text-white shadow-sm btn-confirm-glow hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+              class="p-4 bg-green-600 hover:bg-green-700 rounded-lg text-center transition-all text-white shadow-xs btn-confirm-glow hover:scale-[1.02] focus:outline-hidden focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
             >
               <div class="text-3xl mb-2">✅</div>
               <p class="font-semibold">Confirm & Expand</p>
@@ -1046,7 +1046,7 @@
             </button>
 
             <button
-              class="p-4 bg-white border-2 border-amber-400 text-amber-700 hover:bg-amber-50 rounded-lg text-center transition-all btn-edit-glow hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2"
+              class="p-4 bg-white border-2 border-amber-400 text-amber-700 hover:bg-amber-50 rounded-lg text-center transition-all btn-edit-glow hover:scale-[1.02] focus:outline-hidden focus:ring-2 focus:ring-amber-400 focus:ring-offset-2"
             >
               <div class="text-3xl mb-2">✏️</div>
               <p class="font-semibold">Edit Scene</p>
@@ -1054,7 +1054,7 @@
             </button>
 
             <button
-              class="p-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-center transition-all hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
+              class="p-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-center transition-all hover:scale-[1.02] focus:outline-hidden focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
             >
               <div class="text-3xl mb-2">🎲</div>
               <p class="font-semibold">Re-Roll</p>
@@ -1086,7 +1086,7 @@
         </div>
 
         <!-- Progress indicator -->
-        <div class="bg-white rounded-xl p-4 mb-6 border border-slate-200 shadow-sm">
+        <div class="bg-white rounded-xl p-4 mb-6 border border-slate-200 shadow-xs">
           <div class="flex items-center justify-between mb-3">
             <h3 class="font-semibold text-slate-900">Expansion Progress</h3>
             <span class="text-slate-600 font-medium">Scene 1 of 3</span>
@@ -1120,7 +1120,7 @@
         </div>
 
         <!-- Expanded Scene Content -->
-        <div class="bg-white rounded-xl p-6 mb-6 space-y-6 border border-slate-200 shadow-sm">
+        <div class="bg-white rounded-xl p-6 mb-6 space-y-6 border border-slate-200 shadow-xs">
           <!-- Setting Section -->
           <section>
             <h3 class="text-lg font-semibold text-slate-900 mb-3 flex items-center gap-2">
@@ -1320,7 +1320,7 @@
             <div class="space-y-3">
               <div class="flex gap-4 items-start">
                 <div
-                  class="bg-amber-100 border border-amber-200 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold flex-shrink-0 text-amber-700"
+                  class="bg-amber-100 border border-amber-200 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold shrink-0 text-amber-700"
                 >
                   1
                 </div>
@@ -1338,7 +1338,7 @@
 
               <div class="flex gap-4 items-start">
                 <div
-                  class="bg-amber-100 border border-amber-200 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold flex-shrink-0 text-amber-700"
+                  class="bg-amber-100 border border-amber-200 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold shrink-0 text-amber-700"
                 >
                   2
                 </div>
@@ -1358,7 +1358,7 @@
 
               <div class="flex gap-4 items-start">
                 <div
-                  class="bg-amber-100 border border-amber-200 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold flex-shrink-0 text-amber-700"
+                  class="bg-amber-100 border border-amber-200 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold shrink-0 text-amber-700"
                 >
                   3
                 </div>
@@ -1373,7 +1373,7 @@
 
               <div class="flex gap-4 items-start">
                 <div
-                  class="bg-amber-100 border border-amber-200 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold flex-shrink-0 text-amber-700"
+                  class="bg-amber-100 border border-amber-200 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold shrink-0 text-amber-700"
                 >
                   4
                 </div>
@@ -1395,7 +1395,7 @@
             <h3 class="text-lg font-semibold text-slate-900 mb-3 flex items-center gap-2">
               <span>➡️</span> Transition to Scene 2
             </h3>
-            <div class="read-aloud-box p-5 rounded-lg bg-gradient-to-r from-amber-50 to-white">
+            <div class="read-aloud-box p-5 rounded-lg bg-linear-to-r from-amber-50 to-white">
               <p class="text-slate-700 italic leading-relaxed">
                 "Finn pauses at the treeline, their hand on a weathered signpost pointing into the
                 Witherwild. 'This is where we went in,' they say, voice barely above a whisper.
@@ -1406,7 +1406,7 @@
         </div>
 
         <!-- Action Buttons -->
-        <div class="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+        <div class="bg-white rounded-xl p-6 border border-slate-200 shadow-xs">
           <h4 class="font-semibold mb-4 text-slate-900">
             What would you like to do with this expanded scene?
           </h4>
@@ -1414,7 +1414,7 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <button
               onclick="nextStep()"
-              class="p-4 bg-green-600 hover:bg-green-700 rounded-lg text-center transition-all text-white shadow-sm"
+              class="p-4 bg-green-600 hover:bg-green-700 rounded-lg text-center transition-all text-white shadow-xs"
             >
               <div class="text-3xl mb-2">✅</div>
               <p class="font-semibold">Confirm Expansion</p>
@@ -1437,7 +1437,7 @@
               <input
                 type="text"
                 placeholder="e.g., Add more tension to Elder Mora's dialogue"
-                class="flex-1 bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none transition-all placeholder:text-slate-400"
+                class="flex-1 bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-hidden transition-all placeholder:text-slate-400"
               />
               <button
                 class="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 font-medium transition-colors"
@@ -1472,7 +1472,7 @@
         </div>
 
         <!-- Progress indicator -->
-        <div class="bg-white rounded-xl p-4 mb-6 border border-slate-200 shadow-sm">
+        <div class="bg-white rounded-xl p-4 mb-6 border border-slate-200 shadow-xs">
           <div class="flex items-center justify-between mb-3">
             <h3 class="font-semibold text-slate-900">Expansion Progress</h3>
             <span class="text-slate-600 font-medium">Scene 2 of 3</span>
@@ -1505,7 +1505,7 @@
         </div>
 
         <!-- Expanded Scene Content -->
-        <div class="bg-white rounded-xl p-6 mb-6 space-y-6 border border-slate-200 shadow-sm">
+        <div class="bg-white rounded-xl p-6 mb-6 space-y-6 border border-slate-200 shadow-xs">
           <!-- Setting Section -->
           <section>
             <h3 class="text-lg font-semibold text-slate-900 mb-3 flex items-center gap-2">
@@ -1707,7 +1707,7 @@
         </div>
 
         <!-- Action Buttons -->
-        <div class="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+        <div class="bg-white rounded-xl p-6 border border-slate-200 shadow-xs">
           <h4 class="font-semibold mb-4 text-slate-900">
             What would you like to do with this expanded scene?
           </h4>
@@ -1715,7 +1715,7 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <button
               onclick="nextStep()"
-              class="p-4 bg-green-600 hover:bg-green-700 rounded-lg text-center transition-all text-white shadow-sm"
+              class="p-4 bg-green-600 hover:bg-green-700 rounded-lg text-center transition-all text-white shadow-xs"
             >
               <div class="text-3xl mb-2">✅</div>
               <p class="font-semibold">Confirm Expansion</p>
@@ -1756,7 +1756,7 @@
         </div>
 
         <!-- Progress indicator -->
-        <div class="bg-white rounded-xl p-4 mb-6 border border-slate-200 shadow-sm">
+        <div class="bg-white rounded-xl p-4 mb-6 border border-slate-200 shadow-xs">
           <div class="flex items-center justify-between mb-3">
             <h3 class="font-semibold text-slate-900">Expansion Progress</h3>
             <span class="text-amber-600 font-medium">Scene 3 of 3 (Final!)</span>
@@ -1791,7 +1791,7 @@
         </div>
 
         <!-- Expanded Scene Content -->
-        <div class="bg-white rounded-xl p-6 mb-6 space-y-6 border border-slate-200 shadow-sm">
+        <div class="bg-white rounded-xl p-6 mb-6 space-y-6 border border-slate-200 shadow-xs">
           <!-- Setting -->
           <section>
             <h3 class="text-lg font-semibold text-slate-900 mb-3 flex items-center gap-2">
@@ -1961,7 +1961,7 @@
             <h3 class="text-lg font-semibold text-slate-900 mb-3 flex items-center gap-2">
               <span>🏁</span> Resolution & Return
             </h3>
-            <div class="read-aloud-box p-5 rounded-lg bg-gradient-to-r from-amber-50 to-white">
+            <div class="read-aloud-box p-5 rounded-lg bg-linear-to-r from-amber-50 to-white">
               <p class="text-slate-700 italic leading-relaxed">
                 "The journey back to Thornhaven feels shorter somehow, the forest already beginning
                 to heal. As the village gates come into view, Elder Mora is waiting. 'Is it... is it
@@ -1973,7 +1973,7 @@
         </div>
 
         <!-- Action Buttons -->
-        <div class="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+        <div class="bg-white rounded-xl p-6 border border-slate-200 shadow-xs">
           <h4 class="font-semibold mb-4 text-slate-900">
             This is the final expansion! What would you like to do?
           </h4>
@@ -1981,7 +1981,7 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <button
               onclick="nextStep()"
-              class="p-4 bg-green-600 hover:bg-green-700 rounded-lg text-center transition-all text-white shadow-sm"
+              class="p-4 bg-green-600 hover:bg-green-700 rounded-lg text-center transition-all text-white shadow-xs"
             >
               <div class="text-3xl mb-2">✅</div>
               <p class="font-semibold">Confirm & Finish</p>
@@ -2032,7 +2032,7 @@
         </div>
 
         <!-- Adventure Summary Card -->
-        <div class="bg-white rounded-xl p-6 mb-6 border border-slate-200 shadow-sm">
+        <div class="bg-white rounded-xl p-6 mb-6 border border-slate-200 shadow-xs">
           <div class="flex items-start justify-between mb-4">
             <div>
               <h2 class="text-2xl font-bold text-slate-900">The Witherwild Expedition</h2>
@@ -2069,7 +2069,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <!-- HTML Export -->
           <div
-            class="bg-white rounded-xl p-6 border-2 border-amber-400 shadow-sm card-glow transition-all hover:scale-[1.01]"
+            class="bg-white rounded-xl p-6 border-2 border-amber-400 shadow-xs card-glow transition-all hover:scale-[1.01]"
           >
             <div class="flex items-center gap-3 mb-4">
               <div class="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
@@ -2099,7 +2099,7 @@
             </ul>
 
             <button
-              class="w-full py-3 bg-slate-600 hover:bg-slate-700 text-white font-semibold rounded-lg flex items-center justify-center gap-2 transition-all btn-confirm-glow focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
+              class="w-full py-3 bg-slate-600 hover:bg-slate-700 text-white font-semibold rounded-lg flex items-center justify-center gap-2 transition-all btn-confirm-glow focus:outline-hidden focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
             >
               <span>↓</span> Download HTML
             </button>
@@ -2110,7 +2110,7 @@
 
           <!-- PDF Export -->
           <div
-            class="bg-white rounded-xl p-6 border border-slate-200 shadow-sm card-glow transition-all hover:scale-[1.01] hover:border-slate-300"
+            class="bg-white rounded-xl p-6 border border-slate-200 shadow-xs card-glow transition-all hover:scale-[1.01] hover:border-slate-300"
           >
             <div class="flex items-center gap-3 mb-4">
               <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
@@ -2139,7 +2139,7 @@
             </ul>
 
             <button
-              class="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg flex items-center justify-center gap-2 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
+              class="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg flex items-center justify-center gap-2 transition-colors focus:outline-hidden focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
             >
               <span>↓</span> Download PDF
             </button>
@@ -2150,12 +2150,12 @@
         </div>
 
         <!-- Additional Options -->
-        <div class="bg-white rounded-xl p-6 mb-6 border border-slate-200 shadow-sm">
+        <div class="bg-white rounded-xl p-6 mb-6 border border-slate-200 shadow-xs">
           <h3 class="font-semibold mb-4 text-slate-900">Additional Options</h3>
 
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <button
-              class="p-4 bg-slate-50 hover:bg-slate-100 rounded-lg text-center transition-all border border-slate-100 hover:border-slate-200 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
+              class="p-4 bg-slate-50 hover:bg-slate-100 rounded-lg text-center transition-all border border-slate-100 hover:border-slate-200 hover:scale-[1.02] focus:outline-hidden focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
             >
               <div class="text-2xl mb-2">📋</div>
               <p class="font-medium text-sm text-slate-900">Copy to Clipboard</p>
@@ -2163,7 +2163,7 @@
             </button>
 
             <button
-              class="p-4 bg-slate-50 hover:bg-slate-100 rounded-lg text-center transition-all border border-slate-100 hover:border-slate-200 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
+              class="p-4 bg-slate-50 hover:bg-slate-100 rounded-lg text-center transition-all border border-slate-100 hover:border-slate-200 hover:scale-[1.02] focus:outline-hidden focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
             >
               <div class="text-2xl mb-2">🔗</div>
               <p class="font-medium text-sm text-slate-900">Share Link</p>
@@ -2171,7 +2171,7 @@
             </button>
 
             <button
-              class="p-4 bg-slate-50 hover:bg-slate-100 rounded-lg text-center transition-all border border-slate-100 hover:border-slate-200 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
+              class="p-4 bg-slate-50 hover:bg-slate-100 rounded-lg text-center transition-all border border-slate-100 hover:border-slate-200 hover:scale-[1.02] focus:outline-hidden focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
             >
               <div class="text-2xl mb-2">📝</div>
               <p class="font-medium text-sm text-slate-900">Markdown</p>
@@ -2184,7 +2184,7 @@
         <div class="text-center">
           <button
             onclick="goToStep(3)"
-            class="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
+            class="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium transition-colors focus:outline-hidden focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
           >
             ← Back to Dashboard
           </button>

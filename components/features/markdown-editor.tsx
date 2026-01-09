@@ -85,7 +85,7 @@ export function MarkdownEditor({
       aria-label={ariaLabel || 'Movement content'}
       className={cn(
         'w-full px-3 py-2 text-sm',
-        'bg-transparent border-none outline-none resize-none',
+        'bg-transparent border-none outline-hidden resize-none',
         'placeholder:text-muted-foreground',
         'min-h-[200px]',
         className,

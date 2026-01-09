@@ -35,7 +35,7 @@ describe('Button Component', () => {
       expect(button).toHaveClass('bg-secondary', 'text-secondary-foreground')
     })
 
-    it('should apply outline variant classes', () => {
+    it('should apply outline-solid variant classes', () => {
       render(
         <Button variant="outline" data-testid="button">
           Outline

@@ -112,7 +112,7 @@ export function CreditPurchaseDialog({ open, onSuccess, onCancel }: CreditPurcha
             <button
               key={pkg.id}
               data-testid={`credit-package-${pkg.id}`}
-              className={`relative rounded-lg border p-4 text-left transition-all hover:border-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
+              className={`relative rounded-lg border p-4 text-left transition-all hover:border-primary focus:outline-hidden focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
                 selectedPackage?.id === pkg.id
                   ? 'border-primary ring-2 ring-primary ring-offset-2'
                   : 'border-gray-200 dark:border-gray-800'

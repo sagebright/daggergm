@@ -152,7 +152,7 @@ font-family:
 
 ```html
 <div
-  class="bg-white rounded-xl p-6 border border-slate-200 shadow-sm
+  class="bg-white rounded-xl p-6 border border-slate-200 shadow-xs
             hover:shadow-md hover:border-slate-300 transition-all"
 ></div>
 ```
@@ -176,7 +176,7 @@ font-family:
 ```html
 <button
   class="px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white
-               font-medium rounded-lg shadow-sm transition-colors"
+               font-medium rounded-lg shadow-xs transition-colors"
 >
   Confirm
 </button>
@@ -223,7 +223,7 @@ font-family:
   class="w-full bg-white border border-slate-300 rounded-lg
        px-4 py-2.5 text-slate-900 placeholder:text-slate-400
        focus:border-slate-500 focus:ring-2 focus:ring-slate-500/20
-       focus:outline-none transition-all"
+       focus:outline-hidden transition-all"
 />
 ```
 
@@ -261,8 +261,8 @@ The signature element - subtle gold accent with premium feel:
 
 ```html
 <div
-  class="bg-gradient-to-r from-amber-50 to-white border-l-4 border-amber-400
-            rounded-r-lg p-5 shadow-sm"
+  class="bg-linear-to-r from-amber-50 to-white border-l-4 border-amber-400
+            rounded-r-lg p-5 shadow-xs"
 >
   <p class="text-xs font-semibold text-amber-700 uppercase tracking-wider mb-3">
     Read-Aloud Narrative
@@ -285,7 +285,7 @@ The signature element - subtle gold accent with premium feel:
 ### NPC Cards
 
 ```html
-<div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
+<div class="bg-white rounded-xl p-5 border border-slate-200 shadow-xs">
   <h3 class="font-semibold text-slate-900 text-lg mb-4">Elder Mora</h3>
   <table class="w-full text-sm">
     <tr class="border-b border-slate-100">
@@ -552,7 +552,7 @@ Use collapsible sections throughout:
 ### Focus States
 
 ```css
-focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2
+focus:outline-hidden focus:ring-2 focus:ring-slate-500 focus:ring-offset-2
 ```
 
 ### Color Contrast

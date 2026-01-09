@@ -28,7 +28,7 @@ export function getCSSVariables(): CSSVariableMap {
     'card',
     'border',
     'input',
-    'ring',
+    'ring-3',
   ]
 
   themeVariables.forEach((variable) => {

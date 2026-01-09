@@ -143,7 +143,7 @@ export function FocusMode({
       <div
         className={cn(
           'h-full overflow-y-auto p-4 pb-20 transition-all duration-300',
-          isPanelOpen && focusedId ? 'pr-[25rem]' : 'pr-4',
+          isPanelOpen && focusedId ? 'pr-100' : 'pr-4',
         )}
       >
         <AnimatePresence>
@@ -260,7 +260,7 @@ export function FocusMode({
       </Button>
 
       {/* Regeneration Budget Display */}
-      <div className="fixed top-4 left-16 z-50 bg-card border rounded-lg p-3 shadow-sm max-w-sm">
+      <div className="fixed top-4 left-16 z-50 bg-card border rounded-lg p-3 shadow-xs max-w-sm">
         <RegenerationBudget
           scaffoldUsed={scaffoldRegenerationsUsed}
           scaffoldLimit={10}

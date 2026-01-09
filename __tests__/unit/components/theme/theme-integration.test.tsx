@@ -53,7 +53,7 @@ describe('Theme Integration', () => {
       expect(button.className).toContain('hover:bg-primary/90')
     })
 
-    it('should have proper focus ring with theme accent', () => {
+    it('should have proper focus ring-3 with theme accent', () => {
       render(<Button>Test Button</Button>)
       const button = screen.getByRole('button')
 
@@ -161,7 +161,8 @@ describe('Theme Integration', () => {
       const button = screen.getByRole('button')
       const input = screen.getByPlaceholderText('Focusable Input')
 
-      expect(button.className).toContain('focus-visible:ring')
+      // Tailwind v4 uses ring-[3px] instead of ring-3
+      expect(button.className).toContain('focus-visible:ring-[3px]')
       expect(input.className).toContain('focus:ring-accent')
     })
   })

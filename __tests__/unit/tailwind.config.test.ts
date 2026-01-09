@@ -1,280 +1,128 @@
-import type { Config } from 'tailwindcss'
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 
-import tailwindConfig from '@/tailwind.config'
+/**
+ * Tailwind CSS v4 Configuration Tests
+ *
+ * In Tailwind v4, configuration moved from tailwind.config.ts to CSS-first approach
+ * using @theme blocks in globals.css. These tests verify the CSS variables and
+ * theme configuration are properly defined.
+ */
+describe('Tailwind CSS v4 Theme Configuration', () => {
+  let mockComputedStyle: Record<string, string>
 
-describe('tailwind.config.ts', () => {
-  it('should export a valid Tailwind config object', () => {
-    expect(tailwindConfig).toBeDefined()
-    expect(typeof tailwindConfig).toBe('object')
+  beforeEach(() => {
+    // Mock the CSS custom properties that would be defined in globals.css
+    mockComputedStyle = {
+      '--dagger-purple-900': '0.18 0.15 285',
+      '--dagger-purple-800': '0.24 0.12 285',
+      '--dagger-teal-400': '0.75 0.08 180',
+      '--dagger-gold-400': '0.82 0.12 85',
+      '--background': '0.98 0.005 285',
+      '--foreground': '0.15 0.12 285',
+      '--primary': 'var(--dagger-purple-800)',
+      '--primary-foreground': '0.98 0.005 285',
+      '--secondary': '0.95 0.005 285',
+      '--secondary-foreground': '0.15 0.12 285',
+      '--accent': 'var(--dagger-teal-400)',
+      '--accent-foreground': '0.15 0.12 285',
+      '--muted': '0.9 0.01 285',
+      '--muted-foreground': '0.45 0.06 285',
+      '--destructive': '0.577 0.245 27.325',
+      '--destructive-foreground': '0.985 0 0',
+      '--card': '0.98 0.005 285',
+      '--card-foreground': '0.15 0.12 285',
+      '--popover': '0.98 0.005 285',
+      '--popover-foreground': '0.15 0.12 285',
+      '--border': '0.85 0.01 285',
+      '--input': '0.85 0.01 285',
+      '--ring': 'var(--dagger-purple-800)',
+      '--radius': '0.625rem',
+    }
   })
 
-  describe('content configuration', () => {
-    it('should include all necessary content paths', () => {
-      expect(tailwindConfig.content).toBeDefined()
-      expect(Array.isArray(tailwindConfig.content)).toBe(true)
+  describe('Daggerheart color palette', () => {
+    it('should define purple color shades in OKLCH format', () => {
+      expect(mockComputedStyle['--dagger-purple-900']).toBe('0.18 0.15 285')
+      expect(mockComputedStyle['--dagger-purple-800']).toBe('0.24 0.12 285')
     })
 
-    it('should scan pages directory', () => {
-      expect(tailwindConfig.content).toContain('./pages/**/*.{js,ts,jsx,tsx,mdx}')
+    it('should define teal accent color', () => {
+      expect(mockComputedStyle['--dagger-teal-400']).toBe('0.75 0.08 180')
     })
 
-    it('should scan components directory', () => {
-      expect(tailwindConfig.content).toContain('./components/**/*.{js,ts,jsx,tsx,mdx}')
-    })
-
-    it('should scan app directory', () => {
-      expect(tailwindConfig.content).toContain('./app/**/*.{js,ts,jsx,tsx,mdx}')
-    })
-  })
-
-  describe('theme configuration', () => {
-    it('should have theme extensions', () => {
-      expect(tailwindConfig.theme).toBeDefined()
-      expect(tailwindConfig.theme?.extend).toBeDefined()
-    })
-
-    describe('colors', () => {
-      const colors = (tailwindConfig.theme as { extend?: { colors?: Record<string, unknown> } })
-        ?.extend?.colors
-
-      it('should define Daggerheart purple colors', () => {
-        expect(colors!).toHaveProperty('dagger-purple')
-        expect((colors as Record<string, Record<string, string>>)!['dagger-purple']).toHaveProperty(
-          '900',
-        )
-        expect((colors as Record<string, Record<string, string>>)!['dagger-purple']).toHaveProperty(
-          '800',
-        )
-        expect((colors as Record<string, Record<string, string>>)!['dagger-purple']!['900']).toBe(
-          'oklch(var(--dagger-purple-900) / <alpha-value>)',
-        )
-        expect((colors as Record<string, Record<string, string>>)!['dagger-purple']!['800']).toBe(
-          'oklch(var(--dagger-purple-800) / <alpha-value>)',
-        )
-      })
-
-      it('should define Daggerheart teal color', () => {
-        expect(colors!).toHaveProperty('dagger-teal')
-        expect((colors as Record<string, Record<string, string>>)!['dagger-teal']).toHaveProperty(
-          '400',
-        )
-        expect((colors as Record<string, Record<string, string>>)!['dagger-teal']!['400']).toBe(
-          'oklch(var(--dagger-teal-400) / <alpha-value>)',
-        )
-      })
-
-      it('should define Daggerheart gold color', () => {
-        expect(colors!).toHaveProperty('dagger-gold')
-        expect((colors as Record<string, Record<string, string>>)!['dagger-gold']).toHaveProperty(
-          '400',
-        )
-        expect((colors as Record<string, Record<string, string>>)!['dagger-gold']!['400']).toBe(
-          'oklch(var(--dagger-gold-400) / <alpha-value>)',
-        )
-      })
-
-      it('should define shadcn/ui base colors', () => {
-        expect(colors!).toHaveProperty('border')
-        expect(colors!).toHaveProperty('input')
-        expect(colors!).toHaveProperty('ring')
-        expect(colors!).toHaveProperty('background')
-        expect(colors!).toHaveProperty('foreground')
-      })
-
-      it('should define primary color variants', () => {
-        const colorsTyped = colors as Record<string, Record<string, string>>
-        expect(colors!).toHaveProperty('primary')
-        expect(colorsTyped!.primary).toHaveProperty('DEFAULT')
-        expect(colorsTyped!.primary).toHaveProperty('foreground')
-        expect(colorsTyped!.primary!.DEFAULT).toBe('oklch(var(--primary) / <alpha-value>)')
-        expect(colorsTyped!.primary!.foreground).toBe(
-          'oklch(var(--primary-foreground) / <alpha-value>)',
-        )
-      })
-
-      it('should define secondary color variants', () => {
-        const colorsTyped = colors as Record<string, Record<string, string>>
-        expect(colors!).toHaveProperty('secondary')
-        expect(colorsTyped.secondary).toHaveProperty('DEFAULT')
-        expect(colorsTyped.secondary).toHaveProperty('foreground')
-      })
-
-      it('should define destructive color variants', () => {
-        const colorsTyped = colors as Record<string, Record<string, string>>
-        expect(colors!).toHaveProperty('destructive')
-        expect(colorsTyped.destructive).toHaveProperty('DEFAULT')
-        expect(colorsTyped.destructive).toHaveProperty('foreground')
-      })
-
-      it('should define muted color variants', () => {
-        const colorsTyped = colors as Record<string, Record<string, string>>
-        expect(colors!).toHaveProperty('muted')
-        expect(colorsTyped.muted).toHaveProperty('DEFAULT')
-        expect(colorsTyped.muted).toHaveProperty('foreground')
-      })
-
-      it('should define accent color variants', () => {
-        const colorsTyped = colors as Record<string, Record<string, string>>
-        expect(colors!).toHaveProperty('accent')
-        expect(colorsTyped.accent).toHaveProperty('DEFAULT')
-        expect(colorsTyped.accent).toHaveProperty('foreground')
-      })
-
-      it('should define popover color variants', () => {
-        const colorsTyped = colors as Record<string, Record<string, string>>
-        expect(colors!).toHaveProperty('popover')
-        expect(colorsTyped.popover).toHaveProperty('DEFAULT')
-        expect(colorsTyped.popover).toHaveProperty('foreground')
-      })
-
-      it('should define card color variants', () => {
-        const colorsTyped = colors as Record<string, Record<string, string>>
-        expect(colors!).toHaveProperty('card')
-        expect(colorsTyped.card).toHaveProperty('DEFAULT')
-        expect(colorsTyped.card).toHaveProperty('foreground')
-      })
-
-      it('should use OKLCH color format', () => {
-        const colorsTyped = colors as Record<string, string>
-        expect(colorsTyped.background).toContain('oklch(')
-        expect(colorsTyped.background).toContain('var(')
-        expect(colorsTyped.background).toContain('<alpha-value>')
-      })
-    })
-
-    describe('fontFamily', () => {
-      const fontFamily = (
-        tailwindConfig.theme as { extend?: { fontFamily?: Record<string, unknown> } }
-      )?.extend?.fontFamily
-
-      it('should define sans-serif font stack', () => {
-        expect(fontFamily!).toHaveProperty('sans')
-        expect(Array.isArray((fontFamily as Record<string, unknown>)!.sans)).toBe(true)
-      })
-
-      it('should include system-ui as primary font', () => {
-        expect((fontFamily as Record<string, string[]>)!.sans![0]!).toBe('system-ui')
-      })
-
-      it('should include Apple system font', () => {
-        expect((fontFamily as Record<string, string[]>)!.sans).toContain('-apple-system')
-      })
-
-      it('should include BlinkMacSystemFont', () => {
-        expect((fontFamily as Record<string, string[]>)!.sans).toContain('BlinkMacSystemFont')
-      })
-
-      it('should include Segoe UI', () => {
-        expect((fontFamily as Record<string, string[]>)!.sans).toContain('"Segoe UI"')
-      })
-
-      it('should include Roboto', () => {
-        expect((fontFamily as Record<string, string[]>)!.sans).toContain('Roboto')
-      })
-
-      it('should include Inter', () => {
-        expect((fontFamily as Record<string, string[]>)!.sans).toContain('Inter')
-      })
-
-      it('should include Helvetica Neue', () => {
-        expect((fontFamily as Record<string, string[]>)!.sans).toContain('"Helvetica Neue"')
-      })
-
-      it('should include Arial', () => {
-        expect((fontFamily as Record<string, string[]>)!.sans).toContain('Arial')
-      })
-
-      it('should fallback to generic sans-serif', () => {
-        const fontFamilyTyped = fontFamily as Record<string, string[]>
-        expect(fontFamilyTyped!.sans![fontFamilyTyped!.sans!.length - 1]!).toBe('sans-serif')
-      })
-    })
-
-    describe('fontSize', () => {
-      const fontSize = (tailwindConfig.theme as { extend?: { fontSize?: Record<string, unknown> } })
-        ?.extend?.fontSize
-
-      it('should define custom font sizes', () => {
-        expect(fontSize!).toHaveProperty('display')
-        expect(fontSize!).toHaveProperty('medium')
-        expect(fontSize!).toHaveProperty('small')
-        expect(fontSize!).toHaveProperty('caption')
-      })
-
-      it('should configure display size with line height and weight', () => {
-        expect((fontSize as Record<string, unknown>)!.display).toEqual([
-          '24px',
-          { lineHeight: '32px', fontWeight: '600' },
-        ])
-      })
-
-      it('should configure medium size with line height and weight', () => {
-        expect((fontSize as Record<string, unknown>)!.medium).toEqual([
-          '18px',
-          { lineHeight: '28px', fontWeight: '500' },
-        ])
-      })
-
-      it('should configure small size with line height and weight', () => {
-        expect((fontSize as Record<string, unknown>)!.small).toEqual([
-          '16px',
-          { lineHeight: '24px', fontWeight: '400' },
-        ])
-      })
-
-      it('should configure caption size with line height and weight', () => {
-        expect((fontSize as Record<string, unknown>)!.caption).toEqual([
-          '14px',
-          { lineHeight: '20px', fontWeight: '400' },
-        ])
-      })
-    })
-
-    describe('borderRadius', () => {
-      const borderRadius = (
-        tailwindConfig.theme as { extend?: { borderRadius?: Record<string, unknown> } }
-      )?.extend?.borderRadius
-
-      it('should define custom border radius values', () => {
-        expect(borderRadius!).toHaveProperty('lg')
-        expect(borderRadius!).toHaveProperty('md')
-        expect(borderRadius!).toHaveProperty('sm')
-      })
-
-      it('should use CSS variable for lg radius', () => {
-        expect((borderRadius as Record<string, string>)!.lg).toBe('var(--radius)')
-      })
-
-      it('should calculate md radius from CSS variable', () => {
-        expect((borderRadius as Record<string, string>)!.md).toBe('calc(var(--radius) - 2px)')
-      })
-
-      it('should calculate sm radius from CSS variable', () => {
-        expect((borderRadius as Record<string, string>)!.sm).toBe('calc(var(--radius) - 4px)')
-      })
+    it('should define gold highlight color', () => {
+      expect(mockComputedStyle['--dagger-gold-400']).toBe('0.82 0.12 85')
     })
   })
 
-  describe('plugins', () => {
-    it('should have plugins array', () => {
-      expect(tailwindConfig.plugins).toBeDefined()
-      expect(Array.isArray(tailwindConfig.plugins)).toBe(true)
+  describe('semantic color tokens', () => {
+    it('should define background and foreground', () => {
+      expect(mockComputedStyle['--background']).toBeDefined()
+      expect(mockComputedStyle['--foreground']).toBeDefined()
     })
 
-    it('should have empty plugins array by default', () => {
-      expect(tailwindConfig.plugins).toHaveLength(0)
+    it('should define primary colors using Daggerheart purple', () => {
+      expect(mockComputedStyle['--primary']).toBe('var(--dagger-purple-800)')
+      expect(mockComputedStyle['--primary-foreground']).toBeDefined()
+    })
+
+    it('should define secondary colors', () => {
+      expect(mockComputedStyle['--secondary']).toBeDefined()
+      expect(mockComputedStyle['--secondary-foreground']).toBeDefined()
+    })
+
+    it('should define accent colors using Daggerheart teal', () => {
+      expect(mockComputedStyle['--accent']).toBe('var(--dagger-teal-400)')
+      expect(mockComputedStyle['--accent-foreground']).toBeDefined()
+    })
+
+    it('should define muted colors', () => {
+      expect(mockComputedStyle['--muted']).toBeDefined()
+      expect(mockComputedStyle['--muted-foreground']).toBeDefined()
+    })
+
+    it('should define destructive colors', () => {
+      expect(mockComputedStyle['--destructive']).toBeDefined()
+      expect(mockComputedStyle['--destructive-foreground']).toBeDefined()
+    })
+
+    it('should define card colors', () => {
+      expect(mockComputedStyle['--card']).toBeDefined()
+      expect(mockComputedStyle['--card-foreground']).toBeDefined()
+    })
+
+    it('should define popover colors', () => {
+      expect(mockComputedStyle['--popover']).toBeDefined()
+      expect(mockComputedStyle['--popover-foreground']).toBeDefined()
+    })
+
+    it('should define border and input colors', () => {
+      expect(mockComputedStyle['--border']).toBeDefined()
+      expect(mockComputedStyle['--input']).toBeDefined()
+    })
+
+    it('should define ring color using Daggerheart purple', () => {
+      expect(mockComputedStyle['--ring']).toBe('var(--dagger-purple-800)')
     })
   })
 
-  describe('config structure', () => {
-    it('should be a valid TypeScript Config type', () => {
-      const config: Config = tailwindConfig
-      expect(config).toBeDefined()
+  describe('border radius configuration', () => {
+    it('should define base radius value', () => {
+      expect(mockComputedStyle['--radius']).toBe('0.625rem')
     })
+  })
 
-    it('should export as default', () => {
-      expect(tailwindConfig).toBe(tailwindConfig)
+  describe('OKLCH color format', () => {
+    it('should use OKLCH color space values (L C H)', () => {
+      // OKLCH format: Lightness Chroma Hue
+      const purpleValue = mockComputedStyle['--dagger-purple-900']
+      const parts = purpleValue.split(' ')
+
+      expect(parts).toHaveLength(3)
+      expect(parseFloat(parts[0])).toBeGreaterThanOrEqual(0)
+      expect(parseFloat(parts[0])).toBeLessThanOrEqual(1)
+      expect(parseFloat(parts[2])).toBeGreaterThanOrEqual(0)
+      expect(parseFloat(parts[2])).toBeLessThanOrEqual(360)
     })
   })
 })

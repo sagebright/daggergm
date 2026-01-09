@@ -30,7 +30,7 @@ describe('Badge', () => {
     expect(badge).toHaveClass('text-destructive-foreground')
   })
 
-  it('should apply outline variant styles', () => {
+  it('should apply outline-solid variant styles', () => {
     render(<Badge variant="outline">Outline</Badge>)
     const badge = screen.getByText('Outline')
     expect(badge).toHaveClass('text-foreground')
