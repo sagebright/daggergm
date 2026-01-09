@@ -42,8 +42,7 @@ export default defineConfig({
         statements: 69,
       },
 
-      // Fail if uncovered files exist
-      all: true,
+      // Vitest 4: coverage.all removed (include already specifies files)
       skipFull: false,
     },
 
@@ -66,12 +65,8 @@ export default defineConfig({
     // Performance
     isolate: true, // Run each test file in isolation
     pool: 'threads',
-    poolOptions: {
-      threads: {
-        singleThread: false,
-        maxThreads: 4, // Adjust based on CI
-      },
-    },
+    // Vitest 4: poolOptions moved to top-level
+    maxWorkers: 4, // Adjust based on CI
 
     // Reporter
     reporters: ['verbose'],

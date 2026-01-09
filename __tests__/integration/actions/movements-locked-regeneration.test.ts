@@ -31,17 +31,22 @@ vi.mock('@/lib/supabase/server', async () => {
   }
 })
 
-// Mock OpenAI provider
+// Vitest 4: Module-level mock instance for class mocks
+const mockOpenAIProviderInstance = {
+  regenerateMovement: vi.fn().mockResolvedValue({
+    id: 'mov-2',
+    title: 'Regenerated Combat Encounter',
+    type: 'combat',
+    description: 'A newly regenerated combat scene that fits with locked movements',
+    estimatedTime: '45 minutes',
+  }),
+}
+
+// Mock OpenAI provider - Vitest 4: Constructor mocks must use class or function keyword
 vi.mock('@/lib/llm/openai-provider', () => ({
-  OpenAIProvider: vi.fn().mockImplementation(() => ({
-    regenerateMovement: vi.fn().mockResolvedValue({
-      id: 'mov-2',
-      title: 'Regenerated Combat Encounter',
-      type: 'combat',
-      description: 'A newly regenerated combat scene that fits with locked movements',
-      estimatedTime: '45 minutes',
-    }),
-  })),
+  OpenAIProvider: class MockOpenAIProvider {
+    regenerateMovement = mockOpenAIProviderInstance.regenerateMovement
+  },
 }))
 
 // Mock analytics
@@ -153,13 +158,11 @@ describe('Movement Regeneration with Locked Movements', () => {
 
   describe('Locked Movement Context', () => {
     it('should pass locked movements as context to LLM', async () => {
-      const { OpenAIProvider } = await import('@/lib/llm/openai-provider')
-
       await regenerateScaffoldMovement(adventureId, movementToRegenerate)
 
       // Verify LLM was called with locked movements context
-      const mockInstance = vi.mocked(OpenAIProvider).mock.results[0]?.value
-      expect(mockInstance.regenerateMovement).toHaveBeenCalledWith(
+      // Note: Using module-level mock instance (Vitest 4 pattern)
+      expect(mockOpenAIProviderInstance.regenerateMovement).toHaveBeenCalledWith(
         expect.objectContaining({
           lockedMovements: expect.arrayContaining([
             expect.objectContaining({

@@ -1,9 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 import { generateAdventure } from '@/app/actions/adventures'
-import { CreditManager } from '@/lib/credits/credit-manager'
 import { getLLMProvider } from '@/lib/llm/provider'
 import { createServerSupabaseClient, createServiceRoleClient } from '@/lib/supabase/server'
+
+// Vitest 4: Mock instance methods at module level for class mocks
+const mockCreditManagerInstance = {
+  consumeCredit: vi.fn(),
+  refundCredit: vi.fn(),
+}
 
 // Mock dependencies
 vi.mock('@/lib/supabase/server', () => ({
@@ -27,7 +32,13 @@ vi.mock('@/lib/supabase/server', () => ({
 vi.mock('next/cache', () => ({
   revalidatePath: vi.fn(),
 }))
-vi.mock('@/lib/credits/credit-manager')
+// Vitest 4: Constructor mocks must use class or function keyword
+vi.mock('@/lib/credits/credit-manager', () => ({
+  CreditManager: class MockCreditManager {
+    consumeCredit = mockCreditManagerInstance.consumeCredit
+    refundCredit = mockCreditManagerInstance.refundCredit
+  },
+}))
 vi.mock('@/lib/llm/provider')
 
 describe('Adventure Actions - Validation', () => {
@@ -36,11 +47,6 @@ describe('Adventure Actions - Validation', () => {
       getUser: vi.fn(),
     },
     from: vi.fn(),
-  }
-
-  const mockCreditManager = {
-    consumeCredit: vi.fn(),
-    refundCredit: vi.fn(),
   }
 
   const mockLLMProvider = {
@@ -55,9 +61,7 @@ describe('Adventure Actions - Validation', () => {
     vi.mocked(createServiceRoleClient).mockResolvedValue(
       mockSupabaseClient as unknown as Awaited<ReturnType<typeof createServiceRoleClient>>,
     )
-    vi.mocked(CreditManager).mockImplementation(
-      () => mockCreditManager as unknown as InstanceType<typeof CreditManager>,
-    )
+    // Note: CreditManager mock is now class-based at module level via mockCreditManagerInstance
     vi.mocked(getLLMProvider).mockReturnValue(
       mockLLMProvider as unknown as ReturnType<typeof getLLMProvider>,
     )
@@ -84,7 +88,7 @@ describe('Adventure Actions - Validation', () => {
       if (!result.success) {
         expect((result as { success: false; error: string }).error).toContain('Invalid option')
       }
-      expect(mockCreditManager.consumeCredit).not.toHaveBeenCalled()
+      expect(mockCreditManagerInstance.consumeCredit).not.toHaveBeenCalled()
     })
 
     it('should reject empty primary motif', async () => {
@@ -104,7 +108,7 @@ describe('Adventure Actions - Validation', () => {
       if (!result.success) {
         expect((result as { success: false; error: string }).error).toContain('Invalid input')
       }
-      expect(mockCreditManager.consumeCredit).not.toHaveBeenCalled()
+      expect(mockCreditManagerInstance.consumeCredit).not.toHaveBeenCalled()
     })
 
     it('should reject invalid party size', async () => {
@@ -126,7 +130,7 @@ describe('Adventure Actions - Validation', () => {
           'Party size must be 8 or less',
         )
       }
-      expect(mockCreditManager.consumeCredit).not.toHaveBeenCalled()
+      expect(mockCreditManagerInstance.consumeCredit).not.toHaveBeenCalled()
     })
 
     it('should reject invalid difficulty', async () => {
@@ -146,7 +150,7 @@ describe('Adventure Actions - Validation', () => {
       if (!result.success) {
         expect((result as { success: false; error: string }).error).toContain('Invalid option')
       }
-      expect(mockCreditManager.consumeCredit).not.toHaveBeenCalled()
+      expect(mockCreditManagerInstance.consumeCredit).not.toHaveBeenCalled()
     })
 
     it('should reject invalid stakes', async () => {
@@ -166,7 +170,7 @@ describe('Adventure Actions - Validation', () => {
       if (!result.success) {
         expect((result as { success: false; error: string }).error).toContain('Invalid option')
       }
-      expect(mockCreditManager.consumeCredit).not.toHaveBeenCalled()
+      expect(mockCreditManagerInstance.consumeCredit).not.toHaveBeenCalled()
     })
 
     it('should block unauthenticated users (guest email no longer supported)', async () => {
@@ -188,7 +192,7 @@ describe('Adventure Actions - Validation', () => {
           'Authentication required',
         )
       }
-      expect(mockCreditManager.consumeCredit).not.toHaveBeenCalled()
+      expect(mockCreditManagerInstance.consumeCredit).not.toHaveBeenCalled()
     })
 
     it('should validate and transform config before processing', async () => {
@@ -196,7 +200,7 @@ describe('Adventure Actions - Validation', () => {
         data: { user: { id: 'user-123' } },
       })
 
-      mockCreditManager.consumeCredit.mockResolvedValue({ success: true })
+      mockCreditManagerInstance.consumeCredit.mockResolvedValue({ success: true })
       mockLLMProvider.generateAdventureScaffold.mockResolvedValue({
         title: 'Test Adventure',
         movements: [],
@@ -240,7 +244,7 @@ describe('Adventure Actions - Validation', () => {
         data: { user: { id: 'user-123' } },
       })
 
-      mockCreditManager.consumeCredit.mockResolvedValue({ success: true })
+      mockCreditManagerInstance.consumeCredit.mockResolvedValue({ success: true })
       mockLLMProvider.generateAdventureScaffold.mockResolvedValue({
         title: 'Test Adventure',
         movements: [],

@@ -1,36 +1,38 @@
-import { OpenAI } from 'openai'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 import { OpenAIProvider } from '@/lib/llm/openai-provider'
 import type { ScaffoldParams, ExpansionParams, RefinementParams } from '@/lib/llm/types'
 
-// Mock OpenAI
-vi.mock('openai', () => ({
-  OpenAI: vi.fn(() => ({
-    chat: {
-      completions: {
-        create: vi.fn().mockResolvedValue({
-          choices: [
-            {
-              message: {
-                role: 'assistant' as const,
-                refusal: null,
-                content: JSON.stringify({
-                  title: 'Test Adventure',
-                  description: 'Test description',
-                  estimatedDuration: '3-4 hours',
-                  movements: [],
-                }),
-              },
-              finish_reason: 'stop' as const,
-              index: 0,
-              logprobs: null,
-            },
-          ],
+// Mock chat completions create function
+const mockChatCompletionsCreate = vi.fn().mockResolvedValue({
+  choices: [
+    {
+      message: {
+        role: 'assistant' as const,
+        refusal: null,
+        content: JSON.stringify({
+          title: 'Test Adventure',
+          description: 'Test description',
+          estimatedDuration: '3-4 hours',
+          movements: [],
         }),
       },
+      finish_reason: 'stop' as const,
+      index: 0,
+      logprobs: null,
     },
-  })),
+  ],
+})
+
+// Mock OpenAI - Vitest 4: Constructor mocks must use class or function keyword
+vi.mock('openai', () => ({
+  OpenAI: class MockOpenAI {
+    chat = {
+      completions: {
+        create: mockChatCompletionsCreate,
+      },
+    }
+  },
 }))
 
 // Mock Supabase for caching
@@ -63,39 +65,30 @@ vi.mock('@/lib/supabase/server', () => ({
 
 describe('OpenAIProvider', () => {
   let provider: OpenAIProvider
-  let mockOpenAI: InstanceType<typeof OpenAI>
 
   beforeEach(() => {
     vi.clearAllMocks()
 
-    // Set up the mock OpenAI instance
-    mockOpenAI = {
-      chat: {
-        completions: {
-          create: vi.fn().mockResolvedValue({
-            choices: [
-              {
-                message: {
-                  role: 'assistant' as const,
-                  refusal: null,
-                  content: JSON.stringify({
-                    title: 'Test Adventure',
-                    description: 'Test description',
-                    estimatedDuration: '3-4 hours',
-                    movements: [],
-                  }),
-                },
-                finish_reason: 'stop' as const,
-                index: 0,
-                logprobs: null,
-              },
-            ],
-          }),
+    // Reset the mock to default response
+    mockChatCompletionsCreate.mockResolvedValue({
+      choices: [
+        {
+          message: {
+            role: 'assistant' as const,
+            refusal: null,
+            content: JSON.stringify({
+              title: 'Test Adventure',
+              description: 'Test description',
+              estimatedDuration: '3-4 hours',
+              movements: [],
+            }),
+          },
+          finish_reason: 'stop' as const,
+          index: 0,
+          logprobs: null,
         },
-      },
-    } as unknown as InstanceType<typeof OpenAI>
-
-    vi.mocked(OpenAI).mockImplementation(() => mockOpenAI)
+      ],
+    })
 
     provider = new OpenAIProvider()
   })
@@ -111,7 +104,7 @@ describe('OpenAIProvider', () => {
         stakes: 'personal',
       }
 
-      vi.mocked(mockOpenAI.chat.completions.create).mockResolvedValueOnce({
+      mockChatCompletionsCreate.mockResolvedValueOnce({
         id: 'test-completion-1',
         object: 'chat.completion' as const,
         created: Date.now(),
@@ -136,7 +129,7 @@ describe('OpenAIProvider', () => {
 
       await provider.generateAdventureScaffold(params)
 
-      expect(mockOpenAI.chat.completions.create).toHaveBeenCalledWith(
+      expect(mockChatCompletionsCreate).toHaveBeenCalledWith(
         expect.objectContaining({
           temperature: 0.75, // Scaffold temperature
           model: 'gpt-4-turbo-preview',
@@ -161,7 +154,7 @@ describe('OpenAIProvider', () => {
         },
       }
 
-      vi.mocked(mockOpenAI.chat.completions.create).mockResolvedValueOnce({
+      mockChatCompletionsCreate.mockResolvedValueOnce({
         id: 'test-completion-2',
         object: 'chat.completion' as const,
         created: Date.now(),
@@ -182,7 +175,7 @@ describe('OpenAIProvider', () => {
 
       await provider.expandMovement(params)
 
-      expect(mockOpenAI.chat.completions.create).toHaveBeenCalledWith(
+      expect(mockChatCompletionsCreate).toHaveBeenCalledWith(
         expect.objectContaining({
           temperature: 0.5, // Combat temperature (lower for consistency)
         }),
@@ -205,7 +198,7 @@ describe('OpenAIProvider', () => {
         },
       }
 
-      vi.mocked(mockOpenAI.chat.completions.create).mockResolvedValueOnce({
+      mockChatCompletionsCreate.mockResolvedValueOnce({
         id: 'test-completion-3',
         object: 'chat.completion' as const,
         created: Date.now(),
@@ -226,7 +219,7 @@ describe('OpenAIProvider', () => {
 
       await provider.expandMovement(params)
 
-      expect(mockOpenAI.chat.completions.create).toHaveBeenCalledWith(
+      expect(mockChatCompletionsCreate).toHaveBeenCalledWith(
         expect.objectContaining({
           temperature: 0.9, // NPC dialogue temperature (higher for variety)
         }),
@@ -245,7 +238,7 @@ describe('OpenAIProvider', () => {
         stakes: 'personal',
       }
 
-      vi.mocked(mockOpenAI.chat.completions.create).mockResolvedValueOnce({
+      mockChatCompletionsCreate.mockResolvedValueOnce({
         id: 'test-completion-4',
         object: 'chat.completion' as const,
         created: Date.now(),
@@ -270,7 +263,7 @@ describe('OpenAIProvider', () => {
       await provider.generateAdventureScaffold(params)
 
       // Check that system message includes Witherwild context
-      const call = vi.mocked(mockOpenAI.chat.completions.create).mock.calls[0]![0]!
+      const call = mockChatCompletionsCreate.mock.calls[0]![0]!
       expect(call.messages![0]!.content).toContain('Witherwild')
       expect(call.messages![0]!.content).toContain('corruption')
       expect(call.messages![0]!.content).toContain('Ancient corruption spreading')
@@ -287,7 +280,7 @@ describe('OpenAIProvider', () => {
         stakes: 'low',
       }
 
-      vi.mocked(mockOpenAI.chat.completions.create).mockResolvedValueOnce({
+      mockChatCompletionsCreate.mockResolvedValueOnce({
         id: 'test-completion-5',
         object: 'chat.completion' as const,
         created: Date.now(),
@@ -311,7 +304,7 @@ describe('OpenAIProvider', () => {
 
       await provider.generateAdventureScaffold(params)
 
-      const call = vi.mocked(mockOpenAI.chat.completions.create).mock.calls[0]![0]!
+      const call = mockChatCompletionsCreate.mock.calls[0]![0]!
       expect(call.messages![1]!.content).toContain('floating islands')
       expect(call.messages![0]!.content).not.toContain('Witherwild')
     })
@@ -366,7 +359,7 @@ describe('OpenAIProvider', () => {
       const result = await provider.generateAdventureScaffold(params)
 
       // Should not call OpenAI
-      expect(mockOpenAI.chat.completions.create).not.toHaveBeenCalled()
+      expect(mockChatCompletionsCreate).not.toHaveBeenCalled()
       expect(result.title).toBe('Cached Adventure')
     })
 
@@ -380,7 +373,7 @@ describe('OpenAIProvider', () => {
         stakes: 'low',
       }
 
-      vi.mocked(mockOpenAI.chat.completions.create).mockResolvedValueOnce({
+      mockChatCompletionsCreate.mockResolvedValueOnce({
         id: 'test-completion-6',
         object: 'chat.completion' as const,
         created: Date.now(),
@@ -530,9 +523,7 @@ describe('OpenAIProvider', () => {
         }),
       } as unknown as Awaited<ReturnType<typeof createServerSupabaseClient>>)
 
-      vi.mocked(mockOpenAI.chat.completions.create).mockRejectedValueOnce(
-        new Error('API rate limit exceeded'),
-      )
+      mockChatCompletionsCreate.mockRejectedValueOnce(new Error('API rate limit exceeded'))
 
       await expect(provider.generateAdventureScaffold(params)).rejects.toThrow(
         'API rate limit exceeded',
@@ -549,7 +540,7 @@ describe('OpenAIProvider', () => {
         stakes: 'personal',
       }
 
-      vi.mocked(mockOpenAI.chat.completions.create).mockResolvedValueOnce({
+      mockChatCompletionsCreate.mockResolvedValueOnce({
         id: 'test-completion-7',
         object: 'chat.completion' as const,
         created: Date.now(),
@@ -581,9 +572,7 @@ describe('OpenAIProvider', () => {
         stakes: 'personal',
       }
 
-      vi.mocked(mockOpenAI.chat.completions.create).mockRejectedValueOnce(
-        new Error('Request timeout'),
-      )
+      mockChatCompletionsCreate.mockRejectedValueOnce(new Error('Request timeout'))
 
       await expect(provider.generateAdventureScaffold(params)).rejects.toThrow('Request timeout')
     })
@@ -601,7 +590,7 @@ describe('OpenAIProvider', () => {
       const error = new Error('Service temporarily unavailable')
       ;(error as any).status = 503
 
-      vi.mocked(mockOpenAI.chat.completions.create).mockRejectedValueOnce(error)
+      mockChatCompletionsCreate.mockRejectedValueOnce(error)
 
       await expect(provider.generateAdventureScaffold(params)).rejects.toThrow(
         'Service temporarily unavailable',
@@ -621,7 +610,7 @@ describe('OpenAIProvider', () => {
       const error = new Error('Invalid API key')
       ;(error as any).status = 401
 
-      vi.mocked(mockOpenAI.chat.completions.create).mockRejectedValueOnce(error)
+      mockChatCompletionsCreate.mockRejectedValueOnce(error)
 
       await expect(provider.generateAdventureScaffold(params)).rejects.toThrow('Invalid API key')
     })
@@ -636,7 +625,7 @@ describe('OpenAIProvider', () => {
         stakes: 'personal',
       }
 
-      vi.mocked(mockOpenAI.chat.completions.create).mockResolvedValueOnce({
+      mockChatCompletionsCreate.mockResolvedValueOnce({
         id: 'test-completion-empty',
         object: 'chat.completion' as const,
         created: Date.now(),
@@ -657,7 +646,7 @@ describe('OpenAIProvider', () => {
         stakes: 'personal',
       }
 
-      vi.mocked(mockOpenAI.chat.completions.create).mockResolvedValueOnce({
+      mockChatCompletionsCreate.mockResolvedValueOnce({
         id: 'test-completion-undefined',
         object: 'chat.completion' as const,
         created: Date.now(),
@@ -689,7 +678,7 @@ describe('OpenAIProvider', () => {
         stakes: 'personal',
       }
 
-      vi.mocked(mockOpenAI.chat.completions.create).mockResolvedValueOnce({
+      mockChatCompletionsCreate.mockResolvedValueOnce({
         id: 'test-completion-missing-finish',
         object: 'chat.completion' as const,
         created: Date.now(),
@@ -727,7 +716,7 @@ describe('OpenAIProvider', () => {
         stakes: 'personal',
       }
 
-      vi.mocked(mockOpenAI.chat.completions.create).mockResolvedValueOnce({
+      mockChatCompletionsCreate.mockResolvedValueOnce({
         id: 'test-completion-extra-fields',
         object: 'chat.completion' as const,
         created: Date.now(),
@@ -768,7 +757,7 @@ describe('OpenAIProvider', () => {
         stakes: 'personal',
       }
 
-      vi.mocked(mockOpenAI.chat.completions.create).mockResolvedValueOnce({
+      mockChatCompletionsCreate.mockResolvedValueOnce({
         id: 'test-completion-incomplete',
         object: 'chat.completion' as const,
         created: Date.now(),
@@ -817,7 +806,7 @@ describe('OpenAIProvider', () => {
         },
       }
 
-      vi.mocked(mockOpenAI.chat.completions.create).mockResolvedValueOnce({
+      mockChatCompletionsCreate.mockResolvedValueOnce({
         id: 'test-expansion-malformed',
         object: 'chat.completion' as const,
         created: Date.now(),
@@ -857,7 +846,7 @@ describe('OpenAIProvider', () => {
         },
       }
 
-      vi.mocked(mockOpenAI.chat.completions.create).mockResolvedValueOnce({
+      mockChatCompletionsCreate.mockResolvedValueOnce({
         id: 'test-refinement-empty',
         object: 'chat.completion' as const,
         created: Date.now(),
@@ -898,7 +887,7 @@ describe('OpenAIProvider', () => {
         },
       }
 
-      vi.mocked(mockOpenAI.chat.completions.create).mockResolvedValueOnce({
+      mockChatCompletionsCreate.mockResolvedValueOnce({
         id: 'test-completion-8',
         object: 'chat.completion' as const,
         created: Date.now(),
@@ -920,7 +909,7 @@ describe('OpenAIProvider', () => {
       const result = await provider.refineContent(params)
 
       expect(result.refinedContent).toContain('heavy oak door')
-      expect(mockOpenAI.chat.completions.create).toHaveBeenCalledWith(
+      expect(mockChatCompletionsCreate).toHaveBeenCalledWith(
         expect.objectContaining({
           temperature: 0.8, // Description temperature
         }),

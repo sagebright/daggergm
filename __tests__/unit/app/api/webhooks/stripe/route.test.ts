@@ -2,42 +2,47 @@ import { NextRequest } from 'next/server'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 import { POST } from '@/app/api/webhooks/stripe/route'
-import { CreditManager } from '@/lib/credits/credit-manager'
 import { createClient } from '@/lib/supabase/server'
 import type { createClient as CreateClientType } from '@/lib/supabase/server'
 
 vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn(),
 }))
-vi.mock('@/lib/credits/credit-manager')
+
+// Vitest 4: Constructor mocks must use class or function keyword
+const mockCreditManagerInstance = {
+  addCredits: vi.fn(),
+}
+
+vi.mock('@/lib/credits/credit-manager', () => ({
+  CreditManager: class MockCreditManager {
+    addCredits = mockCreditManagerInstance.addCredits
+  },
+}))
 
 // Mock Stripe globally
 const mockStripeWebhooks = {
   constructEvent: vi.fn(),
 }
 
-vi.mock('stripe', () => ({
-  default: vi.fn().mockImplementation(() => ({
-    webhooks: mockStripeWebhooks,
-  })),
-}))
+// Vitest 4: Constructor mocks must use class or function keyword
+vi.mock('stripe', () => {
+  return {
+    default: class MockStripe {
+      webhooks = mockStripeWebhooks
+    },
+  }
+})
 
 describe('Stripe Webhook Handler', () => {
   const mockSupabase = {
     from: vi.fn(),
   }
 
-  const mockCreditManager = {
-    addCredits: vi.fn(),
-  }
-
   beforeEach(() => {
     vi.clearAllMocks()
     vi.mocked(createClient).mockReturnValue(
       Promise.resolve(mockSupabase as unknown as Awaited<ReturnType<typeof CreateClientType>>),
-    )
-    vi.mocked(CreditManager).mockImplementation(
-      () => mockCreditManager as unknown as InstanceType<typeof CreditManager>,
     )
 
     // Mock environment variables
@@ -102,7 +107,7 @@ describe('Stripe Webhook Handler', () => {
       }
 
       mockStripeWebhooks.constructEvent.mockReturnValue(mockEvent)
-      mockCreditManager.addCredits.mockResolvedValue({ success: true })
+      mockCreditManagerInstance.addCredits.mockResolvedValue({ success: true })
 
       const request = new NextRequest('http://localhost/api/webhooks/stripe', {
         method: 'POST',
@@ -115,7 +120,11 @@ describe('Stripe Webhook Handler', () => {
       const response = await POST(request)
       const data = await response.json()
 
-      expect(mockCreditManager.addCredits).toHaveBeenCalledWith('user-123', 10, 'stripe_purchase')
+      expect(mockCreditManagerInstance.addCredits).toHaveBeenCalledWith(
+        'user-123',
+        10,
+        'stripe_purchase',
+      )
       expect(response.status).toBe(200)
       expect(data).toEqual({ received: true })
     })
@@ -137,7 +146,7 @@ describe('Stripe Webhook Handler', () => {
       }
 
       mockStripeWebhooks.constructEvent.mockReturnValue(mockEvent)
-      mockCreditManager.addCredits.mockResolvedValue({ success: true })
+      mockCreditManagerInstance.addCredits.mockResolvedValue({ success: true })
 
       const request = new NextRequest('http://localhost/api/webhooks/stripe', {
         method: 'POST',
@@ -149,7 +158,11 @@ describe('Stripe Webhook Handler', () => {
 
       const response = await POST(request)
 
-      expect(mockCreditManager.addCredits).toHaveBeenCalledWith('user-456', 50, 'stripe_purchase')
+      expect(mockCreditManagerInstance.addCredits).toHaveBeenCalledWith(
+        'user-456',
+        50,
+        'stripe_purchase',
+      )
       expect(response.status).toBe(200)
     })
 
@@ -201,7 +214,7 @@ describe('Stripe Webhook Handler', () => {
 
       const response = await POST(request)
 
-      expect(mockCreditManager.addCredits).not.toHaveBeenCalled()
+      expect(mockCreditManagerInstance.addCredits).not.toHaveBeenCalled()
       expect(response.status).toBe(200)
     })
 
@@ -231,7 +244,7 @@ describe('Stripe Webhook Handler', () => {
       const response = await POST(request)
       const data = await response.json()
 
-      expect(mockCreditManager.addCredits).not.toHaveBeenCalled()
+      expect(mockCreditManagerInstance.addCredits).not.toHaveBeenCalled()
       expect(response.status).toBe(400)
       expect(data.error).toContain('Missing required metadata')
     })
@@ -254,7 +267,7 @@ describe('Stripe Webhook Handler', () => {
       }
 
       mockStripeWebhooks.constructEvent.mockReturnValue(mockEvent)
-      mockCreditManager.addCredits.mockRejectedValue(new Error('Database error'))
+      mockCreditManagerInstance.addCredits.mockRejectedValue(new Error('Database error'))
 
       const request = new NextRequest('http://localhost/api/webhooks/stripe', {
         method: 'POST',

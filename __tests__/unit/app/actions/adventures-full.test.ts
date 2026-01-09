@@ -5,12 +5,17 @@ import {
   getUserAdventures,
   updateAdventureState,
 } from '@/app/actions/adventures'
-import { CreditManager } from '@/lib/credits/credit-manager'
 import { InsufficientCreditsError } from '@/lib/credits/errors'
 import { getLLMProvider } from '@/lib/llm/provider'
 import * as rateLimitMiddleware from '@/lib/rate-limiting/middleware'
 import { RateLimitError } from '@/lib/rate-limiting/rate-limiter'
 import { createServerSupabaseClient, createServiceRoleClient } from '@/lib/supabase/server'
+
+// Vitest 4: Mock instance methods at module level for class mocks
+const mockCreditManagerInstance = {
+  consumeCredit: vi.fn(),
+  refundCredit: vi.fn(),
+}
 
 // Mock dependencies
 vi.mock('@/lib/supabase/server', () => ({
@@ -20,7 +25,13 @@ vi.mock('@/lib/supabase/server', () => ({
 vi.mock('next/cache', () => ({
   revalidatePath: vi.fn(),
 }))
-vi.mock('@/lib/credits/credit-manager')
+// Vitest 4: Constructor mocks must use class or function keyword
+vi.mock('@/lib/credits/credit-manager', () => ({
+  CreditManager: class MockCreditManager {
+    consumeCredit = mockCreditManagerInstance.consumeCredit
+    refundCredit = mockCreditManagerInstance.refundCredit
+  },
+}))
 vi.mock('@/lib/llm/provider')
 vi.mock('@/lib/analytics/analytics', () => ({
   analytics: {
@@ -49,11 +60,6 @@ describe('Adventure Actions - Full Coverage', () => {
     from: vi.fn(),
   }
 
-  const mockCreditManager = {
-    consumeCredit: vi.fn(),
-    refundCredit: vi.fn(),
-  }
-
   const mockLLMProvider = {
     generateAdventureScaffold: vi.fn(),
   }
@@ -66,9 +72,7 @@ describe('Adventure Actions - Full Coverage', () => {
     vi.mocked(createServiceRoleClient).mockResolvedValue(
       mockServiceRoleClient as unknown as Awaited<ReturnType<typeof createServiceRoleClient>>,
     )
-    vi.mocked(CreditManager).mockImplementation(
-      () => mockCreditManager as unknown as InstanceType<typeof CreditManager>,
-    )
+    // Note: CreditManager mock is now class-based at module level via mockCreditManagerInstance
     vi.mocked(getLLMProvider).mockReturnValue(
       mockLLMProvider as unknown as ReturnType<typeof getLLMProvider>,
     )
@@ -156,7 +160,7 @@ describe('Adventure Actions - Full Coverage', () => {
       if (!result.success) {
         expect(result.error).toContain('Authentication required')
       }
-      expect(mockCreditManager.consumeCredit).not.toHaveBeenCalled()
+      expect(mockCreditManagerInstance.consumeCredit).not.toHaveBeenCalled()
     })
 
     it('should reject when no user and no guest email', async () => {
@@ -184,7 +188,7 @@ describe('Adventure Actions - Full Coverage', () => {
         data: { user: { id: 'user-123' } },
       })
 
-      mockCreditManager.consumeCredit.mockRejectedValue(
+      mockCreditManagerInstance.consumeCredit.mockRejectedValue(
         new InsufficientCreditsError('Not enough credits'),
       )
 
@@ -206,7 +210,7 @@ describe('Adventure Actions - Full Coverage', () => {
         data: { user: { id: 'user-123' } },
       })
 
-      mockCreditManager.consumeCredit.mockRejectedValue(new Error('Database error'))
+      mockCreditManagerInstance.consumeCredit.mockRejectedValue(new Error('Database error'))
 
       const config = {
         length: 'oneshot',
@@ -228,8 +232,8 @@ describe('Adventure Actions - Full Coverage', () => {
         data: { user: { id: 'user-123' } },
       })
 
-      mockCreditManager.consumeCredit.mockResolvedValue({ success: true })
-      mockCreditManager.refundCredit.mockResolvedValue({ success: true })
+      mockCreditManagerInstance.consumeCredit.mockResolvedValue({ success: true })
+      mockCreditManagerInstance.refundCredit.mockResolvedValue({ success: true })
       mockLLMProvider.generateAdventureScaffold.mockResolvedValue({
         title: 'Test Adventure',
         movements: [],
@@ -260,7 +264,7 @@ describe('Adventure Actions - Full Coverage', () => {
         // The error message comes from the caught error
         expect(result.error).toBeDefined()
       }
-      expect(mockCreditManager.refundCredit).toHaveBeenCalled()
+      expect(mockCreditManagerInstance.refundCredit).toHaveBeenCalled()
     })
   })
 

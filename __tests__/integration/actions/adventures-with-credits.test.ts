@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 import { generateAdventure } from '@/app/actions/adventures'
-import { CreditManager } from '@/lib/credits/credit-manager'
 import { InsufficientCreditsError } from '@/lib/credits/errors'
 
 // Mock crypto module
@@ -17,8 +16,20 @@ vi.mock('next/cache', () => ({
   revalidatePath: vi.fn(),
 }))
 
+// Vitest 4: Module-level mock instance for class mocks
+const mockCreditManagerInstance = {
+  consumeCredit: vi.fn(),
+  refundCredit: vi.fn(),
+}
+
 // Mock dependencies
-vi.mock('@/lib/credits/credit-manager')
+// Vitest 4: Constructor mocks must use class or function keyword
+vi.mock('@/lib/credits/credit-manager', () => ({
+  CreditManager: class MockCreditManager {
+    consumeCredit = mockCreditManagerInstance.consumeCredit
+    refundCredit = mockCreditManagerInstance.refundCredit
+  },
+}))
 vi.mock('@/lib/supabase/server', () => ({
   createServerSupabaseClient: vi.fn(() =>
     Promise.resolve({
@@ -94,24 +105,13 @@ vi.mock('@/lib/llm/provider', () => ({
 }))
 
 describe('Adventure Generation with Credits', () => {
-  let mockCreditManager: {
-    consumeCredit: ReturnType<typeof vi.fn>
-    refundCredit: ReturnType<typeof vi.fn>
-  }
-
   beforeEach(() => {
     vi.clearAllMocks()
-    mockCreditManager = {
-      consumeCredit: vi.fn(),
-      refundCredit: vi.fn(),
-    }
-    vi.mocked(CreditManager).mockImplementation(
-      () => mockCreditManager as unknown as InstanceType<typeof CreditManager>,
-    )
+    // Note: CreditManager mock is now class-based at module level via mockCreditManagerInstance
   })
 
   it('should consume a credit when generating an adventure', async () => {
-    mockCreditManager.consumeCredit.mockResolvedValueOnce({
+    mockCreditManagerInstance.consumeCredit.mockResolvedValueOnce({
       success: true,
       remainingCredits: 4,
     })
@@ -128,13 +128,13 @@ describe('Adventure Generation with Credits', () => {
     })
 
     expect(result.success).toBe(true)
-    expect(mockCreditManager.consumeCredit).toHaveBeenCalledWith('user-123', 'adventure', {
+    expect(mockCreditManagerInstance.consumeCredit).toHaveBeenCalledWith('user-123', 'adventure', {
       adventureId: 'test-adventure-id',
     })
   })
 
   it('should fail if user has insufficient credits', async () => {
-    mockCreditManager.consumeCredit.mockRejectedValueOnce(new InsufficientCreditsError())
+    mockCreditManagerInstance.consumeCredit.mockRejectedValueOnce(new InsufficientCreditsError())
 
     const result = await generateAdventure({
       length: 'oneshot',
@@ -154,7 +154,7 @@ describe('Adventure Generation with Credits', () => {
   })
 
   it('should refund credit if adventure generation fails after consumption', async () => {
-    mockCreditManager.consumeCredit.mockResolvedValueOnce({
+    mockCreditManagerInstance.consumeCredit.mockResolvedValueOnce({
       success: true,
       remainingCredits: 4,
     })
@@ -169,7 +169,7 @@ describe('Adventure Generation with Credits', () => {
       regenerateMovement: vi.fn(),
     }))
 
-    mockCreditManager.refundCredit.mockResolvedValueOnce({
+    mockCreditManagerInstance.refundCredit.mockResolvedValueOnce({
       success: true,
       newBalance: 5,
     })
@@ -186,7 +186,7 @@ describe('Adventure Generation with Credits', () => {
     })
 
     expect(result.success).toBe(false)
-    expect(mockCreditManager.refundCredit).toHaveBeenCalledWith(
+    expect(mockCreditManagerInstance.refundCredit).toHaveBeenCalledWith(
       'user-123',
       'adventure',
       expect.objectContaining({
@@ -223,6 +223,6 @@ describe('Adventure Generation with Credits', () => {
     if (!result.success && 'error' in result) {
       expect(result.error).toContain('Authentication required')
     }
-    expect(mockCreditManager.consumeCredit).not.toHaveBeenCalled()
+    expect(mockCreditManagerInstance.consumeCredit).not.toHaveBeenCalled()
   })
 })

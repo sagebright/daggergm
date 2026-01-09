@@ -32,16 +32,16 @@ vi.mock('@/lib/supabase/server', async () => {
   }
 })
 
-// Mock LLM provider
+// Mock LLM provider - Vitest 4: Constructor mocks must use class or function keyword
 vi.mock('@/lib/llm/openai-provider', () => ({
-  OpenAIProvider: vi.fn().mockImplementation(() => ({
-    regenerateMovement: vi.fn().mockResolvedValue({
+  OpenAIProvider: class MockOpenAIProvider {
+    regenerateMovement = vi.fn().mockResolvedValue({
       title: 'Regenerated Movement Title',
       description: 'Regenerated movement description with new content',
       type: 'combat',
       estimatedTime: '20 minutes',
-    }),
-  })),
+    })
+  },
 }))
 
 // Mock analytics

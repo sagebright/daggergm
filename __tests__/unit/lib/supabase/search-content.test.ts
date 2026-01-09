@@ -9,13 +9,13 @@ const mockEmbeddingsCreate = vi.fn().mockResolvedValue({
   ],
 })
 
-// Mock OpenAI at module level
+// Mock OpenAI at module level - Vitest 4: Constructor mocks must use class or function keyword
 vi.mock('openai', () => ({
-  OpenAI: vi.fn().mockImplementation(() => ({
-    embeddings: {
+  OpenAI: class MockOpenAI {
+    embeddings = {
       create: mockEmbeddingsCreate,
-    },
-  })),
+    }
+  },
 }))
 
 // Create mock RPC function

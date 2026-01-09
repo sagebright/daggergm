@@ -1,8 +1,6 @@
-import { OpenAI } from 'openai'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 import { generateAdventure, getAdventure, getUserAdventures } from '@/app/actions/adventures'
-import { CreditManager } from '@/lib/credits/credit-manager'
 import { InsufficientCreditsError } from '@/lib/credits/errors'
 import { getLLMProvider } from '@/lib/llm/provider'
 import { createServerSupabaseClient, createServiceRoleClient } from '@/lib/supabase/server'
@@ -32,7 +30,20 @@ vi.mock('next/cache', () => ({
 vi.mock('next/navigation', () => ({
   redirect: vi.fn(),
 }))
-vi.mock('@/lib/credits/credit-manager')
+
+// Mock CreditManager - Vitest 4: Constructor mocks must use class or function keyword
+const mockCreditManagerInstance = {
+  consumeCredit: vi.fn(),
+  refundCredit: vi.fn(),
+  getUserCredits: vi.fn(),
+}
+vi.mock('@/lib/credits/credit-manager', () => ({
+  CreditManager: class MockCreditManager {
+    consumeCredit = mockCreditManagerInstance.consumeCredit
+    refundCredit = mockCreditManagerInstance.refundCredit
+    getUserCredits = mockCreditManagerInstance.getUserCredits
+  },
+}))
 vi.mock('@/lib/llm/provider')
 
 // Mock crypto
@@ -43,8 +54,17 @@ vi.mock('crypto', () => ({
   randomUUID: vi.fn(() => 'test-uuid'),
 }))
 
-// Mock OpenAI module
-vi.mock('openai')
+// Mock OpenAI - Vitest 4: Constructor mocks must use class or function keyword
+const mockChatCompletionsCreate = vi.fn()
+vi.mock('openai', () => ({
+  OpenAI: class MockOpenAI {
+    chat = {
+      completions: {
+        create: mockChatCompletionsCreate,
+      },
+    }
+  },
+}))
 
 describe('Adventure Server Actions', () => {
   const mockSupabaseClient = {
@@ -52,20 +72,6 @@ describe('Adventure Server Actions', () => {
       getUser: vi.fn(),
     },
     from: vi.fn(),
-  }
-
-  const mockOpenAIInstance = {
-    chat: {
-      completions: {
-        create: vi.fn(),
-      },
-    },
-  }
-
-  const mockCreditManager = {
-    consumeCredit: vi.fn(),
-    refundCredit: vi.fn(),
-    getUserCredits: vi.fn(),
   }
 
   const mockLLMProvider = {
@@ -79,12 +85,6 @@ describe('Adventure Server Actions', () => {
     )
     vi.mocked(createServiceRoleClient).mockResolvedValue(
       mockSupabaseClient as unknown as Awaited<ReturnType<typeof createServiceRoleClient>>,
-    )
-    vi.mocked(OpenAI).mockImplementation(
-      () => mockOpenAIInstance as unknown as InstanceType<typeof OpenAI>,
-    )
-    vi.mocked(CreditManager).mockImplementation(
-      () => mockCreditManager as unknown as InstanceType<typeof CreditManager>,
     )
     vi.mocked(getLLMProvider).mockReturnValue(
       mockLLMProvider as unknown as ReturnType<typeof getLLMProvider>,
@@ -107,7 +107,7 @@ describe('Adventure Server Actions', () => {
       })
 
       // Mock credit consumption
-      mockCreditManager.consumeCredit.mockResolvedValueOnce({
+      mockCreditManagerInstance.consumeCredit.mockResolvedValueOnce({
         success: true,
         remainingCredits: 4,
       })
@@ -145,9 +145,13 @@ describe('Adventure Server Actions', () => {
       })
 
       // Verify credit was consumed
-      expect(mockCreditManager.consumeCredit).toHaveBeenCalledWith('user-123', 'adventure', {
-        adventureId: 'test-uuid',
-      })
+      expect(mockCreditManagerInstance.consumeCredit).toHaveBeenCalledWith(
+        'user-123',
+        'adventure',
+        {
+          adventureId: 'test-uuid',
+        },
+      )
     })
 
     it('should fail if user has insufficient credits', async () => {
@@ -159,7 +163,7 @@ describe('Adventure Server Actions', () => {
       })
 
       // Mock insufficient credits error
-      mockCreditManager.consumeCredit.mockRejectedValueOnce(new InsufficientCreditsError())
+      mockCreditManagerInstance.consumeCredit.mockRejectedValueOnce(new InsufficientCreditsError())
 
       // Act
       const result = await generateAdventure({
@@ -202,7 +206,7 @@ describe('Adventure Server Actions', () => {
       })
 
       // Mock successful credit consumption
-      mockCreditManager.consumeCredit.mockResolvedValueOnce({
+      mockCreditManagerInstance.consumeCredit.mockResolvedValueOnce({
         success: true,
         remainingCredits: 4,
       })
@@ -213,7 +217,7 @@ describe('Adventure Server Actions', () => {
       )
 
       // Mock credit refund
-      mockCreditManager.refundCredit.mockResolvedValueOnce({
+      mockCreditManagerInstance.refundCredit.mockResolvedValueOnce({
         success: true,
         newBalance: 5,
       })
@@ -231,7 +235,7 @@ describe('Adventure Server Actions', () => {
       })
 
       // Verify credit was refunded
-      expect(mockCreditManager.refundCredit).toHaveBeenCalledWith(
+      expect(mockCreditManagerInstance.refundCredit).toHaveBeenCalledWith(
         'user-123',
         'adventure',
         expect.objectContaining({

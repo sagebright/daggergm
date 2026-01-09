@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 import { generateAdventure } from '@/app/actions/adventures'
-import { CreditManager } from '@/lib/credits/credit-manager'
 
 // Mock crypto module
 vi.mock('crypto', () => ({
@@ -16,8 +15,20 @@ vi.mock('next/cache', () => ({
   revalidatePath: vi.fn(),
 }))
 
+// Vitest 4: Module-level mock instance for class mocks
+const mockCreditManagerInstance = {
+  consumeCredit: vi.fn(),
+  refundCredit: vi.fn(),
+}
+
 // Mock dependencies
-vi.mock('@/lib/credits/credit-manager')
+// Vitest 4: Constructor mocks must use class or function keyword
+vi.mock('@/lib/credits/credit-manager', () => ({
+  CreditManager: class MockCreditManager {
+    consumeCredit = mockCreditManagerInstance.consumeCredit
+    refundCredit = mockCreditManagerInstance.refundCredit
+  },
+}))
 vi.mock('@/lib/supabase/server', () => ({
   createServerSupabaseClient: vi.fn(() =>
     Promise.resolve({
@@ -70,20 +81,9 @@ vi.mock('@/lib/llm/provider', () => ({
 }))
 
 describe('Guest Restrictions', () => {
-  let mockCreditManager: {
-    consumeCredit: ReturnType<typeof vi.fn>
-    refundCredit: ReturnType<typeof vi.fn>
-  }
-
   beforeEach(() => {
     vi.clearAllMocks()
-    mockCreditManager = {
-      consumeCredit: vi.fn(),
-      refundCredit: vi.fn(),
-    }
-    vi.mocked(CreditManager).mockImplementation(
-      () => mockCreditManager as unknown as InstanceType<typeof CreditManager>,
-    )
+    // Note: CreditManager mock is now class-based at module level via mockCreditManagerInstance
   })
 
   it('should reject unauthenticated adventure generation', async () => {
@@ -104,7 +104,7 @@ describe('Guest Restrictions', () => {
     expect(result.success).toBe(false)
     expect(result.error).toContain('Authentication required')
     // Should not consume credits for unauthenticated requests
-    expect(mockCreditManager.consumeCredit).not.toHaveBeenCalled()
+    expect(mockCreditManagerInstance.consumeCredit).not.toHaveBeenCalled()
   })
 
   it('should not accept guestEmail parameter', async () => {
@@ -125,6 +125,6 @@ describe('Guest Restrictions', () => {
     expect(result.success).toBe(false)
     expect(result.error).toContain('Authentication required')
     // Should not consume credits for guest requests
-    expect(mockCreditManager.consumeCredit).not.toHaveBeenCalled()
+    expect(mockCreditManagerInstance.consumeCredit).not.toHaveBeenCalled()
   })
 })

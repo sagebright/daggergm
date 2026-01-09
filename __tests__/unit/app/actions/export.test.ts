@@ -1,9 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 import { exportAdventure } from '@/app/actions/export'
-import { MarkdownExporter } from '@/lib/export/markdown-exporter'
-import { PDFExporter } from '@/lib/export/pdf-exporter'
-import { Roll20Exporter } from '@/lib/export/roll20-exporter'
 
 // Create a variable to hold the mock Supabase client
 let mockSupabase: {
@@ -13,13 +10,34 @@ let mockSupabase: {
   from: ReturnType<typeof vi.fn>
 }
 
+// Vitest 4: Module-level mock instances that can be controlled in tests
+const mockExporter = {
+  exportToFile: vi.fn(),
+}
+
 vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn(() => Promise.resolve(mockSupabase)),
   createServerSupabaseClient: vi.fn(() => Promise.resolve(mockSupabase)),
 }))
-vi.mock('@/lib/export/markdown-exporter')
-vi.mock('@/lib/export/pdf-exporter')
-vi.mock('@/lib/export/roll20-exporter')
+
+// Vitest 4: Constructor mocks must use class or function keyword
+vi.mock('@/lib/export/markdown-exporter', () => ({
+  MarkdownExporter: class MockMarkdownExporter {
+    exportToFile = mockExporter.exportToFile
+  },
+}))
+
+vi.mock('@/lib/export/pdf-exporter', () => ({
+  PDFExporter: class MockPDFExporter {
+    exportToFile = mockExporter.exportToFile
+  },
+}))
+
+vi.mock('@/lib/export/roll20-exporter', () => ({
+  Roll20Exporter: class MockRoll20Exporter {
+    exportToFile = mockExporter.exportToFile
+  },
+}))
 
 // Mock analytics
 vi.mock('@/lib/analytics/analytics', () => ({
@@ -114,16 +132,11 @@ describe('Export Server Actions', () => {
 
   describe('exportAdventure', () => {
     it('should export adventure as markdown', async () => {
-      const mockExporter = {
-        exportToFile: vi.fn().mockReturnValue({
-          filename: 'adventure.md',
-          content: '# Adventure',
-          mimeType: 'text/markdown',
-        }),
-      }
-      vi.mocked(MarkdownExporter).mockImplementation(
-        () => mockExporter as unknown as InstanceType<typeof MarkdownExporter>,
-      )
+      mockExporter.exportToFile.mockReturnValue({
+        filename: 'adventure.md',
+        content: '# Adventure',
+        mimeType: 'text/markdown',
+      })
 
       const result = await exportAdventure('123e4567-e89b-12d3-a456-426614174000', 'markdown')
 
@@ -146,16 +159,11 @@ describe('Export Server Actions', () => {
     })
 
     it('should export adventure as PDF', async () => {
-      const mockExporter = {
-        exportToFile: vi.fn().mockResolvedValue({
-          filename: 'adventure.pdf',
-          content: Buffer.from('PDF content'),
-          mimeType: 'application/pdf',
-        }),
-      }
-      vi.mocked(PDFExporter).mockImplementation(
-        () => mockExporter as unknown as InstanceType<typeof PDFExporter>,
-      )
+      mockExporter.exportToFile.mockResolvedValue({
+        filename: 'adventure.pdf',
+        content: Buffer.from('PDF content'),
+        mimeType: 'application/pdf',
+      })
 
       const result = await exportAdventure('123e4567-e89b-12d3-a456-426614174000', 'pdf')
 
@@ -165,16 +173,11 @@ describe('Export Server Actions', () => {
     })
 
     it('should export adventure as Roll20 format', async () => {
-      const mockExporter = {
-        exportToFile: vi.fn().mockReturnValue({
-          filename: 'adventure-roll20.txt',
-          content: 'Roll20 format',
-          mimeType: 'text/plain',
-        }),
-      }
-      vi.mocked(Roll20Exporter).mockImplementation(
-        () => mockExporter as unknown as InstanceType<typeof Roll20Exporter>,
-      )
+      mockExporter.exportToFile.mockReturnValue({
+        filename: 'adventure-roll20.txt',
+        content: 'Roll20 format',
+        mimeType: 'text/plain',
+      })
 
       const result = await exportAdventure('123e4567-e89b-12d3-a456-426614174000', 'roll20')
 
@@ -237,14 +240,9 @@ describe('Export Server Actions', () => {
     })
 
     it('should handle export errors', async () => {
-      const mockExporter = {
-        exportToFile: vi.fn().mockImplementation(() => {
-          throw new Error('Export failed')
-        }),
-      }
-      vi.mocked(MarkdownExporter).mockImplementation(
-        () => mockExporter as unknown as InstanceType<typeof MarkdownExporter>,
-      )
+      mockExporter.exportToFile.mockImplementation(() => {
+        throw new Error('Export failed')
+      })
 
       const result = await exportAdventure('123e4567-e89b-12d3-a456-426614174000', 'markdown')
 
@@ -263,16 +261,11 @@ describe('Export Server Actions', () => {
     })
 
     it('should include movements from adventure JSONB array', async () => {
-      const mockExporter = {
-        exportToFile: vi.fn().mockReturnValue({
-          filename: 'adventure.md',
-          content: '# Adventure',
-          mimeType: 'text/markdown',
-        }),
-      }
-      vi.mocked(MarkdownExporter).mockImplementation(
-        () => mockExporter as unknown as InstanceType<typeof MarkdownExporter>,
-      )
+      mockExporter.exportToFile.mockReturnValue({
+        filename: 'adventure.md',
+        content: '# Adventure',
+        mimeType: 'text/markdown',
+      })
 
       const result = await exportAdventure('123e4567-e89b-12d3-a456-426614174000', 'markdown')
 
@@ -298,16 +291,11 @@ describe('Export Server Actions', () => {
         single: vi.fn().mockResolvedValue({ data: adventureWithoutMovements, error: null }),
       })
 
-      const mockExporter = {
-        exportToFile: vi.fn().mockReturnValue({
-          filename: 'adventure.md',
-          content: '# Adventure',
-          mimeType: 'text/markdown',
-        }),
-      }
-      vi.mocked(MarkdownExporter).mockImplementation(
-        () => mockExporter as unknown as InstanceType<typeof MarkdownExporter>,
-      )
+      mockExporter.exportToFile.mockReturnValue({
+        filename: 'adventure.md',
+        content: '# Adventure',
+        mimeType: 'text/markdown',
+      })
 
       const result = await exportAdventure('123e4567-e89b-12d3-a456-426614174000', 'markdown')
 
