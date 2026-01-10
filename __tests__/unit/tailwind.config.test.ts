@@ -116,13 +116,19 @@ describe('Tailwind CSS v4 Theme Configuration', () => {
     it('should use OKLCH color space values (L C H)', () => {
       // OKLCH format: Lightness Chroma Hue
       const purpleValue = mockComputedStyle['--dagger-purple-900']
-      const parts = purpleValue.split(' ')
+      expect(purpleValue).toBeDefined()
+
+      // Non-null assertion is safe here because we just asserted it's defined
+      const parts = purpleValue!.split(' ')
 
       expect(parts).toHaveLength(3)
-      expect(parseFloat(parts[0])).toBeGreaterThanOrEqual(0)
-      expect(parseFloat(parts[0])).toBeLessThanOrEqual(1)
-      expect(parseFloat(parts[2])).toBeGreaterThanOrEqual(0)
-      expect(parseFloat(parts[2])).toBeLessThanOrEqual(360)
+      // TypeScript safety: parts array is guaranteed to have 3 elements from above assertion
+      const lightness = parts[0]!
+      const hue = parts[2]!
+      expect(parseFloat(lightness)).toBeGreaterThanOrEqual(0)
+      expect(parseFloat(lightness)).toBeLessThanOrEqual(1)
+      expect(parseFloat(hue)).toBeGreaterThanOrEqual(0)
+      expect(parseFloat(hue)).toBeLessThanOrEqual(360)
     })
   })
 })
