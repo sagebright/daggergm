@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test'
 import { createClient } from '@supabase/supabase-js'
 
 import { createConfirmedTestUser, deleteTestUser } from './fixtures/auth-helpers'
+import { selectOption } from './fixtures/ui-helpers'
 
 /**
  * E2E Test: Per-Scene Confirmation Workflow (Issue #9)
@@ -133,10 +134,7 @@ test.describe('Per-Scene Confirmation Workflow', () => {
       await page.getByRole('link', { name: 'Generate New Adventure' }).click()
       await page.waitForURL('/adventures/new')
 
-      await page.click('[id="motif"]')
-      await page.locator('[role="option"]:has-text("High Fantasy")').click()
-      // Wait for dropdown to close before clicking button (Firefox needs this)
-      await expect(page.locator('[role="listbox"]')).not.toBeVisible({ timeout: 5000 })
+      await selectOption(page, 'motif', 'High Fantasy')
       await page.click('button:has-text("Generate Adventure")')
 
       // Wait for redirect to adventure detail page
@@ -233,10 +231,7 @@ test.describe('Per-Scene Confirmation Workflow', () => {
       await page.waitForURL('/dashboard', { timeout: 30000 })
 
       await page.getByRole('link', { name: 'Generate New Adventure' }).click()
-      await page.click('[id="motif"]')
-      await page.locator('[role="option"]:has-text("High Fantasy")').click()
-      // Wait for dropdown to close before clicking button (Firefox needs this)
-      await expect(page.locator('[role="listbox"]')).not.toBeVisible({ timeout: 5000 })
+      await selectOption(page, 'motif', 'High Fantasy')
       await page.click('button:has-text("Generate Adventure")')
 
       await expect(page).toHaveURL(/\/adventures\/[a-f0-9-]{36}/, { timeout: 30000 })
@@ -290,10 +285,7 @@ test.describe('Per-Scene Confirmation Workflow', () => {
       await page.waitForURL('/dashboard', { timeout: 30000 })
 
       await page.getByRole('link', { name: 'Generate New Adventure' }).click()
-      await page.click('[id="motif"]')
-      await page.locator('[role="option"]:has-text("High Fantasy")').click()
-      // Wait for dropdown to close before clicking button (Firefox needs this)
-      await expect(page.locator('[role="listbox"]')).not.toBeVisible({ timeout: 5000 })
+      await selectOption(page, 'motif', 'High Fantasy')
       await page.click('button:has-text("Generate Adventure")')
 
       await expect(page).toHaveURL(/\/adventures\/[a-f0-9-]{36}/, { timeout: 30000 })
@@ -341,10 +333,7 @@ test.describe('Per-Scene Confirmation Workflow', () => {
       await page.waitForURL('/dashboard', { timeout: 30000 })
 
       await page.getByRole('link', { name: 'Generate New Adventure' }).click()
-      await page.click('[id="motif"]')
-      await page.locator('[role="option"]:has-text("High Fantasy")').click()
-      // Wait for dropdown to close before clicking button (Firefox needs this)
-      await expect(page.locator('[role="listbox"]')).not.toBeVisible({ timeout: 5000 })
+      await selectOption(page, 'motif', 'High Fantasy')
       await page.click('button:has-text("Generate Adventure")')
 
       await expect(page).toHaveURL(/\/adventures\/[a-f0-9-]{36}/, { timeout: 30000 })
@@ -392,10 +381,7 @@ test.describe('Per-Scene Confirmation Workflow', () => {
       await page.waitForURL('/dashboard', { timeout: 30000 })
 
       await page.getByRole('link', { name: 'Generate New Adventure' }).click()
-      await page.click('[id="motif"]')
-      await page.locator('[role="option"]:has-text("High Fantasy")').click()
-      // Wait for dropdown to close before clicking button (Firefox needs this)
-      await expect(page.locator('[role="listbox"]')).not.toBeVisible({ timeout: 5000 })
+      await selectOption(page, 'motif', 'High Fantasy')
       await page.click('button:has-text("Generate Adventure")')
 
       await expect(page).toHaveURL(/\/adventures\/[a-f0-9-]{36}/, { timeout: 30000 })

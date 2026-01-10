@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test'
 import { createClient } from '@supabase/supabase-js'
 
 import { createConfirmedTestUser, deleteTestUser } from './fixtures/auth-helpers'
+import { selectOption } from './fixtures/ui-helpers'
 
 /**
  * E2E Test: Adventure Creation Form (Single-Screen Refactor)
@@ -233,21 +234,14 @@ test.describe('Adventure Creation Form (Single-Screen)', () => {
       await page.getByRole('link', { name: 'Generate New Adventure' }).click()
       await expect(page).toHaveURL('/adventures/new')
 
-      // Fill out form
-      // Select Primary Motif (Radix Select renders options in a portal)
-      await page.click('[id="motif"]')
-      await page.locator('[role="option"]:has-text("High Fantasy")').click()
+      // Fill out form using helper for stable Radix Select interactions
+      await selectOption(page, 'motif', 'High Fantasy')
 
       // Party Size, Party Tier, and Scenes should have defaults
       // But let's select them explicitly for thoroughness
-      await page.click('[id="partySize"]')
-      await page.locator('[role="option"]:has-text("4 Players")').click()
-
-      await page.click('[id="partyTier"]')
-      await page.locator('[role="option"]:has-text("Tier 1")').click()
-
-      await page.click('[id="numScenes"]')
-      await page.locator('[role="option"]:has-text("3 Scenes")').click()
+      await selectOption(page, 'partySize', '4 Players')
+      await selectOption(page, 'partyTier', 'Tier 1')
+      await selectOption(page, 'numScenes', '3 Scenes')
 
       // Submit form
       await page.click('button:has-text("Generate Adventure")')
@@ -296,9 +290,8 @@ test.describe('Adventure Creation Form (Single-Screen)', () => {
       await page.getByRole('link', { name: 'Generate New Adventure' }).click()
       await expect(page).toHaveURL('/adventures/new')
 
-      // Fill out form quickly (Radix Select uses role="option")
-      await page.click('[id="motif"]')
-      await page.locator('[role="option"]:has-text("High Fantasy")').click()
+      // Fill out form using helper for stable Radix Select interactions
+      await selectOption(page, 'motif', 'High Fantasy')
 
       // Submit
       const submitButton = page.locator('button:has-text("Generate Adventure")')
@@ -383,9 +376,8 @@ test.describe('Adventure Creation Form (Single-Screen)', () => {
       await page.getByRole('link', { name: 'Generate New Adventure' }).click()
       await expect(page).toHaveURL('/adventures/new')
 
-      // Fill out form
-      await page.click('[id="motif"]')
-      await page.locator('[role="option"]:has-text("High Fantasy")').click()
+      // Fill out form using helper for stable Radix Select interactions
+      await selectOption(page, 'motif', 'High Fantasy')
 
       // Try to submit
       await page.click('button:has-text("Generate Adventure")')
@@ -426,8 +418,7 @@ test.describe('Adventure Creation Form (Single-Screen)', () => {
       ])
 
       await page.getByRole('link', { name: 'Generate New Adventure' }).click()
-      await page.click('[id="motif"]')
-      await page.locator('[role="option"]:has-text("High Fantasy")').click()
+      await selectOption(page, 'motif', 'High Fantasy')
       await page.click('button:has-text("Generate Adventure")')
 
       // Wait for redirect and capture adventure ID
